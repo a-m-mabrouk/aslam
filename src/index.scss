@@ -1,0 +1,196 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://cdn-uicons.flaticon.com/2.6.0/uicons-brands/css/uicons-brands.css");
+
+:root {
+  --primary-color: #419a9e;
+}
+
+body {
+  background-color: #f1f1f1;
+}
+
+input[type="number"] {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
+  border: 0;
+  border-radius: 0.25em;
+  background: initial;
+  background-color: #7066e0 !important;
+  color: #fff !important;
+  font-size: 1em;
+}
+
+div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-deny) {
+  border: 0;
+  border-radius: 0.25em;
+  background: initial;
+  background-color: #dc3741 !important;
+  color: #fff !important;
+  font-size: 1em;
+}
+
+[type="search"]:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.container {
+  @apply mx-auto px-4;
+}
+
+.loader::before {
+  content: "";
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  left: 0;
+  top: -24px;
+  animation: animloader 4s ease infinite;
+}
+.loader::after {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  background: var(--primary-color);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+  animation: animloader2 2s ease infinite;
+}
+
+.c {
+  box-shadow: none !important;
+
+  &:focus {
+    box-shadow: none !important;
+  }
+}
+
+@keyframes animloader {
+  0% {
+    box-shadow:
+      0 24px rgba(255, 255, 255, 0),
+      24px 24px rgba(255, 255, 255, 0),
+      24px 48px rgba(255, 255, 255, 0),
+      0px 48px rgba(255, 255, 255, 0);
+  }
+  12% {
+    box-shadow:
+      0 24px var(--main-color),
+      24px 24px rgba(255, 255, 255, 0),
+      24px 48px rgba(255, 255, 255, 0),
+      0px 48px rgba(255, 255, 255, 0);
+  }
+  25% {
+    box-shadow:
+      0 24px var(--main-color),
+      24px 24px var(--main-color),
+      24px 48px rgba(255, 255, 255, 0),
+      0px 48px rgba(255, 255, 255, 0);
+  }
+  37% {
+    box-shadow:
+      0 24px var(--main-color),
+      24px 24px var(--main-color),
+      24px 48px var(--main-color),
+      0px 48px rgba(255, 255, 255, 0);
+  }
+  50% {
+    box-shadow:
+      0 24px var(--main-color),
+      24px 24px var(--main-color),
+      24px 48px var(--main-color),
+      0px 48px var(--main-color);
+  }
+  62% {
+    box-shadow:
+      0 24px rgba(255, 255, 255, 0),
+      24px 24px var(--main-color),
+      24px 48px var(--main-color),
+      0px 48px var(--main-color);
+  }
+  75% {
+    box-shadow:
+      0 24px rgba(255, 255, 255, 0),
+      24px 24px rgba(255, 255, 255, 0),
+      24px 48px var(--main-color),
+      0px 48px var(--main-color);
+  }
+  87% {
+    box-shadow:
+      0 24px rgba(255, 255, 255, 0),
+      24px 24px rgba(255, 255, 255, 0),
+      24px 48px rgba(255, 255, 255, 0),
+      0px 48px var(--main-color);
+  }
+  100% {
+    box-shadow:
+      0 24px rgba(255, 255, 255, 0),
+      24px 24px rgba(255, 255, 255, 0),
+      24px 48px rgba(255, 255, 255, 0),
+      0px 48px rgba(255, 255, 255, 0);
+  }
+}
+
+@keyframes animloader2 {
+  0% {
+    transform: translate(0, 0) rotateX(0) rotateY(0);
+  }
+  25% {
+    transform: translate(100%, 0) rotateX(0) rotateY(180deg);
+  }
+  50% {
+    transform: translate(100%, 100%) rotateX(-180deg) rotateY(180deg);
+  }
+  75% {
+    transform: translate(0, 100%) rotateX(-180deg) rotateY(360deg);
+  }
+  100% {
+    transform: translate(0, 0) rotateX(0) rotateY(360deg);
+  }
+}
+
+.btn_social {
+  &:hover {
+    i {
+      animation: move-up-down 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1;
+      animation-fill-mode: forwards;
+      animation-delay: 300ms;
+    }
+  }
+}
+
+@keyframes move-up-down {
+  0% {
+    transform: translateY(-200%);
+    opacity: 0;
+  }
+
+  50% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+
+  70% {
+    transform: translateY(0px);
+  }
+
+  90% {
+    transform: translateY(3px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
