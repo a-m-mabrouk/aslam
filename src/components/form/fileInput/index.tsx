@@ -3,6 +3,7 @@ import {
   ArrowsRightLeftIcon,
   PhotoIcon,
   TrashIcon,
+  TableCellsIcon
 } from "@heroicons/react/24/solid";
 import styles from "./styles.module.scss";
 import { useCallback, useEffect, useState } from "react";
@@ -10,13 +11,21 @@ export default function InputFile({
   onChange,
   value,
   label,
+  fileType = "photo",
+  accept = "png,jpg,jpeg",
+  acceptDesc = "PNG, JPG, JPEG",
+  btnText = "Add image",
   name,
   error,
 }: {
   onChange: any;
-  label: string;
-  name: string;
   value: File | undefined | string;
+  label: string;
+  fileType?: "photo" | "excel";
+  accept?: string;
+  acceptDesc?: string;
+  btnText?: string;
+  name: string;
   setError?: any;
   error?: string;
 }) {
@@ -37,8 +46,12 @@ export default function InputFile({
 
   const handleChange = (e: any) => {
     const file = e.target.files![0];
-
-    toBase64(file);
+    if (fileType === "photo") {
+      toBase64(file);
+    } else {
+      setSrc('excelllll')
+      setNameImage(file.name);
+    }
     onChange(name, file, true);
   };
 
@@ -63,32 +76,16 @@ export default function InputFile({
   return (
     <div className="grow">
       <p className={styles.title}>{label}</p>
-      {!src ? (
-        <label htmlFor={name} className={styles.file_input_container}>
-          <input
-            type="file"
-            name={name}
-            id={name}
-            onChange={handleChange}
-            accept="png,jpg,jpeg"
-          />
-
-          <div>
-            <PhotoIcon className="size-14 text-primary" />
-            <span>Add image</span>
-            <p className={styles.desc}>PNG, JPG, JPEG</p>
-          </div>
-        </label>
-      ) : (
+      {src? (
         <div className={`${styles.file_input_container} ${styles.selected}`}>
           <input
             type="file"
             name={name}
             id={name}
             onChange={handleChange}
-            accept="png,jpg,jpeg"
+            accept={accept}
           />
-          <img src={src} alt="file" onError={handleImgError} />
+          {fileType === "photo"? <img src={src} alt="file" onError={handleImgError} />: <TableCellsIcon className="size-32 text-primary" />}
           <div className={styles.info}>
             <p>{nameImage}</p>
             <div className={styles.btn_group}>
@@ -102,6 +99,24 @@ export default function InputFile({
             </div>
           </div>
         </div>
+      ) : (
+        <label htmlFor={name} className={styles.file_input_container}>
+          <input
+            type="file"
+            name={name}
+            id={name}
+            onChange={handleChange}
+            accept={accept}
+          />
+
+          <div>
+            {fileType === "photo"&&<PhotoIcon className="size-14 text-primary" />}
+            {fileType === "excel"&&<TableCellsIcon className="size-14 text-primary" />}
+            
+            <span>{btnText}</span>
+            <p className={styles.desc}>{acceptDesc}</p>
+          </div>
+        </label>
       )}
       {error && <p className="text-red-500">{error}</p>}
     </div>

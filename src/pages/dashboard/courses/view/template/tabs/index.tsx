@@ -8,6 +8,7 @@ import {
   DocumentTextIcon,
   FolderIcon,
 } from "@heroicons/react/24/outline";
+import Exams from "./exams";
 
 export default function Tabs() {
   const { t } = useTranslation("viewCourse");
@@ -21,7 +22,7 @@ export default function Tabs() {
           <Resources />
         </TabsCard.TabItem>
         <TabsCard.TabItem title={t("exams")} icon={DocumentTextIcon}>
-          tab
+          <Exams />
         </TabsCard.TabItem>
       </TabsCard>
     </BgCard>
