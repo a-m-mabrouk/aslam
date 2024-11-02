@@ -1,21 +1,25 @@
 import { useState, useEffect, useRef } from "react";
-import { Button, Card, Progress } from "flowbite-react";
+import { Button, Card, Progress, Modal } from "flowbite-react";
 import { PauseIcon, PlayIcon, StopIcon } from "@heroicons/react/24/solid";
+import Question from "./Question";
+import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
+import { resetExam, showQueAns } from "../../../../../../../../store/reducers/exam";
 
-interface Question {
-  id: number;
-  text: string;
-  options: string[];
-}
-
-const dummyQuestions: Question[] = [
-  { id: 1, text: "What is React?", options: ["Library", "Framework", "Language", "Tool"] },
-  { id: 2, text: "What is TypeScript?", options: ["Library", "Framework", "Language", "Tool"] },
-  { id: 3, text: "What is HTML?", options: ["Markup", "Framework", "Language", "Tool"] },
-  // Add more dummy questions as needed
-];
-
-const ExamDetails = ({ onStart }: { onStart: () => void }) => (
+const ExamDetails = ({
+  onStart,
+  questions,
+}: {
+  onStart: () => void;
+  questions: Question[];
+}) => {
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+  
+    return `${hours}:${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  };
+  return (
   <Card>
     <div className="flex justify-around">
       <div className="text-center">
@@ -24,11 +28,11 @@ const ExamDetails = ({ onStart }: { onStart: () => void }) => (
       </div>
       <div className="text-center">
         <h2 className="text-lg font-bold">سؤال</h2>
-        <p>{dummyQuestions.length}</p>
+        <p>{questions?.length}</p>
       </div>
       <div className="text-center">
-        <h2 className="text-lg font-bold">دقيقة</h2>
-        <p>56</p>
+        <h2 className="text-lg font-bold">مدة الاختبار</h2>
+        <p>{formatTime(questions.length * 1.2 * 60)}</p>
       </div>
     </div>
     <ul className="ml-5 mt-4 list-disc text-right">
@@ -36,14 +40,21 @@ const ExamDetails = ({ onStart }: { onStart: () => void }) => (
       <li>يمكنك إعادة إجراء الاختبار...</li>
       {/* Additional instructions */}
     </ul>
-    <Button onClick={onStart} className="mt-5">ابدأ الاختبار</Button>
+    <Button onClick={onStart} className="mt-5">
+      ابدأ الاختبار
+    </Button>
   </Card>
-);
+)};
 
-const ExamInterface = () => {
+const ExamInterface = ({ questions }: { questions: Question[] }) => {
+  const dispatch = useAppDispatch();
+  const examAnswers = useAppSelector(({exam}) => exam.examAnswers)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(56 * 60); // 56 minutes in seconds
+  const [timeRemaining, setTimeRemaining] = useState(
+    questions.length * 1.2 * 60,
+  );
   const [isPaused, setIsPaused] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const startTimer = () => {
@@ -74,24 +85,32 @@ const ExamInterface = () => {
     };
   }, [isPaused]);
 
-  const progress = ((56 * 60 - timeRemaining) / (56 * 60)) * 100;
+  const progress =
+    ((questions.length * 1.2 * 60 - timeRemaining) /
+      (questions.length * 1.2 * 60)) *
+    100;
 
   const goToNextQuestion = () => {
-    if (currentQuestionIndex < dummyQuestions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    if (currentQuestionIndex < questions?.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
     }
   };
 
   const goToPreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
+      setCurrentQuestionIndex((prev) => prev - 1);
     }
   };
-
+  const showAns = () => {
+    dispatch(showQueAns(currentQuestionIndex));
+    setOpenModal(true);
+  }
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  
+    return `${hours}:${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
   return (
@@ -103,52 +122,83 @@ const ExamInterface = () => {
           <Progress progress={progress} color="blue" className="mt-2" />
         </div>
         <div>
-          <p>سؤال {currentQuestionIndex + 1} من {dummyQuestions.length}</p>
+          <p>
+            سؤال {currentQuestionIndex + 1} من {questions?.length}
+          </p>
         </div>
-        <div>
-            <span onClick={isPaused ? resumeTimer : pauseTimer} color="gray" className="mr-2">
-                {isPaused ? <PlayIcon /> : <PauseIcon />}</span>
-          {/* <Button onClick={isPaused ? resumeTimer : pauseTimer} color="gray" className="mr-2">
-          </Button> */}
-          <span onClick={stopExam} color="red"><StopIcon /></span>
+        <div className="flex">
+          <span
+            onClick={isPaused ? resumeTimer : pauseTimer}
+            color="gray"
+            className="mr-2"
+          >
+            {isPaused ? <PlayIcon className="size-8 cursor-pointer" /> : <PauseIcon className="size-8 cursor-pointer" />}
+          </span>
+          <span onClick={stopExam} color="red">
+            <StopIcon className="size-8 cursor-pointer" />
+          </span>
         </div>
       </header>
 
       {/* Question Content */}
-      <main className="grow p-4">
-        <h2>{dummyQuestions[currentQuestionIndex].text}</h2>
-        <ul className="mt-4">
-          {dummyQuestions[currentQuestionIndex].options.map((option, index) => (
-            <li key={index} className="mt-2">
-              <input type="radio" name={`question-${currentQuestionIndex}`} id={`option-${index}`} />
-              <label htmlFor={`option-${index}`} className="ml-2">{option}</label>
-            </li>
-          ))}
-        </ul>
-      </main>
+      <Question question={questions[currentQuestionIndex]} questionIndex={currentQuestionIndex} />
 
       {/* Footer */}
       <footer className="flex items-center justify-between bg-gray-200 p-4">
-        <Button onClick={goToPreviousQuestion} disabled={currentQuestionIndex === 0} color="red">
+        <Button
+          onClick={goToPreviousQuestion}
+          disabled={currentQuestionIndex === 0}
+          color="red"
+        >
           السابق
         </Button>
-        <Button onClick={goToNextQuestion} disabled={currentQuestionIndex === dummyQuestions.length - 1} color="green">
+        <Button
+          onClick={showAns}
+          disabled={examAnswers[currentQuestionIndex]?.showAnsClicked}
+          color="yellow"
+        >
+          الاجابة الصحيحة 
+        </Button>
+        <Button
+          onClick={goToNextQuestion}
+          disabled={currentQuestionIndex === questions?.length - 1}
+          color="green"
+        >
           التالي
         </Button>
       </footer>
+      <Modal show={openModal} size="md" onClose={() => setOpenModal(false)}>
+        <Modal.Header>الوصف</Modal.Header>
+        <Modal.Body>
+          <div className="space-y-6 p-6">
+            <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                {questions[currentQuestionIndex]?.description}
+            </p>
+          </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
 
-const ExamComponent = () => {
+const ExamComponent = ({ questions }: { questions: Question[] }) => {
+  const dispatch = useAppDispatch();
   const [isExamStarted, setIsExamStarted] = useState(false);
+  const examAnswers = useAppSelector(({exam}) => exam.examAnswers);
+  console.log(examAnswers);
+  
 
   return (
     <div className="mx-auto my-8 max-w-4xl">
-      {isExamStarted ? (
-        <ExamInterface />
+      {!questions.length ? (
+        <h4>No exams</h4>
+      ) : isExamStarted ? (
+        <ExamInterface questions={questions} />
       ) : (
-        <ExamDetails onStart={() => setIsExamStarted(true)} />
+        <ExamDetails
+          questions={questions}
+          onStart={() => {setIsExamStarted(true);dispatch(resetExam())}}
+        />
       )}
     </div>
   );
