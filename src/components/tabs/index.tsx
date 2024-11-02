@@ -49,9 +49,20 @@ const theme = {
   tabpanel: "py-3",
 };
 
-export function TabsCard({ children }: { children: React.ReactNode }) {
+export function TabsCard({
+  handleActiveTabchange,
+  children,
+}: {
+  handleActiveTabchange?: (e: number) => void;
+  children: React.ReactNode;
+}) {
   return (
-    <Tabs aria-label="Tabs with underline" variant="underline" theme={theme}>
+    <Tabs
+      onActiveTabChange={handleActiveTabchange}
+      aria-label="Tabs with underline"
+      variant="underline"
+      theme={theme}
+    >
       {children}
     </Tabs>
   );

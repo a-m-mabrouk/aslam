@@ -18,7 +18,7 @@ export default function Resources() {
       {file?.map((file) => {
         const name = file.path.split("/");
         return (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4" key={file.id}>
             <a
               href={file.path}
               download

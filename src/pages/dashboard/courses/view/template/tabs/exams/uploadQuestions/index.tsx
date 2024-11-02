@@ -2,7 +2,7 @@ import * as XLSX from "xlsx";
 import { useState } from "react";
 import { Button } from "flowbite-react";
 import { useTranslation } from "react-i18next";
-import TitleSection from "../../../../../../../../components/title";
+// import TitleSection from "../../../../../../../../components/title";
 import InputFile from "../../../../../../../../components/form/fileInput";
 
 export default function UploadQuestions() {
@@ -40,7 +40,7 @@ export default function UploadQuestions() {
   return (
     <div className="grid gap-4">
       <div className="flex justify-between gap-4">
-        <TitleSection title={t("exams")} />
+        {/* <TitleSection title={t("exams")} /> */}
         <InputFile
           label={t("add Excel")}
           name="excel"
