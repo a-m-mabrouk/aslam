@@ -1,169 +1,256 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { DndProvider, useDrag, useDrop, DragSourceMonitor } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { DndProvider, DragSourceMonitor, useDrag, useDrop } from "react-dnd";
-import { Card } from "flowbite-react";
+import { TouchBackend } from "react-dnd-touch-backend";
+import { MultiBackend, TouchTransition } from "react-dnd-multi-backend";
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "../../../../../../../../../store";
+import { setAnswer } from "../../../../../../../../../store/reducers/exam";
 
-const ItemTypes = {
-    ITEM: "item",
-};
-
-// Define types for items and areas
-interface DraggableItemProps {
-    id: number;
-    label: string;
+interface DraggableAreaProps {
+  id: number;
+  label: string;
 }
 
 interface DroppableAreaProps {
-    id: number;
-    label: string;
-    items: DraggableItemProps[];
+  id: number;
+  label: string;
+  items: DraggableAreaProps[];
 }
 
 interface DraggableItemComponentProps {
-    item: DraggableItemProps;
-    onDropBack: (item: DraggableItemProps) => void;
+  item: DraggableAreaProps;
+  onDropBack: (item: DraggableAreaProps) => void;
 }
 
 interface DroppableAreaComponentProps {
-    label: string;
-    items: DraggableItemProps[];
-    onDropItem: (item: DraggableItemProps) => void;
+  id: number;
+  label: string;
+  items: DraggableAreaProps[];
+  onDropItem: (areaId: number, item: DraggableAreaProps) => void;
+  onDropBack: (item: DraggableAreaProps) => void;
 }
 
-// Draggable item component
-const DraggableItem: React.FC<DraggableItemComponentProps> = ({ item, onDropBack }) => {
-    const [{ isDragging }, drag] = useDrag({
-        type: ItemTypes.ITEM,
-        item,
-        end: (droppedItem: DraggableItemProps, monitor: DragSourceMonitor) => {
-            if (!monitor.didDrop()) {
-                onDropBack(droppedItem); // Handle item drop back to the container
-            }
-        },
-        collect: (monitor) => ({
-            isDragging: monitor.isDragging(),
-        }),
-    });
+function DraggableItem({ item, onDropBack }: DraggableItemComponentProps) {
+  const [{ isDragging }, drag] = useDrag({
+    type: "dragItem",
+    item,
+    end: (droppedItem: DraggableAreaProps, monitor: DragSourceMonitor) => {
+      if (!monitor.didDrop()) {
+        onDropBack(droppedItem);
+      }
+    },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  });
 
-    return (
-        <div
-            ref={drag}
-            style={{
-                transform: isDragging ? 'scale(1.1)' : 'none', // Slightly scale the item while dragging
-                cursor: "move",
-                border: "1px solid gray",
-                padding: "8px 16px",
-                backgroundColor: "white",
-                boxShadow: isDragging ? "0px 0px 10px rgba(0, 0, 0, 0.2)" : "none", // Add shadow while dragging
-            }}
-        >
-            {item.label}
-        </div>
-    );
-};
+  return (
+    <div
+      ref={drag}
+      className={`mb-2 cursor-move border border-gray-400 p-2 transition-transform ${
+        isDragging ? "scale-110 shadow-md" : ""
+      }`}
+    >
+      {item.label}
+    </div>
+  );
+}
 
-// Droppable area component
-const DroppableArea: React.FC<DroppableAreaComponentProps> = ({ label, items, onDropItem }) => {
-    const [{ isOver }, drop] = useDrop({
-        accept: ItemTypes.ITEM,
-        drop: (item: DraggableItemProps) => onDropItem(item),
-        collect: (monitor) => ({
-            isOver: monitor.isOver(),
-        }),
-    });
+function DroppableArea({
+  id,
+  label,
+  items,
+  onDropItem,
+  onDropBack,
+}: DroppableAreaComponentProps) {
+  const [{ isOver }, drop] = useDrop({
+    accept: "dragItem",
+    drop: (item: DraggableAreaProps) => onDropItem(id, item),
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+    }),
+  });
 
-    return (
-        <Card
-            ref={drop}
-            style={{
-                backgroundColor: isOver ? '#4a90e2' : '#007bff',
-                minHeight: "60px",
-                padding: "16px",
-                color: "white",
-                transition: "background-color 0.2s ease",
-            }}
-            className="flex flex-col"
-        >
-            <h4>{label}</h4>
-            {items.map((item) => (
-                <div key={item.id}>{item.label}</div>
-            ))}
-        </Card>
-    );
+  return (
+    <div
+      ref={drop}
+      className={`flex min-h-[60px] flex-col rounded-lg p-4 text-white shadow-md transition-colors ${
+        isOver ? "bg-blue-400" : "bg-blue-600"
+      }`}
+    >
+      <h4 className="font-bold">{label}</h4>
+      {items.map((item) => (
+        <DraggableItem key={item.id} item={item} onDropBack={onDropBack} />
+      ))}
+    </div>
+  );
+}
+
+const backendOptions = {
+  backends: [
+    { id: 1, backend: HTML5Backend },
+    {
+      id: 2,
+      backend: TouchBackend,
+      options: { enableMouseEvents: true },
+      preview: true,
+      transition: TouchTransition,
+    },
+  ],
 };
 
 export default function QuestionDragDrop({
-    question,
-    questionIndex,
+  question,
+  questionIndex,
 }: {
-    question: any; // Replace `any` with the actual type of question if available
-    questionIndex: number;
+  question: ExcelQuestion;
+  questionIndex: number;
 }) {
-    const [draggableItems, setDraggableItems] = useState<DraggableItemProps[]>([
-        { id: 1, label: "وظيف" },
-        { id: 2, label: "مصنف - متوازن" },
-        { id: 3, label: "مصنف - ضعيف" },
-        { id: 4, label: "مصنف - قوي" },
-        { id: 5, label: "موجه نحو المشروع" },
-    ]);
+  const dispatch = useAppDispatch();
+  const examAnswers = useAppSelector(({ exam }) => exam.examAnswers);
+  const thisQueAnswers = examAnswers[questionIndex];
 
-    const [droppableAreas, setDroppableAreas] = useState<DroppableAreaProps[]>([
-        { id: 1, label: "معتدلة إلى مرتفعة", items: [] },
-        { id: 2, label: "منخفضة", items: [] },
-        { id: 3, label: "مرتفعة إلى كاملة تقريبا", items: [] },
-        { id: 4, label: "منخفضة إلى معتدلة", items: [] },
-        { id: 5, label: "قليلة أو لا توجد", items: [] },
-    ]);
+  const dragArray: DraggableAreaProps[] = Object.keys(question)
+    .filter((e: string) => e.search("drag") >= 0)
+    .filter((key) => question[key as keyof ExcelQuestion])
+    .map((key, id) => ({
+      id,
+      label: question[key as keyof ExcelQuestion] as string,
+    }));
 
-    // Handle dropping an item into a droppable area
-    const handleDropItem = (areaId: number, item: DraggableItemProps) => {
-        setDroppableAreas((prevAreas) =>
-            prevAreas.map((area) =>
-                area.id === areaId ? { ...area, items: [...area.items, item] } : area
-            )
-        );
-        setDraggableItems((items) => items.filter((draggableItem) => draggableItem.id !== item.id));
-    };
+  const dropArray: DroppableAreaProps[] = Object.keys(question)
+    .filter((e: string) => e.search("drop") >= 0)
+    .filter((key) => question[key as keyof ExcelQuestion])
+    .map((key, id) => ({
+      id,
+      label: question[key as keyof ExcelQuestion] as string,
+      items: [],
+    }));
 
-    // Handle returning item to the draggable container
-    const handleDropBack = (item: DraggableItemProps) => {
-        if (!draggableItems.some((draggableItem) => draggableItem.id === item.id)) {
-            setDraggableItems((prevItems) => [...prevItems, item]);
-            setDroppableAreas((prevAreas) =>
-                prevAreas.map((area) => ({
-                    ...area,
-                    items: area.items.filter((areaItem) => areaItem.id !== item.id),
-                }))
-            );
-        }
-    };
+    const selectedOpt = thisQueAnswers?.selectedOpt && JSON.parse(thisQueAnswers?.selectedOpt);
+    
+    const draggables = selectedOpt?.draggableItems || dragArray;
+    const droppables = selectedOpt?.droppableAreas || dropArray;
+    
 
-    return (
-        <DndProvider backend={HTML5Backend}>
-            <div className="flex gap-4">
-                {/* Draggable Items */}
-                <div className="flex flex-col gap-2">
-                    {draggableItems.map((item) => (
-                        <DraggableItem
-                            key={item.id}
-                            item={item}
-                            onDropBack={handleDropBack}
-                        />
-                    ))}
-                </div>
+  const [draggableItems, setDraggableItems] =
+    useState<DraggableAreaProps[]>(draggables);
+  const [droppableAreas, setDroppableAreas] =
+    useState<DroppableAreaProps[]>(droppables);
 
-                {/* Droppable Areas */}
-                <div className="flex flex-col gap-2">
-                    {droppableAreas.map((area) => (
-                        <DroppableArea
-                            key={area.id}
-                            label={area.label}
-                            items={area.items}
-                            onDropItem={(item) => handleDropItem(area.id, item)}
-                        />
-                    ))}
-                </div>
-            </div>
-        </DndProvider>
+  const [queAnswers, setQueAnswers] = useState({
+    questionIndex,
+    queAnsDetails: {
+      isCorrect: thisQueAnswers?.isCorrect || false,
+      selectedOpt: thisQueAnswers?.selectedOpt,
+      showAnsClicked: thisQueAnswers?.showAnsClicked || false,
+    },
+  });
+
+  const handleDropItem = (areaId: number, item: DraggableAreaProps) => {
+    if (droppableAreas[areaId].items.length) return;
+
+    setDroppableAreas((prevAreas) =>
+      prevAreas.map((area) =>
+        area.id === areaId
+          ? { ...area, items: [...area.items, item] }
+          : { ...area, items: area.items.filter((i) => i.id !== item.id) },
+      ),
     );
+
+    setDraggableItems((items) =>
+      items.filter((draggableItem) => draggableItem.id !== item.id),
+    );
+
+    const validateItemsArray = droppableAreas.map(
+      (droppableArea) => droppableArea.id === droppableArea.items[0]?.id,
+    );
+    validateItemsArray[areaId] = areaId === item.id;
+    const isCorrect = validateItemsArray.every((e) => e);
+
+    setQueAnswers((prev) => ({
+      ...prev,
+      queAnsDetails: {
+        ...prev.queAnsDetails,
+        isCorrect,
+      },
+    }));
+
+    // Update selectedOpt with the current state of draggable and droppable items
+    // const snapshot = {
+    //   draggableItems: draggableItems,
+    //   droppableAreas: validateItemsArray,
+    // };
+    // setSelectedOpt(JSON.stringify(snapshot));
+
+    // dispatch(
+    //   setAnswer({
+    //     questionIndex,
+    //     queAnsDetails: {
+    //       isCorrect,
+    //       selectedOpt: JSON.stringify(snapshot),
+    //       showAnsClicked: false,
+    //     },
+    //   }),
+    // );
+  };
+
+  const handleDropBack = (item: DraggableAreaProps) => {
+    if (!draggableItems.some((draggableItem) => draggableItem.id === item.id)) {
+      setDraggableItems((prevItems) => [...prevItems, item]);
+      setDroppableAreas((prevAreas) =>
+        prevAreas.map((area) => ({
+          ...area,
+          items: area.items.filter((areaItem) => areaItem.id !== item.id),
+        })),
+      );
+    }
+  };
+
+  useEffect(() => {
+    dispatch(
+      setAnswer({
+        questionIndex,
+        queAnsDetails: {
+          isCorrect: queAnswers.queAnsDetails.isCorrect,
+          selectedOpt: JSON.stringify({draggableItems, droppableAreas}),
+          showAnsClicked: queAnswers.queAnsDetails.showAnsClicked,
+        },
+      }),
+    );    
+  }, [dispatch, draggableItems, droppableAreas, queAnswers, questionIndex]);
+
+  return (
+    <DndProvider backend={MultiBackend} options={backendOptions}>
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Draggable Items */}
+        <div className="flex flex-col gap-2">
+          {draggableItems.map((item) => (
+            <DraggableItem
+              key={item.id}
+              item={item}
+              onDropBack={handleDropBack}
+            />
+          ))}
+        </div>
+
+        {/* Droppable Areas */}
+        <div className="flex flex-col gap-2">
+          {droppableAreas.map((area) => (
+            <DroppableArea
+              key={area.id}
+              id={area.id}
+              label={area.label}
+              items={area.items}
+              onDropItem={handleDropItem}
+              onDropBack={handleDropBack}
+            />
+          ))}
+        </div>
+      </div>
+    </DndProvider>
+  );
 }
