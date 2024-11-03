@@ -1,5 +1,7 @@
 interface ExcelQuestion {
     type: "mcq" | "dragdrop";
+    chapter?: string;
+    domain?: string;
     questionText: string;
     description: string;
     degree: number;

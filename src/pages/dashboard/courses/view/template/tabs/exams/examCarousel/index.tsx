@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button, Card, Progress, Modal } from "flowbite-react";
 import { PauseIcon, PlayIcon, StopIcon } from "@heroicons/react/24/solid";
-import Question from "./Question";
+import Question from "./question";
 import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
 import { resetExam, showQueAns } from "../../../../../../../../store/reducers/exam";
 

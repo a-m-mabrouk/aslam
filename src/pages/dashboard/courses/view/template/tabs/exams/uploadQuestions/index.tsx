@@ -4,7 +4,11 @@ import { Button } from "flowbite-react";
 import { useTranslation } from "react-i18next";
 import InputFile from "../../../../../../../../components/form/fileInput";
 
-export default function UploadQuestions({onAddQuestions}: {onAddQuestions: (questions: ExcelQuestion[]) => void}) {
+export default function UploadQuestions({
+  onAddQuestions,
+}: {
+  onAddQuestions: (questions: ExcelQuestion[]) => void;
+}) {
   const { t } = useTranslation("viewCourse");
   const [file, setFile] = useState<File | undefined>(undefined);
   const handleFileChange = (_: string, value: File | undefined) => {
@@ -19,21 +23,24 @@ export default function UploadQuestions({onAddQuestions}: {onAddQuestions: (ques
       const workbook = XLSX.read(data, { type: "array" });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-      const questions: ExcelQuestion[] = XLSX.utils
-        .sheet_to_json(sheet, {defval: ''})
-        .map((q: any) => {
+      const rawQuestions = XLSX.utils.sheet_to_json(sheet, {
+        defval: "",
+      }) as ExcelQuestion[];
+
+      const questions: ExcelQuestion[] = rawQuestions.map(
+        (q: ExcelQuestion) => {
           const queType = q.type?.toLowerCase();
           if (!["mcq", "dragdrop"].includes(queType)) {
             throw new Error("Invalid question type");
           }
           return q;
-        });
-
+        },
+      );
       onAddQuestions(questions);
     };
     reader.readAsArrayBuffer(file);
   };
-  
+
   return (
     <div className="grid gap-4">
       <div className="flex justify-between gap-4">
@@ -50,9 +57,9 @@ export default function UploadQuestions({onAddQuestions}: {onAddQuestions: (ques
           error={""}
         />
       </div>
-        <Button onClick={handlefileUpload} disabled={!file}>
-          {t("Upload Questions")}
-        </Button>
+      <Button onClick={handlefileUpload} disabled={!file}>
+        {t("Upload Questions")}
+      </Button>
     </div>
   );
 }
