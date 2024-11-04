@@ -71,7 +71,7 @@ export default function CreateChapter() {
       <PopupModal
         isOpen={open}
         closeModal={toggleModal}
-        title={t("addChapter")}
+        title={t("addVideo")}
       >
         <PopupModal.Form onSubmit={handleSubmit}>
           <TextInputLang
@@ -92,7 +92,7 @@ export default function CreateChapter() {
         </PopupModal.Form>
       </PopupModal>
       <PrimaryBtn pluse onClick={toggleModal}>
-        {t("addChapter")}
+        {t("addVideo")}
       </PrimaryBtn>
     </>
   );

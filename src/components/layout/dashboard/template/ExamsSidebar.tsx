@@ -92,7 +92,7 @@ export default function ExamsSidebar() {
                           <AccordionCard.Content>
                             <div className="grid gap-4">
                               {subItem?.children?.map((item) => (
-                                <h1>{item.title}</h1>
+                                <h1 key={item.id}>{item.title}</h1>
                               ))}
                             </div>
                           </AccordionCard.Content>

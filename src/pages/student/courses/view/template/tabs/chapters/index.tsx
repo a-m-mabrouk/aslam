@@ -7,7 +7,7 @@ import PlayerModal from "../../../../../../../components/popupModal/player";
 import TitleSection from "../../../../../../../components/title";
 import DescriptionLesson from "./description";
 
-export default function Chapters() {
+export default function Videos() {
   const { course } = useContext(ViewCourseContext);
   const { modules, expire } = course || {};
   const { t } = useTranslation("viewCourse");
@@ -65,7 +65,7 @@ export default function Chapters() {
         }
         <>
           {modules?.length === 0 && (
-            <p className="py-4 text-center text-gray-400">{t("noChapters")}</p>
+            <p className="py-4 text-center text-gray-400">{t("noVideos")}</p>
           )}
         </>
       </AccordionCard>

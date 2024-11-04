@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import TitleSection from "../../../../../../../../components/title";
 
 // import PlayerModal from "../../../../../../../../components/popupModal/player";
-// import DescriptionLesson from "../../../../../../../student/courses/view/template/tabs/chapters/description";
+// import DescriptionLesson from "../../../../../../../student/courses/view/template/tabs/videos/description";
 
 
 export default function ExamsSideAccordion() {

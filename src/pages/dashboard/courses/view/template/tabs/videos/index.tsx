@@ -18,7 +18,7 @@ export default function Chapters() {
   return (
     <div className="grid gap-4">
       <div className="flex justify-between gap-2">
-        <TitleSection title={t("chapters")} />
+        <TitleSection title={t("videos")} />
         <CreateChapter />
       </div>
 
@@ -63,7 +63,7 @@ export default function Chapters() {
         }
         <>
           {modules?.length === 0 && (
-            <p className="py-4 text-center text-gray-400">{t("noChapters")}</p>
+            <p className="py-4 text-center text-gray-400">{t("noVideos")}</p>
           )}
         </>
       </AccordionCard>

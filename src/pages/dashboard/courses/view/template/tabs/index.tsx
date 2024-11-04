@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import BgCard from "../../../../../../components/cards/bg";
 import { TabsCard } from "../../../../../../components/tabs";
-import Chapters from "./chapters";
+import Videos from "./videos";
 import Resources from "./resources";
 import {
   DocumentIcon,
@@ -27,8 +27,8 @@ export default function Tabs() {
   return (
     <BgCard>
       <TabsCard handleActiveTabchange={(tabIndex) => handleTabChange(tabIndex)}>
-        <TabsCard.TabItem title={t("chapters")} icon={FolderIcon}>
-          <Chapters />
+        <TabsCard.TabItem title={t("videos")} icon={FolderIcon}>
+          <Videos />
         </TabsCard.TabItem>
         <TabsCard.TabItem title={t("resources")} icon={DocumentIcon}>
           <Resources />

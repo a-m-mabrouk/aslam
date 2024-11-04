@@ -7,7 +7,7 @@ const Question = memo(
     question,
     questionIndex,
   }: {
-    question: Question;
+    question: ExcelQuestion;
     questionIndex: number;
   }) => {
     
