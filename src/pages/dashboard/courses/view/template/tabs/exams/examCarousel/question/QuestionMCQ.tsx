@@ -9,7 +9,7 @@ export default function QuestionMCQ({
   question,
   questionIndex,
 }: {
-  question: ExcelQuestion;
+  question: Question;
   questionIndex: number;
 }) {
   const dispatch = useAppDispatch();

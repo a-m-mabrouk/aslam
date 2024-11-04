@@ -106,7 +106,7 @@ export default function QuestionDragDrop({
   question,
   questionIndex,
 }: {
-  question: ExcelQuestion;
+  question: Question;
   questionIndex: number;
 }) {
   const dispatch = useAppDispatch();
@@ -115,18 +115,18 @@ export default function QuestionDragDrop({
 
   const dragArray: DraggableAreaProps[] = Object.keys(question)
     .filter((e: string) => e.search("drag") >= 0)
-    .filter((key) => question[key as keyof ExcelQuestion])
+    .filter((key) => question[key as keyof Question])
     .map((key, id) => ({
       id,
-      label: question[key as keyof ExcelQuestion] as string,
+      label: question[key as keyof Question] as string,
     }));
 
   const dropArray: DroppableAreaProps[] = Object.keys(question)
     .filter((e: string) => e.search("drop") >= 0)
-    .filter((key) => question[key as keyof ExcelQuestion])
+    .filter((key) => question[key as keyof Question])
     .map((key, id) => ({
       id,
-      label: question[key as keyof ExcelQuestion] as string,
+      label: question[key as keyof Question] as string,
       items: [],
     }));
 

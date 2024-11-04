@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button, Card, Progress, Modal } from "flowbite-react";
 import { PauseIcon, PlayIcon, StopIcon } from "@heroicons/react/24/solid";
-import ExcelQuestion from "./question";
+import Question from "./question";
 import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
 import { resetExam, showQueAns } from "../../../../../../../../store/reducers/exam";
 
@@ -10,7 +10,7 @@ const ExamDetails = ({
   questions,
 }: {
   onStart: () => void;
-  questions: ExcelQuestion[];
+  questions: Question[];
 }) => {
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -46,7 +46,7 @@ const ExamDetails = ({
   </Card>
 )};
 
-const ExamInterface = ({ questions }: { questions: ExcelQuestion[] }) => {
+const ExamInterface = ({ questions }: { questions: Question[] }) => {
   const dispatch = useAppDispatch();
   const examAnswers = useAppSelector(({exam}) => exam.examAnswers)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -140,8 +140,8 @@ const ExamInterface = ({ questions }: { questions: ExcelQuestion[] }) => {
         </div>
       </header>
 
-      {/* ExcelQuestion Content */}
-      <ExcelQuestion question={questions[currentQuestionIndex]} questionIndex={currentQuestionIndex} />
+      {/* Question Content */}
+      <Question question={questions[currentQuestionIndex]} questionIndex={currentQuestionIndex} />
 
       {/* Footer */}
       <footer className="flex items-center justify-between bg-gray-200 p-4">
@@ -181,7 +181,7 @@ const ExamInterface = ({ questions }: { questions: ExcelQuestion[] }) => {
   );
 };
 
-const ExamComponent = ({ questions }: { questions: ExcelQuestion[] }) => {
+const ExamComponent = ({ questions }: { questions: Question[] }) => {
   const dispatch = useAppDispatch();
   const [isExamStarted, setIsExamStarted] = useState(false);
   const examAnswers = useAppSelector(({exam}) => exam.examAnswers);

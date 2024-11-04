@@ -7,7 +7,7 @@ import InputFile from "../../../../../../../../components/form/fileInput";
 export default function UploadQuestions({
   onAddQuestions,
 }: {
-  onAddQuestions: (questions: ExcelQuestion[]) => void;
+  onAddQuestions: (questions: Question[]) => void;
 }) {
   const { t } = useTranslation("viewCourse");
   const [file, setFile] = useState<File | undefined>(undefined);
@@ -27,15 +27,44 @@ export default function UploadQuestions({
         defval: "",
       }) as ExcelQuestion[];
 
-      const questions: ExcelQuestion[] = rawQuestions.map(
-        (q: ExcelQuestion) => {
-          const queType = q.type?.toLowerCase();
-          if (!["mcq", "dragdrop"].includes(queType)) {
-            throw new Error("Invalid question type");
-          }
-          return q;
-        },
-      );
+      const questions: Question[] = rawQuestions.map((q: ExcelQuestion) => {
+        const queType = q.type?.toLowerCase();
+        const customQuestion: Question = {
+          type: q.type,
+            chapter: q.chapter,
+            domain: q.domain,
+            name: q.questionText,
+            description: q.description,
+            degree: q.degree,
+            options: []
+        }
+        if (queType === "mcq") {
+          type charIndex = 'a' | 'b' | 'c' | 'd' | 'e' | 'f';
+          ['a', 'b', 'c', 'd', 'e', 'f'].forEach(opt => {
+            if (q[opt as charIndex]?.trim() !== "") {
+              customQuestion.options.push({
+                option: q[opt as charIndex]?.trim()!,
+                answer: q.answer === opt? 'true': 'false'
+              })
+            }
+          })
+        } else if (queType === "dragdrop") {
+          type dragIndex = 'drag1' | 'drag2' | 'drag3' | 'drag4' | 'drag5' | 'drag6';
+          type dropIndex = 'drop1' | 'drop2' | 'drop3' | 'drop4' | 'drop5' | 'drop6';
+          ['drag1', 'drag2', 'drag3', 'drag4', 'drag5', 'drag6'].forEach(opt => {
+            if (q[opt as dragIndex]?.trim() !== "") {
+              customQuestion.options.push({
+                option: q[opt as dragIndex]?.trim()!,
+                answer: q[opt.replace('drag', 'drop') as dropIndex]!
+              })
+            }
+          })
+        } else {
+          throw new Error("Invalid question type");
+        }
+
+        return customQuestion;
+      });
       onAddQuestions(questions);
     };
     reader.readAsArrayBuffer(file);
