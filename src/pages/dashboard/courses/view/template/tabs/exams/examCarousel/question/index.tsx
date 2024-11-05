@@ -21,7 +21,7 @@ const Question = memo(
 
     return (
       <main className="grow p-4">
-        <h2>{question.questionText}</h2>
+        <h2>{question.name}</h2>
         {questionMarkup}
       </main>
     );

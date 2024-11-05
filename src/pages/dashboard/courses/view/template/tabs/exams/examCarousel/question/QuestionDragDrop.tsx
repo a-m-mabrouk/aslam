@@ -113,28 +113,19 @@ export default function QuestionDragDrop({
   const examAnswers = useAppSelector(({ exam }) => exam.examAnswers);
   const thisQueAnswers = examAnswers[questionIndex];
 
-  const dragArray: DraggableAreaProps[] = Object.keys(question)
-    .filter((e: string) => e.search("drag") >= 0)
-    .filter((key) => question[key as keyof Question])
-    .map((key, id) => ({
-      id,
-      label: question[key as keyof Question] as string,
-    }));
+  const dragArray: DraggableAreaProps[] = question.options.map(
+    ({ option: label }, id) => ({ id, label }),
+  );
 
-  const dropArray: DroppableAreaProps[] = Object.keys(question)
-    .filter((e: string) => e.search("drop") >= 0)
-    .filter((key) => question[key as keyof Question])
-    .map((key, id) => ({
-      id,
-      label: question[key as keyof Question] as string,
-      items: [],
-    }));
+  const dropArray: DroppableAreaProps[] = question.options.map(
+    ({ answer: label }, id) => ({ id, label, items: [] }),
+  );
 
-    const selectedOpt = thisQueAnswers?.selectedOpt && JSON.parse(thisQueAnswers?.selectedOpt);
-    
-    const draggables = selectedOpt?.draggableItems || dragArray;
-    const droppables = selectedOpt?.droppableAreas || dropArray;
-    
+  const selectedOpt =
+    thisQueAnswers?.selectedOpt && JSON.parse(thisQueAnswers?.selectedOpt);
+
+  const draggables = selectedOpt?.draggableItems || dragArray;
+  const droppables = selectedOpt?.droppableAreas || dropArray;
 
   const [draggableItems, setDraggableItems] =
     useState<DraggableAreaProps[]>(draggables);
@@ -179,23 +170,6 @@ export default function QuestionDragDrop({
       },
     }));
 
-    // Update selectedOpt with the current state of draggable and droppable items
-    // const snapshot = {
-    //   draggableItems: draggableItems,
-    //   droppableAreas: validateItemsArray,
-    // };
-    // setSelectedOpt(JSON.stringify(snapshot));
-
-    // dispatch(
-    //   setAnswer({
-    //     questionIndex,
-    //     queAnsDetails: {
-    //       isCorrect,
-    //       selectedOpt: JSON.stringify(snapshot),
-    //       showAnsClicked: false,
-    //     },
-    //   }),
-    // );
   };
 
   const handleDropBack = (item: DraggableAreaProps) => {
@@ -216,11 +190,11 @@ export default function QuestionDragDrop({
         questionIndex,
         queAnsDetails: {
           isCorrect: queAnswers.queAnsDetails.isCorrect,
-          selectedOpt: JSON.stringify({draggableItems, droppableAreas}),
+          selectedOpt: JSON.stringify({ draggableItems, droppableAreas }),
           showAnsClicked: queAnswers.queAnsDetails.showAnsClicked,
         },
       }),
-    );    
+    );
   }, [dispatch, draggableItems, droppableAreas, queAnswers, questionIndex]);
 
   return (

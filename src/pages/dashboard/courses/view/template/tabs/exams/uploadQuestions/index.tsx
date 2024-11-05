@@ -4,6 +4,33 @@ import { Button } from "flowbite-react";
 import { useTranslation } from "react-i18next";
 import InputFile from "../../../../../../../../components/form/fileInput";
 
+interface ExcelQuestion {
+  type: "mcq" | "dragdrop";
+  chapter?: string;
+  domain?: string;
+  questionText: string;
+  description: string;
+  degree: number;
+  a: string;
+  b: string;
+  c?: string;
+  d?: string;
+  e?: string;
+  f?: string;
+  answer: string;
+  drag1: string;
+  drag2: string;
+  drag3?: string;
+  drag4?: string;
+  drag5?: string;
+  drag6?: string;
+  drop1: string;
+  drop2: string;
+  drop3?: string;
+  drop4?: string;
+  drop5?: string;
+  drop6?: string;
+}
 export default function UploadQuestions({
   onAddQuestions,
 }: {
@@ -31,34 +58,48 @@ export default function UploadQuestions({
         const queType = q.type?.toLowerCase();
         const customQuestion: Question = {
           type: q.type,
-            chapter: q.chapter,
-            domain: q.domain,
-            name: q.questionText,
-            description: q.description,
-            degree: q.degree,
-            options: []
-        }
+          chapter: q.chapter,
+          domain: q.domain,
+          name: q.questionText,
+          description: q.description,
+          degree: q.degree,
+          options: [],
+        };
         if (queType === "mcq") {
-          type charIndex = 'a' | 'b' | 'c' | 'd' | 'e' | 'f';
-          ['a', 'b', 'c', 'd', 'e', 'f'].forEach(opt => {
-            if (q[opt as charIndex]?.trim() !== "") {
+          type charIndex = "a" | "b" | "c" | "d" | "e" | "f";
+          ["a", "b", "c", "d", "e", "f"].forEach((opt) => {
+            const optText = q[opt as charIndex]?.trim();
+            optText &&
               customQuestion.options.push({
-                option: q[opt as charIndex]?.trim()!,
-                answer: q.answer === opt? 'true': 'false'
-              })
-            }
-          })
+                option: optText!,
+                answer: q.answer === opt ? "true" : "false",
+              });
+          });
         } else if (queType === "dragdrop") {
-          type dragIndex = 'drag1' | 'drag2' | 'drag3' | 'drag4' | 'drag5' | 'drag6';
-          type dropIndex = 'drop1' | 'drop2' | 'drop3' | 'drop4' | 'drop5' | 'drop6';
-          ['drag1', 'drag2', 'drag3', 'drag4', 'drag5', 'drag6'].forEach(opt => {
-            if (q[opt as dragIndex]?.trim() !== "") {
-              customQuestion.options.push({
-                option: q[opt as dragIndex]?.trim()!,
-                answer: q[opt.replace('drag', 'drop') as dropIndex]!
-              })
-            }
-          })
+          type dragIndex =
+            | "drag1"
+            | "drag2"
+            | "drag3"
+            | "drag4"
+            | "drag5"
+            | "drag6";
+          type dropIndex =
+            | "drop1"
+            | "drop2"
+            | "drop3"
+            | "drop4"
+            | "drop5"
+            | "drop6";
+          ["drag1", "drag2", "drag3", "drag4", "drag5", "drag6"].forEach(
+            (opt) => {
+              const optText = q[opt as dragIndex]?.trim();
+              optText &&
+                customQuestion.options.push({
+                  option: optText!,
+                  answer: q[opt.replace("drag", "drop") as dropIndex]!,
+                });
+            },
+          );
         } else {
           throw new Error("Invalid question type");
         }
