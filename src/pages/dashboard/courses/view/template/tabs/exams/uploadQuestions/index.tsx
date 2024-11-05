@@ -68,7 +68,8 @@ export default function UploadQuestions({
         if (queType === "mcq") {
           type charIndex = "a" | "b" | "c" | "d" | "e" | "f";
           ["a", "b", "c", "d", "e", "f"].forEach((opt) => {
-            const optText = q[opt as charIndex]?.trim();
+            const optText = q[opt as charIndex]?.toString().trim();
+
             optText &&
               customQuestion.options.push({
                 option: optText!,
@@ -92,7 +93,7 @@ export default function UploadQuestions({
             | "drop6";
           ["drag1", "drag2", "drag3", "drag4", "drag5", "drag6"].forEach(
             (opt) => {
-              const optText = q[opt as dragIndex]?.trim();
+              const optText = q[opt as dragIndex]?.toString().trim();
               optText &&
                 customQuestion.options.push({
                   option: optText!,

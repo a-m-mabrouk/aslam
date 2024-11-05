@@ -32,7 +32,7 @@ const ExamDetails = ({
       </div>
       <div className="text-center">
         <h2 className="text-lg font-bold">مدة الاختبار</h2>
-        <p>{formatTime(questions.length * 1.2 * 60)}</p>
+        <p>{formatTime(Math.round(questions.length * 1.33333 * 60))}</p>
       </div>
     </div>
     <ul className="ml-5 mt-4 list-disc text-right">
@@ -51,7 +51,7 @@ const ExamInterface = ({ questions }: { questions: Question[] }) => {
   const examAnswers = useAppSelector(({exam}) => exam.examAnswers)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(
-    questions.length * 1.2 * 60,
+    Math.round(questions.length * 1.33333 * 60),
   );
   const [isPaused, setIsPaused] = useState(false);
   const [openModal, setOpenModal] = useState(false);
@@ -86,8 +86,8 @@ const ExamInterface = ({ questions }: { questions: Question[] }) => {
   }, [isPaused]);
 
   const progress =
-    ((questions.length * 1.2 * 60 - timeRemaining) /
-      (questions.length * 1.2 * 60)) *
+    ((Math.round(questions.length * 1.33333 * 60) - timeRemaining) /
+    Math.round(questions.length * 1.33333 * 60)) *
     100;
 
   const goToNextQuestion = () => {
