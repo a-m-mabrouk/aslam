@@ -4,7 +4,7 @@ import UploadQuestions from "./uploadQuestions";
 import { useAppDispatch } from "../../../../../../../store";
 import { hideSideNav } from "../../../../../../../store/reducers/layout";
 import ExamCarousel from "./examCarousel";
-import Calculator from "../../../../../../../components/calculator";
+// import Calculator from "../../../../../../../components/calculator";
 
 export default function Exams() {
   const dispatch = useAppDispatch();
@@ -24,7 +24,7 @@ export default function Exams() {
       <ExamsSideAccordion />
       <ExamCarousel questions={questions} />
       <UploadQuestions onAddQuestions={handleSetQuestions} />
-      <Calculator />
+      {/* <Calculator /> */}
     </div>
   )
 }

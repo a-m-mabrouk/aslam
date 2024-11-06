@@ -30,7 +30,10 @@ export default function Students() {
   };
 
   useEffect(() => {
-    error && toastifyBox("error", error);
+    if (error) {
+      toastifyBox("error", error);
+      return;
+    }
     const clear: NodeJS.Timeout = setTimeout(
       () => dispatch(fetchStudents({ search, page })),
       1000,
@@ -94,6 +97,9 @@ export default function Students() {
 
       <BgCard>
         <div className="relative min-h-[400px]">
+          <>
+            {/* {console.log(searchLoading)} */}
+          </>
           {searchLoading ? (
             <Loading position="absolute" />
           ) : (

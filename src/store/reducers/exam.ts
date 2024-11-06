@@ -4,6 +4,7 @@ interface ExamAnswer {
   isCorrect: boolean;
   selectedOpt: string;
   showAnsClicked: boolean;
+  isFlagged: boolean;
 }
 
 interface ExamType {
@@ -16,6 +17,7 @@ interface SetAnswerPayload {
     isCorrect: boolean;
     selectedOpt: string;
     showAnsClicked: boolean;
+    isFlagged: boolean;
   };
 }
 
@@ -34,12 +36,23 @@ const examSlice = createSlice({
       const { questionIndex, queAnsDetails } = payload;
       state.examAnswers[questionIndex] = queAnsDetails;
     },
-    showQueAns: (state, {payload}: PayloadAction<number>) => {
+    setIsCorrect: (state, {payload}: PayloadAction<{questionIndex: number, isCorrect: boolean}>) => {
+      const {questionIndex, isCorrect} = payload;
+      state.examAnswers[questionIndex].isCorrect = isCorrect;
+    },
+    setSelectedOpt: (state, {payload}: PayloadAction<{questionIndex: number, selectedOpt: string}>) => {
+      const {questionIndex, selectedOpt} = payload;
+      state.examAnswers[questionIndex].selectedOpt = selectedOpt;
+    },
+    setShowAnsClicked: (state, {payload}: PayloadAction<number>) => {
       state.examAnswers[payload].showAnsClicked = true;
+    },
+    setIsFlagged: (state, {payload}: PayloadAction<number>) => {
+      state.examAnswers[payload].isFlagged = !state.examAnswers[payload].isFlagged;
     }
   },
 });
 
-export const { resetExam, setAnswer, showQueAns } = examSlice.actions;
+export const { resetExam, setAnswer, setIsCorrect, setSelectedOpt, setShowAnsClicked, setIsFlagged } = examSlice.actions;
 
 export default examSlice.reducer;

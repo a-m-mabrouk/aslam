@@ -2,8 +2,8 @@ import { useCallback } from "react";
 import {
   useAppDispatch,
   useAppSelector,
-} from "../../../../../../../../../store";
-import { setAnswer } from "../../../../../../../../../store/reducers/exam";
+} from "../../../../../../../../../../store";
+import { setIsCorrect, setSelectedOpt } from "../../../../../../../../../../store/reducers/exam";
 
 export default function QuestionMCQ({
   question,
@@ -23,13 +23,8 @@ export default function QuestionMCQ({
           .filter((opt) => opt.answer === "true")[0]
           .option?.trim();
       const selectedOpt = target.value;
-
-      dispatch(
-        setAnswer({
-          questionIndex,
-          queAnsDetails: { isCorrect, selectedOpt, showAnsClicked: false },
-        }),
-      );
+      dispatch(setIsCorrect({questionIndex, isCorrect}))
+      dispatch(setSelectedOpt({questionIndex, selectedOpt}));
     },
     [dispatch, question, questionIndex],
   );

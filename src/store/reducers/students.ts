@@ -72,18 +72,19 @@ const initialState: StudentState = {
 export const fetchStudents = createAsyncThunk(
   "students/fetchStudents",
   async ({ page, search }: FetchStudentsParams) => {
-    try {
-      const response = await axiosDefault.get(
-      `${API_STUDENTS.students}/search?${search ? `name=${search}&` : ""}page=${page}`,
+    // const response = await axiosDefault.get(
+    //   `${API_STUDENTS.students}/search?${search ? `name=${search}&` : ""}page=${page}`,
+    // );
+    const response = await axiosDefault.get(
+      `${API_STUDENTS.students}/search`,
+      {
+        params: {
+          search: search || undefined,
+          page,
+        }
+      }
     );
-    console.log(response);
-    
     return response.data;
-    } catch (error: any) {
-      throw new Error(error.message)
-      
-    }
-    
   },
 );
 
@@ -95,12 +96,16 @@ const studentsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchStudents.pending, (state) => {
+        console.log('pending');
+        
         state.loading = true;
         state.error = null;
       })
       .addCase(
         fetchStudents.fulfilled,
         (state, action: PayloadAction<SearchPayloadActionProps>) => {
+          console.log('filfilled');
+          
           const { data } = action.payload;
           state.loading = false;
           state.data.students = data.data;
@@ -109,6 +114,7 @@ const studentsSlice = createSlice({
         },
       )
       .addCase(fetchStudents.rejected, (state, action) => {
+        state.data.students = [];
         state.loading = false;
         state.error = action.error.message || "Failed to fetch students";
       });

@@ -1,93 +1,18 @@
 import { useEffect, useState } from "react";
-import { DndProvider, useDrag, useDrop, DragSourceMonitor } from "react-dnd";
+import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
 import { MultiBackend, TouchTransition } from "react-dnd-multi-backend";
 import {
   useAppDispatch,
   useAppSelector,
-} from "../../../../../../../../../store";
-import { setAnswer } from "../../../../../../../../../store/reducers/exam";
-
-interface DraggableAreaProps {
-  id: number;
-  label: string;
-}
-
-interface DroppableAreaProps {
-  id: number;
-  label: string;
-  items: DraggableAreaProps[];
-}
-
-interface DraggableItemComponentProps {
-  item: DraggableAreaProps;
-  onDropBack: (item: DraggableAreaProps) => void;
-}
-
-interface DroppableAreaComponentProps {
-  id: number;
-  label: string;
-  items: DraggableAreaProps[];
-  onDropItem: (areaId: number, item: DraggableAreaProps) => void;
-  onDropBack: (item: DraggableAreaProps) => void;
-}
-
-function DraggableItem({ item, onDropBack }: DraggableItemComponentProps) {
-  const [{ isDragging }, drag] = useDrag({
-    type: "dragItem",
-    item,
-    end: (droppedItem: DraggableAreaProps, monitor: DragSourceMonitor) => {
-      if (!monitor.didDrop()) {
-        onDropBack(droppedItem);
-      }
-    },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
-
-  return (
-    <div
-      ref={drag}
-      className={`mb-2 cursor-move border border-gray-400 p-2 transition-transform ${
-        isDragging ? "scale-110 shadow-md" : ""
-      }`}
-    >
-      {item.label}
-    </div>
-  );
-}
-
-function DroppableArea({
-  id,
-  label,
-  items,
-  onDropItem,
-  onDropBack,
-}: DroppableAreaComponentProps) {
-  const [{ isOver }, drop] = useDrop({
-    accept: "dragItem",
-    drop: (item: DraggableAreaProps) => onDropItem(id, item),
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  });
-
-  return (
-    <div
-      ref={drop}
-      className={`flex min-h-[60px] flex-col rounded-lg p-4 text-white shadow-md transition-colors ${
-        isOver ? "bg-blue-400" : "bg-blue-600"
-      }`}
-    >
-      <h4 className="font-bold">{label}</h4>
-      {items.map((item) => (
-        <DraggableItem key={item.id} item={item} onDropBack={onDropBack} />
-      ))}
-    </div>
-  );
-}
+} from "../../../../../../../../../../store";
+import {
+  setIsCorrect,
+  setSelectedOpt,
+} from "../../../../../../../../../../store/reducers/exam";
+import DraggableItem from "./DraggableItem";
+import DroppableArea from "./DroppableArea";
 
 const backendOptions = {
   backends: [
@@ -169,7 +94,6 @@ export default function QuestionDragDrop({
         isCorrect,
       },
     }));
-
   };
 
   const handleDropBack = (item: DraggableAreaProps) => {
@@ -185,22 +109,15 @@ export default function QuestionDragDrop({
   };
 
   useEffect(() => {
-    dispatch(
-      setAnswer({
-        questionIndex,
-        queAnsDetails: {
-          isCorrect: queAnswers.queAnsDetails.isCorrect,
-          selectedOpt: JSON.stringify({ draggableItems, droppableAreas }),
-          showAnsClicked: queAnswers.queAnsDetails.showAnsClicked,
-        },
-      }),
-    );
+    const isCorrect = queAnswers.queAnsDetails.isCorrect;
+    const selectedOpt = JSON.stringify({ draggableItems, droppableAreas });
+    dispatch(setIsCorrect({ questionIndex, isCorrect }));
+    dispatch(setSelectedOpt({ questionIndex, selectedOpt }));
   }, [dispatch, draggableItems, droppableAreas, queAnswers, questionIndex]);
 
   return (
     <DndProvider backend={MultiBackend} options={backendOptions}>
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Draggable Items */}
         <div className="flex flex-col gap-2">
           {draggableItems.map((item) => (
             <DraggableItem
@@ -211,7 +128,6 @@ export default function QuestionDragDrop({
           ))}
         </div>
 
-        {/* Droppable Areas */}
         <div className="flex flex-col gap-2">
           {droppableAreas.map((area) => (
             <DroppableArea

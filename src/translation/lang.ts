@@ -136,6 +136,20 @@ export const resources = {
         phone_number: "Phone Number",
       },
     },
+    exams: {
+      remainingTime: "Remaining time",
+      question: "Question",
+      of: "Of",
+      correctAnswer: "Correct answer",
+      next: "Next",
+      prev: "Previous",
+      description: "Description",
+      flaggedQuestions: "Flagged questions",
+      viewAllQuestions: "View all questions",
+      allQuestions: "All Questions",
+      calculator: "Calculator",
+      board: "Board"
+    }
   },
   ar: {
     auth: {
@@ -272,5 +286,19 @@ export const resources = {
         phone_number: "رقم الهاتف",
       },
     },
+    exams: {
+      remainingTime: "الوقت المتبقي",
+      question: "سؤال",
+      of: "من",
+      correctAnswer: "الإجابة الصحيحة",
+      next: "التالي",
+      prev: "السابق",
+      description: "الوصف",
+      flaggedQuestions: "الأسئلة المحددة",
+      viewAllQuestions: "مشاهدة كل الأسئلة",
+      allQuestions: "كل الأسئلة",
+      calculator: "الآلة الحاسبة",
+      board: "السبورة"
+    }
   },
 };

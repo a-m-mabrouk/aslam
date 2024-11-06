@@ -11,36 +11,27 @@ interface Question {
     answer: string;
   }[];
 }
-interface QuestionMCQ {
-  type: "mcq";
-  questionText: string;
-  description: string;
-  degree: number;
-  a: string;
-  b: string;
-  c?: string;
-  d?: string;
-  e?: string;
-  f?: string;
-  answer: string;
-}
-interface QuestionDragDrop {
-  type: "dragdrop";
-  questionText: string;
-  description: string;
-  degree: number;
-  drag1: string;
-  drag2: string;
-  drag3?: string;
-  drag4?: string;
-  drag5?: string;
-  drag6?: string;
-  drop1: string;
-  drop2: string;
-  drop3?: string;
-  drop4?: string;
-  drop5?: string;
-  drop6?: string;
+
+interface DraggableAreaProps {
+  id: number;
+  label: string;
 }
 
-type Question = QuestionMCQ | QuestionDragDrop;
+interface DroppableAreaProps {
+  id: number;
+  label: string;
+  items: DraggableAreaProps[];
+}
+
+interface DraggableItemComponentProps {
+  item: DraggableAreaProps;
+  onDropBack: (item: DraggableAreaProps) => void;
+}
+
+interface DroppableAreaComponentProps {
+  id: number;
+  label: string;
+  items: DraggableAreaProps[];
+  onDropItem: (areaId: number, item: DraggableAreaProps) => void;
+  onDropBack: (item: DraggableAreaProps) => void;
+}
