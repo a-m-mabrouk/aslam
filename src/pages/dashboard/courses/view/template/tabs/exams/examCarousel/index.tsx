@@ -22,7 +22,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Calculator } from "react-advanced-calculator";
 import "react-advanced-calculator/dist/styles/calculator.css";
-import DrawingBoard from "react-drawing-board";
+// import DrawingBoard from "react-drawing-board";
 
 function DrawingBoardContainer() {
   return (
@@ -35,7 +35,7 @@ function DrawingBoardContainer() {
         maxHeight: "60vh",
       }}
     >
-      <DrawingBoard toolbarPlacement="left" />
+      {/* <DrawingBoard toolbarPlacement="left" /> */}
     </div>
   );
 }
