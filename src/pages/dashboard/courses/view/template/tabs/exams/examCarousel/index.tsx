@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Button, Card, Progress, Modal, Popover } from "flowbite-react";
 import {
   PauseIcon,
@@ -22,7 +22,12 @@ import {
 import { useTranslation } from "react-i18next";
 import { Calculator } from "react-advanced-calculator";
 import "react-advanced-calculator/dist/styles/calculator.css";
+import { createColumnHelper } from "@tanstack/react-table";
+import CellRedirect from "../../../../../../../../components/table/cellRedirect";
+import { redirect } from "react-router";
 // import DrawingBoard from "react-drawing-board";
+
+const columnHelper = createColumnHelper<DataStudent>();
 
 function DrawingBoardContainer() {
   return (
@@ -155,6 +160,52 @@ const ExamInterface = ({ questions }: { questions: Question[] }) => {
   const flaggedQuestionsArr = examAnswers
     .map((examAnswer, i) => (examAnswer.isFlagged ? i : -1))
     .filter((i) => i !== -1);
+    // console.log(flaggedQuestionsArr);
+
+    // const columns = useMemo(
+    //   () => [
+    //     columnHelper.accessor("id", {
+    //       header: t("table.id"),
+    //       cell: (info) => (
+    //         <CellRedirect url={redirect(info.getValue())}>
+    //           {info.getValue()}
+    //         </CellRedirect>
+    //       ),
+    //     }),
+    //     columnHelper.accessor("first_name", {
+    //       header: t("table.firstName"),
+    //       cell: (info) => {
+    //         const id = info.row.original.id;
+    //         const row = info.row.original;
+    //         return (
+    //           <CellRedirect url={redirect(id)}>
+    //             {row.first_name + " " + row.last_name}
+    //           </CellRedirect>
+    //         );
+    //       },
+    //     }),
+    //     columnHelper.accessor("phone_number", {
+    //       header: t("table.phone_number"),
+    //       cell: (info) => {
+    //         const id = info.row.original.id;
+    //         return (
+    //           <CellRedirect url={redirect(id)}>{info.getValue()}</CellRedirect>
+    //         );
+    //       },
+    //     }),
+    //     columnHelper.accessor("email", {
+    //       header: t("table.email"),
+    //       cell: (info) => {
+    //         const id = info.row.original.id;
+    //         return (
+    //           <CellRedirect url={redirect(id)}>{info.getValue()}</CellRedirect>
+    //         );
+    //       },
+    //     }),
+    //   ],
+    //   [t],
+    // );
+    
 
   return (
     <div className="flex h-full flex-col">
@@ -294,9 +345,9 @@ const ExamInterface = ({ questions }: { questions: Question[] }) => {
       >
         <Modal.Header>{t("allQuestions")}</Modal.Header>
         <Modal.Body>
-          <div className="space-y-6 p-6">
-            <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-              {questions.map((_, i) => {
+          <div className="grid gap-2">
+            {/* <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400"> */}
+              {questions.map((q, i) => {
                 return (
                   <Button
                     onClick={() => {
@@ -304,11 +355,11 @@ const ExamInterface = ({ questions }: { questions: Question[] }) => {
                       setAllQuestionsModal(false);
                     }}
                   >
-                    {i + 1}
+                    {i + 1} {q.name}
                   </Button>
                 );
               })}
-            </p>
+            {/* </p> */}
           </div>
         </Modal.Body>
       </Modal>
