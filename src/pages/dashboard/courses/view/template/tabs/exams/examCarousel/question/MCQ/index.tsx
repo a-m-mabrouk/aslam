@@ -85,7 +85,7 @@ export default function QuestionMCQ({
                 onChange={handleRadioChange}
                 value={opt.option}
               />
-              <label htmlFor={`option-${i + 1}`} className="ml-2">
+              <label htmlFor={`option-${i + 1}`} className="ms-2">
                 {opt.option}
               </label>
             </li>

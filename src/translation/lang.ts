@@ -149,7 +149,8 @@ export const resources = {
       allQuestions: "All Questions",
       calculator: "Calculator",
       board: "Board",
-      youCanOnlyChoose: "You can only choose "
+      youCanOnlyChoose: "You can only choose ",
+      endExam: "End Exam"
     }
   },
   ar: {
@@ -300,7 +301,8 @@ export const resources = {
       allQuestions: "كل الأسئلة",
       calculator: "الآلة الحاسبة",
       board: "السبورة",
-      youCanOnlyChoose: "يمكنك فقط اختيار "
+      youCanOnlyChoose: "يمكنك فقط اختيار ",
+      endExam: "إنهاء الامتحان"
     }
   },
 };

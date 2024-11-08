@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ExamsSideAccordion from "./examsSideAccordion";
 import UploadQuestions from "./uploadQuestions";
 import { useAppDispatch } from "../../../../../../../store";
@@ -11,13 +11,14 @@ export default function Exams() {
 
   const [questions, setQuestions] = useState<Question[]>([]);
 
-  const handleSetQuestions = (ques: Question[]) => {
+  const handleSetQuestions = useCallback((ques: Question[]) => {
     setQuestions(ques);
-  }
+  }, []);
+  
   useEffect(() => {
     return () => {
-      dispatch(hideSideNav())
-    }
+      dispatch(hideSideNav());
+    };
   }, [dispatch]);
   return (
     <div>
@@ -26,5 +27,5 @@ export default function Exams() {
       <UploadQuestions onAddQuestions={handleSetQuestions} />
       {/* <Calculator /> */}
     </div>
-  )
+  );
 }

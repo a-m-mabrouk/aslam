@@ -1,13 +1,14 @@
 import { useDrop } from "react-dnd";
 import DraggableItem from "./DraggableItem";
+import React from "react";
 
-export default function DroppableArea({
+const DroppableArea = React.memo(({
     id,
     label,
     items,
     onDropItem,
     onDropBack,
-  }: DroppableAreaComponentProps) {
+  }: DroppableAreaComponentProps) => {
     const [{ isOver }, drop] = useDrop({
       accept: "dragItem",
       drop: (item: DraggableAreaProps) => onDropItem(id, item),
@@ -29,4 +30,6 @@ export default function DroppableArea({
         ))}
       </div>
     );
-  }
+  })
+
+  export default DroppableArea;
