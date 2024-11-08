@@ -148,7 +148,8 @@ export const resources = {
       viewAllQuestions: "View all questions",
       allQuestions: "All Questions",
       calculator: "Calculator",
-      board: "Board"
+      board: "Board",
+      youCanOnlyChoose: "You can only choose "
     }
   },
   ar: {
@@ -298,7 +299,8 @@ export const resources = {
       viewAllQuestions: "مشاهدة كل الأسئلة",
       allQuestions: "كل الأسئلة",
       calculator: "الآلة الحاسبة",
-      board: "السبورة"
+      board: "السبورة",
+      youCanOnlyChoose: "يمكنك فقط اختيار "
     }
   },
 };

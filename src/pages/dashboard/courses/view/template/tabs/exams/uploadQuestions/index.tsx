@@ -73,7 +73,7 @@ export default function UploadQuestions({
             optText &&
               customQuestion.options.push({
                 option: optText!,
-                answer: q.answer === opt ? "true" : "false",
+                answer: q.answer.replace(' ', '').split('-').includes(opt) ? "true" : "false",
               });
           });
         } else if (queType === "dragdrop") {
