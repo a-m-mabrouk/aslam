@@ -150,8 +150,10 @@ export const resources = {
       calculator: "Calculator",
       board: "Board",
       youCanOnlyChoose: "You can only choose ",
-      endExam: "End Exam"
-    }
+      endExam: "End Exam",
+      resultReport: "Result report",
+      details: "Details",
+    },
   },
   ar: {
     auth: {
@@ -302,7 +304,9 @@ export const resources = {
       calculator: "الآلة الحاسبة",
       board: "السبورة",
       youCanOnlyChoose: "يمكنك فقط اختيار ",
-      endExam: "إنهاء الامتحان"
-    }
+      endExam: "إنهاء الامتحان",
+      resultReport: "تقرير نتيجة الاختبار",
+      details: "التفاصيل",
+    },
   },
 };

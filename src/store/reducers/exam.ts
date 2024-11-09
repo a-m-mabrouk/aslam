@@ -1,10 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface ExamAnswer {
-  isCorrect: boolean;
+export interface ExamAnswer {
   selectedOpt: string;
   showAnsClicked: boolean;
   isFlagged: boolean;
+  domain: string;
+  chapter: string;
+  answerstate: "wrong" | "correct" | "skipped";
 }
 
 interface ExamType {
@@ -14,10 +16,12 @@ interface ExamType {
 interface SetAnswerPayload {
   questionIndex: number;
   queAnsDetails: {
-    isCorrect: boolean;
     selectedOpt: string;
     showAnsClicked: boolean;
     isFlagged: boolean;
+    domain: string;
+    chapter: string;
+    answerstate: "wrong" | "correct" | "skipped"
   };
 }
 
@@ -36,9 +40,9 @@ const examSlice = createSlice({
       const { questionIndex, queAnsDetails } = payload;
       state.examAnswers[questionIndex] = queAnsDetails;
     },
-    setIsCorrect: (state, {payload}: PayloadAction<{questionIndex: number, isCorrect: boolean}>) => {
-      const {questionIndex, isCorrect} = payload;
-      state.examAnswers[questionIndex].isCorrect = isCorrect;
+    setAnswerState: (state, {payload}: PayloadAction<{questionIndex: number, answerstate: "wrong" | "correct" | "skipped"}>) => {
+      const {questionIndex, answerstate} = payload;
+      state.examAnswers[questionIndex].answerstate = answerstate;
     },
     setSelectedOpt: (state, {payload}: PayloadAction<{questionIndex: number, selectedOpt: string}>) => {
       const {questionIndex, selectedOpt} = payload;
@@ -53,6 +57,6 @@ const examSlice = createSlice({
   },
 });
 
-export const { resetExam, setAnswer, setIsCorrect, setSelectedOpt, setShowAnsClicked, setIsFlagged } = examSlice.actions;
+export const { resetExam, setAnswer, setSelectedOpt, setShowAnsClicked, setIsFlagged, setAnswerState } = examSlice.actions;
 
 export default examSlice.reducer;

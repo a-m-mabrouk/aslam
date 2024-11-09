@@ -4,7 +4,7 @@ import {
   useAppSelector,
 } from "../../../../../../../../../../store";
 import {
-  setIsCorrect,
+  setAnswerState,
   setSelectedOpt,
 } from "../../../../../../../../../../store/reducers/exam";
 import { useTranslation } from "react-i18next";
@@ -48,9 +48,9 @@ export default function QuestionMCQ({
           userAnswers = selectedOptionsArr.filter((v: string) => v !== value).sort();
         }
       }
-      const isCorrect = userAnswers!.join() === correctOptionsArr.join();      
+      const answerstate = !userAnswers.length? "skipped": userAnswers!.join() === correctOptionsArr.join()? "correct": "wrong";
       const selectedOpt = JSON.stringify(userAnswers);
-      dispatch(setIsCorrect({ questionIndex, isCorrect }));
+      dispatch(setAnswerState({ questionIndex, answerstate }));
       dispatch(setSelectedOpt({ questionIndex, selectedOpt }));
     },
     [correctOptionsArr, dispatch, questionIndex, selectedOptionsArr, t],
@@ -59,20 +59,20 @@ export default function QuestionMCQ({
     <ul className="mt-4">
         {question.options.map((opt, i) => {
           const selectedOpt = examAnswers[questionIndex]?.selectedOpt;
-          const isCorrect = examAnswers[questionIndex]?.isCorrect;
+          const isCorrect = examAnswers[questionIndex]?.answerstate === "correct";
           const checkDisabled = examAnswers[questionIndex]?.showAnsClicked;
 
           const ansClass = !checkDisabled
-            ? "border-gray-300" // Default gray if not disabled
+            ? "border-gray-300"
             : selectedOpt === opt.option && !isCorrect
-              ? "border-red-800 border-2" // Red if selected and not correct
+              ? "border-red-800 border-2"
               : selectedOpt === opt.option && isCorrect
-                ? "border-green-800 border-2" // Green if selected and correct
+                ? "border-green-800 border-2"
                 : checkDisabled &&
                     selectedOpt !== opt.option &&
                     opt.answer === "true"
-                  ? "border-green-800 border-2" // Green if disabled, not selected, but is the correct answer
-                  : "border-gray-300"; // Gray if none of the above conditions are met
+                  ? "border-green-800 border-2"
+                  : "border-gray-300";
           return (
             <li
               key={opt.option} className={`mt-2 border ${ansClass} rounded bg-transparent px-4 py-2 font-semibold ${checkDisabled ? "pointer-events-none opacity-70" : ""}`}

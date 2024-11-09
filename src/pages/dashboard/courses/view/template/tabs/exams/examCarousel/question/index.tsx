@@ -1,11 +1,6 @@
 import { memo } from "react";
 import QuestionMCQ from "./MCQ";
 import QuestionDragDrop from "./dragDrop";
-import {
-  useAppDispatch,
-  useAppSelector,
-} from "../../../../../../../../../store";
-import { setAnswer } from "../../../../../../../../../store/reducers/exam";
 
 const Question = memo(
   ({
@@ -15,22 +10,6 @@ const Question = memo(
     question: Question;
     questionIndex: number;
   }) => {
-    const dispatch = useAppDispatch();
-    const examAnswers = useAppSelector(({ exam }) => exam.examAnswers);
-
-    if (!examAnswers[questionIndex]) {
-      dispatch(
-        setAnswer({
-          questionIndex,
-          queAnsDetails: {
-            isCorrect: false,
-            selectedOpt: "",
-            showAnsClicked: false,
-            isFlagged: false,
-          },
-        }),
-      );
-    }
 
     let questionMarkup = <h2>You can only add MCQ & DragDrop question.</h2>;
     if (question.type === "mcq") {

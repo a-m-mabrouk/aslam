@@ -85,33 +85,3 @@ type viewCourseContextType = {
 type allCoursesContextType = {
   setData: Dispatch<SetStateAction<CoursesList | undefined>>;
 };
-
-// type MCQOption = {
-//   text: string;
-//   isCorrect: boolean;
-// };
-
-// type MCQQuestion = {
-//   type: 'MCQ';
-//   questionText: string;
-//   options: MCQOption[];
-// };
-
-// type DragDropPair = {
-//   left: string;
-//   right: string;
-// };
-
-// type DragDropQuestion = {
-//   type: 'DragDrop';
-//   questionText: string;
-//   pairs: DragDropPair[];  // Array of left-right pairs for matching
-//   optionsLeft: string[];  // Shuffled options for display on the left
-//   optionsRight: string[]; // Shuffled options for display on the right
-// };
-
-// type Question = MCQQuestion | DragDropQuestion;
-
-// interface ExcelUploadProps {
-//   onProcessQuestions: (questions: Question[]) => void;
-// }

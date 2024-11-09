@@ -6,7 +6,7 @@ import {
 } from "../../../../../../../../store/reducers/exam";
 import ExamInterface from "./ExamInterface";
 import ExamDetails from "./ExamDetails";
-import ExamResult from "./ExamResult";
+import ExamResult from "./examResult";
 
 const ExamComponent = ({ questions }: { questions: Question[] }) => {
   const dispatch = useAppDispatch();
@@ -20,15 +20,17 @@ const ExamComponent = ({ questions }: { questions: Question[] }) => {
   const onStart = () => {
     setIsExamStarted(true);
     dispatch(resetExam());
-    questions.forEach((_, questionIndex) =>
+    questions.forEach((q, questionIndex) =>
       dispatch(
         setAnswer({
           questionIndex,
           queAnsDetails: {
-            isCorrect: false,
             selectedOpt: "",
             showAnsClicked: false,
             isFlagged: false,
+            chapter: q.chapter || "",
+            domain: q.domain || "",
+            answerstate: "skipped"
           },
         }),
       ),

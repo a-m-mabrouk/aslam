@@ -8,7 +8,7 @@ import {
   useAppSelector,
 } from "../../../../../../../../../../store";
 import {
-  setIsCorrect,
+  setAnswerState,
   setSelectedOpt,
 } from "../../../../../../../../../../store/reducers/exam";
 import DraggableItem from "./DraggableItem";
@@ -60,9 +60,9 @@ export default function QuestionDragDrop({
   const [queAnswers, setQueAnswers] = useState({
     questionIndex,
     queAnsDetails: {
-      isCorrect: thisQueAnswers?.isCorrect || false,
       selectedOpt: thisQueAnswers?.selectedOpt,
       showAnsClicked: thisQueAnswers?.showAnsClicked || false,
+      answerstate: "skipped"
     },
   });
 
@@ -85,13 +85,13 @@ export default function QuestionDragDrop({
       (droppableArea) => droppableArea.id === droppableArea.items[0]?.id,
     );
     validateItemsArray[areaId] = areaId === item.id;
-    const isCorrect = validateItemsArray.every((e) => e);
+    const answerstate = draggableItems.length? "skipped": validateItemsArray.every((e) => e)? "correct": "wrong";
 
     setQueAnswers((prev) => ({
       ...prev,
       queAnsDetails: {
         ...prev.queAnsDetails,
-        isCorrect,
+        answerstate,
       },
     }));
   };
@@ -109,9 +109,9 @@ export default function QuestionDragDrop({
   };
 
   useEffect(() => {
-    const isCorrect = queAnswers.queAnsDetails.isCorrect;
+    const answerstate = queAnswers.queAnsDetails.answerstate as "wrong" | "correct" | "skipped"; 
     const selectedOpt = JSON.stringify({ draggableItems, droppableAreas });
-    dispatch(setIsCorrect({ questionIndex, isCorrect }));
+    dispatch(setAnswerState({ questionIndex, answerstate }));
     dispatch(setSelectedOpt({ questionIndex, selectedOpt }));
   }, [dispatch, draggableItems, droppableAreas, queAnswers, questionIndex]);
 
