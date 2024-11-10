@@ -1,118 +1,160 @@
-import { AccordionCard } from "../../../accordion";
+import { FormEventHandler, useEffect, useState } from "react";
+import { Button, Modal, TextInput } from "flowbite-react";
 
-type MenuItem = {
-    id: number;
-    title: string;
-    children?: MenuItem[];
+import { API_EXAMS } from "../../../../router/routes/apiRoutes";
+import { AccordionCard } from "../../../accordion";
+import axiosDefault from "../../../../utilities/axios";
+import { useParams } from "react-router";
+import { useTranslation } from "react-i18next";
+
+interface DomainType {
+  id: number;
+  course_id: 1;
+  name: {
+    ar: string;
+    en: string;
   };
+  assessments: string[];
+  subdomains?: DomainType[];
+}
+
+export function DomainAccordionCard({ domain }: { domain: DomainType }) {
+  return (
+    <AccordionCard>
+      <AccordionCard.Panel key={domain.id}>
+        <AccordionCard.Title className="grow">
+          <div className="flex items-center justify-between gap-4">
+            <span className="">{domain?.name.ar}</span>
+          </div>
+        </AccordionCard.Title>
+        <AccordionCard.Content>
+          {domain.subdomains?.map((subdomain) => (
+            <DomainAccordionCard domain={subdomain} />
+          ))}
+          {domain.assessments.map(() => (
+            <h1>dsfdsdf</h1>
+          ))}
+        </AccordionCard.Content>
+      </AccordionCard.Panel>
+    </AccordionCard>
+  );
+}
+
+interface AddNewModalProps {
+  modalType: "assessment" | "subdomain" | "domain";
+  domainId?: string | null;
+  subDomainId?: string | null;
+}
+
+export function AddDomainModal({
+  modalType,
+  domainId = null,
+  subDomainId = null,
+}: AddNewModalProps) {
+  const { t } = useTranslation("exams");
+  const {id: courseId} = useParams();
   
-  const menuStructure: MenuItem[] = [
-    {
-      id: 1,
-      title: "المجالات المعرفية",
-      children: [
-        { id: 2, title: "Item 1" },
-        { id: 3, title: "Item 2" },
-        { id: 4, title: "Item 3" },
-      ],
-    },
-    {
-      id: 5,
-      title: "النطاقات",
-      children: [
-        {
-          id: 12,
-          title: "الأشخاص",
-          children: [
-            { id: 13, title: "Part 1" },
-            { id: 14, title: "Part 2" },
-            { id: 15, title: "Part 3" },
-          ],
-        },
-        {
-          id: 16,
-          title: "العملية",
-          children: [
-            { id: 17, title: "Step 1" },
-            { id: 18, title: "Step 2" },
-          ],
-        },
-        {
-          id: 19,
-          title: "بيئة العمل",
-          children: [
-            { id: 20, title: "Environment 1" },
-            { id: 21, title: "Environment 2" },
-          ],
-        },
-      ],
-    },
-  
-    {
-      id: 22,
-      title: "الإختبارات الكاملة",
-      children: [
-        { id: 23, title: "Test 1" },
-        { id: 24, title: "Test 2" },
-        { id: 25, title: "Test 3" },
-      ],
-    },
-  ];
-  
-  const hasSubcategories = (item: MenuItem): boolean => {
-    return (
-      item.children?.some(
-        (child) => child.children && child.children.length > 0,
-      ) ?? false
-    );
+  const [openModal, setOpenModal] = useState(false);
+  const [nameEn, setNameEn] = useState("");
+  const [nameAr, setNameAr] = useState("");
+
+  function onCloseModal() {
+    setOpenModal(false);
+    setNameEn("");
+    setNameAr("");
+  }
+
+  const addNewHandler: FormEventHandler<HTMLFormElement> = (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    
+    formData.forEach((value, key) => {
+      console.log(key, value);
+    });
   };
+
+  const modalTitle =
+    modalType === "domain"
+      ? t("addDomain")
+      : modalType === "subdomain"
+        ? t("addSubdomain")
+        : t("addAssessment");
+
+  const fieldEn1 =
+    modalType === "domain"
+      ? "Domain title"
+      : modalType === "subdomain"
+        ? "Subdomain title"
+        : "Exam title";
+
+  const fieldAr1 =
+    modalType === "domain"
+      ? "عنوان النطاق"
+      : modalType === "subdomain"
+        ? "عنوان النطاق الفرعي"
+        : "عنوان الامتحان";
+
+  return (
+    <>
+      <span
+        className="cursor-pointer text-cyan-700 hover:underline"
+        onClick={() => setOpenModal(true)}
+      >
+        + {modalTitle}
+      </span>
+      <Modal show={openModal} size="md" onClose={onCloseModal} popup>
+        <Modal.Header />
+        <Modal.Body>
+          <div className="space-y-6">
+            <h3 className="text-xl font-medium text-gray-900 dark:text-white">
+              {modalTitle}
+            </h3>
+            <form className="grid gap-3" onSubmit={addNewHandler}>
+              <TextInput
+                placeholder={fieldEn1}
+                value={nameEn}
+                name="nameEn"
+                onChange={(event) => setNameEn(event.target.value)}
+                required
+              />
+              <TextInput
+                placeholder={fieldAr1}
+                value={nameAr}
+                name="nameAr"
+                onChange={(event) => setNameAr(event.target.value)}
+                required
+              />
+            {courseId && <input type="text" hidden value={courseId} name="courseId" />}
+            {domainId && <input type="text" hidden value={domainId} name="domainId" />}
+            {subDomainId && <input type="text" hidden value={subDomainId} name="subDomainId" />}
+              <Button type="submit">+ {modalTitle}</Button>
+            </form>
+          </div>
+        </Modal.Body>
+      </Modal>
+    </>
+  );
+}
 
 export default function ExamsSidebar() {
-  return (
-    <AccordionCard className="hidden">
-        {
-          menuStructure?.map((mainItem) => (
-            <AccordionCard.Panel key={mainItem.id}>
-              <AccordionCard.Title className="grow">
-                <div className="flex items-center justify-between gap-4">
-                  <span className="">{mainItem?.title}</span>
-                </div>
-              </AccordionCard.Title>
-              <AccordionCard.Content>
-                {hasSubcategories(mainItem) ? (
-                  <AccordionCard>
-                    {
-                      mainItem?.children?.map((subItem) => (
-                        <AccordionCard.Panel key={subItem.id}>
-                          <AccordionCard.Title className="grow">
-                            <div className="flex items-center justify-between gap-4">
-                              <span className="">{subItem?.title}</span>
-                            </div>
-                          </AccordionCard.Title>
-                          <AccordionCard.Content>
-                            <div className="grid gap-4">
-                              {subItem?.children?.map((item) => (
-                                <h1 key={item.id}>{item.title}</h1>
-                              ))}
-                            </div>
-                          </AccordionCard.Content>
-                        </AccordionCard.Panel>
-                      )) as unknown as React.ReactElement
-                    }
-                  </AccordionCard>
-                ) : (
-                  <div className="grid gap-4">
-                    {mainItem?.children?.map((item) => <h1>{item.title}</h1>)}
-                  </div>
-                )}
+  const { id: course_id } = useParams();
+  const [domains, setDomains] = useState<DomainType[]>([]);
 
-                {/* {mainItem?.children?.length === 0 && (
-                  <p className="text-center text-gray-400">{t("noLessons")}</p>
-                )} */}
-              </AccordionCard.Content>
-            </AccordionCard.Panel>
-          )) as unknown as React.ReactElement
-        }
-      </AccordionCard>
-  )
+  useEffect(() => {
+    const fetchDomains = async () => {
+      const { data } = await axiosDefault.get(
+        `${API_EXAMS.domains}?course_id=${course_id}`,
+      );
+      const domains = [...data.data];
+      setDomains(domains);
+    };
+    fetchDomains();
+  }, [course_id]);
+
+  return domains.map((domain) => (
+    <>
+      <DomainAccordionCard key={domain.id} domain={domain} />
+      <AddDomainModal modalType="domain" />
+    </>
+  ));
 }

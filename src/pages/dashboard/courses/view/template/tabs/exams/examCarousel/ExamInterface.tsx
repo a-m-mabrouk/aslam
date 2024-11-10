@@ -154,7 +154,7 @@ export default function ExamInterface({
           <p>
             {t("remainingTime")} {formatTime(timeRemaining)}
           </p>
-          <Progress progress={progress} color="blue" className="mt-2" />
+          <Progress progress={progress} color="indigo" className="mt-2 border-2 border-blue-400" />
         </div>
         <div>
           <p>

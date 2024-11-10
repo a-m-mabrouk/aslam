@@ -30,6 +30,19 @@ const initialState: userLoginType & { isLogin: boolean } = {
   photo: "",
   access_token: "",
 };
+// const initialState: userLoginType & { isLogin: boolean } = {
+//   isLogin: true,
+//   first_name: "test",
+//   last_name: "abo test",
+//   email: "test@mail.com",
+//   role: "teacher",
+//   code: "1",
+//   username: "test123",
+//   phone_number: "01234567890",
+//   id: 1,
+//   photo: "",
+//   access_token: "",
+// };
 
 const authSlice = createSlice({
   name: "auth",

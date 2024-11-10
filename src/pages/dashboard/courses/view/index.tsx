@@ -24,5 +24,5 @@ export default function ViewCourse() {
         </div>
       </ViewCourseContext.Provider>
     </PlaceHolderLoading>
-  );
+  )
 }
