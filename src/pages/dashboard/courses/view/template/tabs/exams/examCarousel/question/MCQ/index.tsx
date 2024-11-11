@@ -19,7 +19,7 @@ export default function QuestionMCQ({
 }) {
   const {t} = useTranslation("exams")
   const dispatch = useAppDispatch();
-  const examAnswers = useAppSelector(({ exam }) => exam.examAnswers);
+  const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
   const selectedOptionsArr = JSON.parse(examAnswers[questionIndex]?.selectedOpt || '[]');
   const correctOptionsArr = useMemo(
     () =>
