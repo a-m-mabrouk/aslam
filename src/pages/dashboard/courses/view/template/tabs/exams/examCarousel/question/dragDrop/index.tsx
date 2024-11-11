@@ -35,7 +35,7 @@ export default function QuestionDragDrop({
   questionIndex: number;
 }) {
   const dispatch = useAppDispatch();
-  const examAnswers = useAppSelector(({ exam }) => exam.examAnswers);
+  const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
   const thisQueAnswers = examAnswers[questionIndex];
 
   const dragArray: DraggableAreaProps[] = question.options.map(

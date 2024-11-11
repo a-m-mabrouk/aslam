@@ -1,7 +1,7 @@
 import { useAppSelector } from "../../../../../../../../../store";
 
 export default function Report() {
-  const examAnswers = useAppSelector(({ exam }) => exam.examAnswers);
+  const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
   const answersRatio =
     Math.round(
       (examAnswers.reduce(

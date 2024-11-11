@@ -3,7 +3,7 @@ import { useAppSelector } from "../../../../../../../../../store";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/solid";
 
 export default function Details() {
-  const examAnswers = useAppSelector(({ exam }) => exam.examAnswers);
+  const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
 
   const aggregatedData = examAnswers.reduce(
     (acc, examAnswer) => {
