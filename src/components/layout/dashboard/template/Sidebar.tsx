@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Logo from "../../../logo";
 import { useAppSelector } from "../../../../store";
-import ExamsSidebar from "./ExamsSidebar";
+import ExamsSidebar from "../../../../pages/dashboard/courses/view/template/tabs/exams/ExamsSidebar";
 const theme = {
   root: {
     inner:
@@ -14,7 +14,7 @@ const theme = {
 };
 export default function DBSidebar() {
   const examsSideNavState = useAppSelector(
-    ({ layout }) => layout.examsSideNavState,
+    ({ exams }) => exams.examsSideNavState,
   );
   const { t } = useTranslation("common");
   return (

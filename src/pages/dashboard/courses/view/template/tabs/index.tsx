@@ -10,7 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Exams from "./exams";
 import { useAppDispatch } from "../../../../../../store";
-import { hideSideNav, showSideNav } from "../../../../../../store/reducers/layout";
+import { hideSideNav, showSideNav } from "../../../../../../store/reducers/exams";
 
 export default function Tabs() {
   const dispatch = useAppDispatch();

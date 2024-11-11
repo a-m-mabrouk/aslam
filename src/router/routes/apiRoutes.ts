@@ -22,4 +22,6 @@ export const API_STUDENTS = {
 };
 export const API_EXAMS = {
   domains: `${API_DOMAIN}/Domain`,
+  subdomain: `${API_DOMAIN}/Subdomain`,
+  assessments: `${API_DOMAIN}/Assessments`,
 };

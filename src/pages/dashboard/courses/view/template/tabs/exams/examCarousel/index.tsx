@@ -3,14 +3,14 @@ import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
 import {
   resetExam,
   setAnswer,
-} from "../../../../../../../../store/reducers/exam";
+} from "../../../../../../../../store/reducers/exams";
 import ExamInterface from "./ExamInterface";
 import ExamDetails from "./ExamDetails";
 import ExamResult from "./examResult";
 
 const ExamComponent = ({ questions }: { questions: Question[] }) => {
   const dispatch = useAppDispatch();
-  const examAnswers = useAppSelector(({ exam }) => exam.examAnswers);
+  const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
   const [isExamStarted, setIsExamStarted] = useState(false);
   const [isExamEnded, setIsExamEnded] = useState(false);
   const examTime = Math.round(questions.length * 1.33333 * 60);

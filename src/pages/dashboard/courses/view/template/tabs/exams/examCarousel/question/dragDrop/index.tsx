@@ -10,7 +10,7 @@ import {
 import {
   setAnswerState,
   setSelectedOpt,
-} from "../../../../../../../../../../store/reducers/exam";
+} from "../../../../../../../../../../store/reducers/exams";
 import DraggableItem from "./DraggableItem";
 import DroppableArea from "./DroppableArea";
 

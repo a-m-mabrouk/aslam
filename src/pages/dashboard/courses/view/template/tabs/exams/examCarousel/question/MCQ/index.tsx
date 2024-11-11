@@ -6,7 +6,7 @@ import {
 import {
   setAnswerState,
   setSelectedOpt,
-} from "../../../../../../../../../../store/reducers/exam";
+} from "../../../../../../../../../../store/reducers/exams";
 import { useTranslation } from "react-i18next";
 import { toastifyBox } from "../../../../../../../../../../helper/toastifyBox";
 

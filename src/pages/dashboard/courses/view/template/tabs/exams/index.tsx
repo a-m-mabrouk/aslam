@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import ExamsSideAccordion from "./examsSideAccordion";
 import UploadQuestions from "./uploadQuestions";
 import { useAppDispatch } from "../../../../../../../store";
-import { hideSideNav } from "../../../../../../../store/reducers/layout";
 import ExamCarousel from "./examCarousel";
+import { hideSideNav } from "../../../../../../../store/reducers/exams";
 // import Calculator from "../../../../../../../components/calculator";
 
 export default function Exams() {
@@ -14,7 +14,7 @@ export default function Exams() {
   const handleSetQuestions = useCallback((ques: Question[]) => {
     setQuestions(ques);
   }, []);
-  
+
   useEffect(() => {
     return () => {
       dispatch(hideSideNav());

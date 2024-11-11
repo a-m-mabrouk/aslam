@@ -2,16 +2,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import { useDispatch, useSelector } from "react-redux";
 import authReducer from "./reducers/auth";
 import forgetpasswordReducer from "./reducers/forgetpassword";
-import layoutReducer from "./reducers/layout";
-import examReducer from "./reducers/exam";
+import examsReducer from "./reducers/exams";
 import studentsReducer from "./reducers/students";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     forgetpassword: forgetpasswordReducer,
-    layout: layoutReducer,
-    exam: examReducer,
+    exams: examsReducer,
     students: studentsReducer,
   },
 });

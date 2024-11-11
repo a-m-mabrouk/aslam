@@ -28,7 +28,7 @@ import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
 import {
   setIsFlagged,
   setShowAnsClicked,
-} from "../../../../../../../../store/reducers/exam";
+} from "../../../../../../../../store/reducers/exams";
 import { useTranslation } from "react-i18next";
 import { Calculator } from "react-advanced-calculator";
 import "react-advanced-calculator/dist/styles/calculator.css";
@@ -62,7 +62,7 @@ export default function ExamInterface({
 }) {
   const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
-  const examAnswers = useAppSelector(({ exam }) => exam.examAnswers);
+  const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(examTime);
   const [isPaused, setIsPaused] = useState(false);
