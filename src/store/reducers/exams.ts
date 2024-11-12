@@ -14,7 +14,7 @@ interface ExamType {
   examAnswers: ExamAnswer[];
   examsSideNavState: boolean;
   domains: DomainType[];
-  examQuestions: Question[] | null;
+  examQuestions: Question[];
   assessmentId: number | null;
 }
 
@@ -34,7 +34,7 @@ const initialState: ExamType = {
   examAnswers: [],
   examsSideNavState: false,
   domains: [],
-  examQuestions: null,
+  examQuestions: [],
   assessmentId: null
 };
 
@@ -86,7 +86,7 @@ const examsSlice = createSlice({
     setDomains: (state, { payload }: PayloadAction<DomainType[]>) => {
       state.domains = payload;
     },
-    setExamQuestions: (state, {payload}: PayloadAction<Question[] | null>) => {
+    setExamQuestions: (state, {payload}: PayloadAction<Question[]>) => {
       state.examQuestions = payload;
     },
     setAssessmentId: (state, {payload}: PayloadAction<number | null>) => {

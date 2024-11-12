@@ -137,6 +137,10 @@ export default function UploadQuestions({
 
     try {
       const questions = await processedQuestions;
+      console.log({questions,
+        assessment_id,
+        course_id: +id
+      });
       
       const { data } = await axiosDefault.post(API_EXAMS.questions,
         {questions,
@@ -157,7 +161,7 @@ export default function UploadQuestions({
     <div className="grid gap-4">
       <div className="flex justify-between gap-4">
         <InputFile
-          label={t("add Excel")}
+          label={""}
           name="excel"
           accept=".xls,.xlsx"
           fileType="excel"

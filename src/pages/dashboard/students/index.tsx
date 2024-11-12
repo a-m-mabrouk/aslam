@@ -16,6 +16,7 @@ import { toastifyBox } from "../../../helper/toastifyBox";
 const columnHelper = createColumnHelper<DataStudent>();
 
 export default function Students() {
+  // const [searchLoading, setSearchLoading] = useState<boolean>(true);
   const dispatch = useAppDispatch();
   const {
     data,
@@ -34,9 +35,11 @@ export default function Students() {
       toastifyBox("error", error);
       return;
     }
+    const time = search? 1000 : 0;
+    
     const clear: NodeJS.Timeout = setTimeout(
       () => dispatch(fetchStudents({ search, page })),
-      1000,
+      time,
     );
 
     return () => {
@@ -97,11 +100,10 @@ export default function Students() {
 
       <BgCard>
         <div className="relative min-h-[400px]">
-          <>
-            {/* {console.log(searchLoading)} */}
-          </>
-          {searchLoading ? (
-            <Loading position="absolute" />
+          {data?.students === null || searchLoading? (
+            <>
+              <Loading position="absolute" />
+            </>
           ) : (
             <Table
               data={data?.students || []}

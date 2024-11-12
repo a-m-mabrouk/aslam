@@ -53,8 +53,8 @@ interface StudentState {
 }
 
 interface FetchStudentsParams {
-  search: string;
-  page: number;
+  search?: string;
+  page?: number;
 }
 
 // Define the initial state for students
@@ -72,15 +72,12 @@ const initialState: StudentState = {
 export const fetchStudents = createAsyncThunk(
   "students/fetchStudents",
   async ({ page, search }: FetchStudentsParams) => {
-    // const response = await axiosDefault.get(
-    //   `${API_STUDENTS.students}/search?${search ? `name=${search}&` : ""}page=${page}`,
-    // );
     const response = await axiosDefault.get(
       `${API_STUDENTS.students}/search`,
       {
         params: {
-          search: search || undefined,
-          page,
+          name: search || undefined,
+          page: page || undefined,
         }
       }
     );
@@ -96,27 +93,23 @@ const studentsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchStudents.pending, (state) => {
-        console.log('pending');
-        
         state.loading = true;
         state.error = null;
       })
       .addCase(
         fetchStudents.fulfilled,
         (state, action: PayloadAction<SearchPayloadActionProps>) => {
-          console.log('filfilled');
-          
           const { data } = action.payload;
-          state.loading = false;
           state.data.students = data.data;
           state.data.currentPage = data.current_page;
           state.data.lastPage = data.last_page;
+          state.loading = false;
         },
       )
       .addCase(fetchStudents.rejected, (state, action) => {
         state.data.students = [];
-        state.loading = false;
         state.error = action.error.message || "Failed to fetch students";
+        state.loading = false;
       });
   },
 });

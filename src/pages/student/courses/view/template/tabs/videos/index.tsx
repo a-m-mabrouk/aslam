@@ -15,7 +15,7 @@ export default function Videos() {
   return (
     <div className="grid gap-4">
       <div className="flex justify-between gap-2">
-        <TitleSection title={t("chapters")} />
+        <TitleSection title={t("videos")} />
       </div>
 
       <AccordionCard>

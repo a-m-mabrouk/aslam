@@ -11,6 +11,7 @@ import {
 import { ViewCourseContext } from "../..";
 import { useContext } from "react";
 import useGetLang from "../../../../../../hooks/useGetLang";
+import ExamComponentStudent from "./exams";
 
 export default function Tabs() {
   const { t } = useTranslation("viewCourse");
@@ -22,11 +23,14 @@ export default function Tabs() {
         <TabsCard.TabItem title={t("description")} icon={DocumentTextIcon}>
           <p className="">{course?.description[lang]}</p>
         </TabsCard.TabItem>
-        <TabsCard.TabItem title={t("chapters")} icon={FolderIcon}>
+        <TabsCard.TabItem title={t("videos")} icon={FolderIcon}>
           <Videos />
         </TabsCard.TabItem>
         <TabsCard.TabItem title={t("resources")} icon={DocumentIcon}>
           <Resources />
+        </TabsCard.TabItem>
+        <TabsCard.TabItem title={t("exams")} icon={DocumentIcon}>
+          <ExamComponentStudent />
         </TabsCard.TabItem>
       </TabsCard>
     </BgCard>

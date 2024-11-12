@@ -1,19 +1,23 @@
-import { useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../../../../../../store";
 import {
+  hideSideNav,
   resetExam,
   setAnswer,
-} from "../../../../../../../../store/reducers/exams";
-import ExamInterface from "./ExamInterface";
-import ExamDetails from "./ExamDetails";
-import ExamResult from "./examResult";
+} from "../../../../../../../store/reducers/exams";
+import ExamInterface from "./examCarousel/ExamInterface";
+import ExamDetails from "./examCarousel/ExamDetails";
+import ExamResult from "./examCarousel/examResult";
+import TitleSection from "../../../../../../../components/title";
+import { useTranslation } from "react-i18next";
 
-const ExamComponent = ({ questions }: { questions: Question[] }) => {
+const ExamComponentStudent = () => {
   const dispatch = useAppDispatch();
-  const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
+  const {examAnswers, assessmentId, examQuestions: questions} = useAppSelector(({ exams }) => exams);
   const [isExamStarted, setIsExamStarted] = useState(false);
   const [isExamEnded, setIsExamEnded] = useState(false);
   const examTime = Math.round(questions.length * 1.33333 * 60);
+  const {t} = useTranslation("exams");
 
   console.log(examAnswers);
 
@@ -39,10 +43,19 @@ const ExamComponent = ({ questions }: { questions: Question[] }) => {
   const handleEndExam = () => {
     setIsExamEnded(true);
   };
+
+  useEffect(() => {
+    return () => {
+      dispatch(hideSideNav());
+    };
+  }, [dispatch]);
   return (
-    <div className="mx-auto my-8 max-w-4xl">
-      {!questions.length ? (
-        <h4>No exams</h4>
+      <div className="mx-auto grid gap-4">
+          <TitleSection title={t("exams")} />
+      {!assessmentId? "fdgdfg" :!questions.length ? (
+        <>
+        <h4 className="mx-auto">{t("noQuestions")}</h4>
+        </>
       ) : isExamEnded ? (
         <ExamResult />
       ) : isExamStarted ? (
@@ -62,4 +75,4 @@ const ExamComponent = ({ questions }: { questions: Question[] }) => {
   );
 };
 
-export default ExamComponent;
+export default ExamComponentStudent;
