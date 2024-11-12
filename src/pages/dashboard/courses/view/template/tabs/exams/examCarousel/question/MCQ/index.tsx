@@ -17,10 +17,12 @@ export default function QuestionMCQ({
   question: Question;
   questionIndex: number;
 }) {
-  const {t} = useTranslation("exams")
+  const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
   const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
-  const selectedOptionsArr = JSON.parse(examAnswers[questionIndex]?.selectedOpt || '[]');
+  const selectedOptionsArr = JSON.parse(
+    examAnswers[questionIndex]?.selectedOpt || "[]",
+  );
   const correctOptionsArr = useMemo(
     () =>
       question.options
@@ -35,20 +37,29 @@ export default function QuestionMCQ({
       const { value, checked } = target;
       let userAnswers: string[] = [];
       if (correctOptionsArr.length === 1) {
-        userAnswers = [value]
+        userAnswers = [value];
       } else {
         if (checked) {
           if (selectedOptionsArr.length < correctOptionsArr.length) {
-            userAnswers = [...selectedOptionsArr, value].sort()
+            userAnswers = [...selectedOptionsArr, value].sort();
           } else {
-            toastifyBox("info", t("youCanOnlyChoose") + correctOptionsArr.length)
+            toastifyBox(
+              "info",
+              t("youCanOnlyChoose") + correctOptionsArr.length,
+            );
             return;
           }
         } else {
-          userAnswers = selectedOptionsArr.filter((v: string) => v !== value).sort();
+          userAnswers = selectedOptionsArr
+            .filter((v: string) => v !== value)
+            .sort();
         }
       }
-      const answerstate = !userAnswers.length? "skipped": userAnswers!.join() === correctOptionsArr.join()? "correct": "wrong";
+      const answerstate = !userAnswers.length
+        ? "skipped"
+        : userAnswers!.join() === correctOptionsArr.join()
+          ? "correct"
+          : "wrong";
       const selectedOpt = JSON.stringify(userAnswers);
       dispatch(setAnswerState({ questionIndex, answerstate }));
       dispatch(setSelectedOpt({ questionIndex, selectedOpt }));
@@ -57,40 +68,43 @@ export default function QuestionMCQ({
   );
   return (
     <ul className="mt-4">
-        {question.options.map((opt, i) => {
-          const selectedOpt = examAnswers[questionIndex]?.selectedOpt;
-          const isCorrect = examAnswers[questionIndex]?.answerstate === "correct";
-          const checkDisabled = examAnswers[questionIndex]?.showAnsClicked;
+      {question.options.map((opt, i) => {
+        const selectedOpt = examAnswers[questionIndex]?.selectedOpt;
+        const isSelected = selectedOpt.includes(opt.option);
+        // const isCorrect = examAnswers[questionIndex]?.answerstate === "correct";
+        const isCorrect = opt.answer === "true";
+        const checkDisabled = examAnswers[questionIndex]?.showAnsClicked;
+        console.log(isCorrect, selectedOpt, opt.option);
 
-          const ansClass = !checkDisabled
-            ? "border-gray-300"
-            : selectedOpt === opt.option && !isCorrect
-              ? "border-red-800 border-2"
-              : selectedOpt === opt.option && isCorrect
+        // const ansClass = !checkDisabled? "border-gray-300": isSelected && !isCorrect ? "border-red-800 border-2": !isSelected && isCorrect? "border-green-800 border-2": 'border-gray-300';
+        const ansClass = !checkDisabled
+          ? "border-gray-300"
+          : isSelected && !isCorrect
+            ? "border-red-800 border-2"
+            : isSelected && isCorrect
+              ? "border-green-800 border-2"
+              : checkDisabled && !isSelected && isCorrect
                 ? "border-green-800 border-2"
-                : checkDisabled &&
-                    selectedOpt !== opt.option &&
-                    opt.answer === "true"
-                  ? "border-green-800 border-2"
-                  : "border-gray-300";
-          return (
-            <li
-              key={opt.option} className={`mt-2 border ${ansClass} rounded bg-transparent px-4 py-2 font-semibold ${checkDisabled ? "pointer-events-none opacity-70" : ""}`}
-            >
-              <input
-                type={correctOptionsArr.length > 1 ? "checkbox" : "radio"}
-                checked={selectedOptionsArr.includes(opt.option)}
-                name={`question-${questionIndex}`}
-                id={`option-${i + 1}`}
-                onChange={handleRadioChange}
-                value={opt.option}
-              />
-              <label htmlFor={`option-${i + 1}`} className="ms-2">
-                {opt.option}
-              </label>
-            </li>
-          );
-        })}
+                : "border-gray-300";
+        return (
+          <li
+            key={opt.option}
+            className={`mt-2 border ${ansClass} rounded bg-transparent px-4 py-2 font-semibold ${checkDisabled ? "pointer-events-none opacity-70" : ""}`}
+          >
+            <input
+              type={correctOptionsArr.length > 1 ? "checkbox" : "radio"}
+              checked={selectedOptionsArr.includes(opt.option)}
+              name={`question-${questionIndex}`}
+              id={`option-${i + 1}`}
+              onChange={handleRadioChange}
+              value={opt.option}
+            />
+            <label htmlFor={`option-${i + 1}`} className="ms-2">
+              {opt.option}
+            </label>
+          </li>
+        );
+      })}
     </ul>
   );
 }

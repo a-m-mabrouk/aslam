@@ -3,8 +3,28 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { STUDENT_ROUTES } from "../../../router/routes/appRoutes";
 import useGetLang from "../../../hooks/useGetLang";
+import { type ReactNode } from "react";
 
 const flagClass = `text-white text-xs w-fit font-bold px-2.5 py-0.5 rounded `;
+
+function LinkWrapper({
+  isExpired,
+  id,
+  children,
+}: {
+  isExpired: boolean;
+  id: number;
+  children: ReactNode;
+}) {
+  return isExpired ? (
+    <Link to={`${STUDENT_ROUTES.courses}/${id}`} className="h-full">
+      {children}
+    </Link>
+  ) : (
+    <>{children}</>
+  );
+}
+
 export function StudentCourseCard({
   name,
   photo,
@@ -19,9 +39,9 @@ export function StudentCourseCard({
 
   return (
     <div className="relative">
-      <Link to={`${STUDENT_ROUTES.courses}/${id}`} className="h-full">
+      <LinkWrapper isExpired={isExpired} id={id}>
         <Card
-          className="relative h-full max-w-sm"
+          className={`relative h-full max-w-sm ${!isExpired ? "cursor-not-allowed" : undefined}`}
           imgAlt="course"
           imgSrc={photo}
         >
@@ -48,7 +68,7 @@ export function StudentCourseCard({
             {description[lang]}
           </p>
         </Card>
-      </Link>
+      </LinkWrapper>
     </div>
   );
 }

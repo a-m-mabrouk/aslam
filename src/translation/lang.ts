@@ -115,6 +115,7 @@ export const resources = {
       removeStudentCourse:
         "Are you sure you want to remove this course from student?",
       studentCourseRemoved: "Student course removed successfully",
+      notSubscibedToCourse: "You are not subscribed to this course"
     },
     students: {
       title: "Students",
@@ -274,6 +275,7 @@ export const resources = {
       resourceDeleted: "تم حذف الملف بنجاح",
       removeStudentCourse: "هل انت متأكد انك تريد حذف هذا الطالب من الدورة؟",
       studentCourseRemoved: "تم حذف الطالب من الدورة بنجاح",
+      notSubscibedToCourse: "أنت غير مشترك في هذه الدورة"
     },
     students: {
       title: "الطلاب",

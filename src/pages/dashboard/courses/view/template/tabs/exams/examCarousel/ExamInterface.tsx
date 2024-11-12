@@ -31,7 +31,7 @@ import {
 } from "../../../../../../../../store/reducers/exams";
 import { useTranslation } from "react-i18next";
 import { Calculator } from "react-advanced-calculator";
-// import "react-advanced-calculator/dist/styles/calculator.css";
+import "react-advanced-calculator/dist/styles/calculator.css";
 
 type FlaggedQuestionType = Question & { queIndex: number };
 
@@ -134,7 +134,7 @@ export default function ExamInterface({
     <div className="flex h-full flex-col">
       {/* Header */}
       <header className="flex items-center justify-between bg-gray-200 p-4">
-        <div>
+        <div id="calc-parent">
           <Popover content={<Calculator />} placement="top">
             <Button>
               <CalculatorIcon className="size-5" />
