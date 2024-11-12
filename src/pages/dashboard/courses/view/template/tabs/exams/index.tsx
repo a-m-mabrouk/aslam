@@ -1,19 +1,22 @@
-import { useCallback, useEffect, useState } from "react";
-import ExamsSideAccordion from "./examsSideAccordion";
+import { useCallback, useEffect } from "react";
 import UploadQuestions from "./uploadQuestions";
-import { useAppDispatch } from "../../../../../../../store";
+import { useAppDispatch, useAppSelector } from "../../../../../../../store";
 import ExamCarousel from "./examCarousel";
-import { hideSideNav } from "../../../../../../../store/reducers/exams";
+import { hideSideNav, setExamQuestions } from "../../../../../../../store/reducers/exams";
+import TitleSection from "../../../../../../../components/title";
+import { useTranslation } from "react-i18next";
 // import Calculator from "../../../../../../../components/calculator";
 
 export default function Exams() {
   const dispatch = useAppDispatch();
-
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const examQuestions = useAppSelector(({exams}) => exams.examQuestions)
+  const { t } = useTranslation("viewCourse");
+  console.log(examQuestions);
+  
 
   const handleSetQuestions = useCallback((ques: Question[]) => {
-    setQuestions(ques);
-  }, []);
+    dispatch(setExamQuestions(ques));
+  }, [dispatch]);
 
   useEffect(() => {
     return () => {
@@ -22,8 +25,13 @@ export default function Exams() {
   }, [dispatch]);
   return (
     <div>
-      <ExamsSideAccordion />
-      <ExamCarousel questions={questions} />
+      <div className="grid gap-4">
+      <div className="flex justify-between gap-2">
+        <TitleSection title={t("exams")} />
+      </div>
+      
+    </div>
+      <ExamCarousel questions={examQuestions || []} />
       <UploadQuestions onAddQuestions={handleSetQuestions} />
       {/* <Calculator /> */}
     </div>

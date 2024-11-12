@@ -3,6 +3,10 @@ import { useState, useMemo } from "react";
 import { Button } from "flowbite-react";
 import { useTranslation } from "react-i18next";
 import InputFile from "../../../../../../../../components/form/fileInput";
+import axiosDefault from "../../../../../../../../utilities/axios";
+import { API_EXAMS } from "../../../../../../../../router/routes/apiRoutes";
+import { useParams } from "react-router";
+import { useAppSelector } from "../../../../../../../../store";
 
 interface ExcelQuestion {
   type: "mcq" | "dragdrop";
@@ -37,8 +41,10 @@ export default function UploadQuestions({
 }: {
   onAddQuestions: (questions: Question[]) => void;
 }) {
+  const {id} = useParams()
   const { t } = useTranslation("viewCourse");
   const [file, setFile] = useState<File | undefined>(undefined);
+  const assessment_id = useAppSelector(({exams}) => exams.assessmentId)
 
   const handleFileChange = (_: string, value: File | undefined) => {
     setFile(value);
@@ -127,11 +133,21 @@ export default function UploadQuestions({
   }, [file]);
 
   const handlefileUpload = async () => {
-    if (!processedQuestions) return;
+    if (!processedQuestions || !id || !assessment_id) return;
 
     try {
       const questions = await processedQuestions;
+      
+      const { data } = await axiosDefault.post(API_EXAMS.questions,
+        {questions,
+          assessment_id,
+          course_id: +id
+        }
+      );
+      console.log(data);
+      
       onAddQuestions(questions);
+
     } catch (error) {
       console.error("Error processing file:", error);
     }

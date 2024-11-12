@@ -7,8 +7,13 @@ import axiosDefault from "../../../../../../../utilities/axios";
 import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../../../../../../store";
-import { setActiveAssessment, setDomains } from "../../../../../../../store/reducers/exams";
+import {
+  setExamQuestions,
+  setDomains,
+  setAssessmentId,
+} from "../../../../../../../store/reducers/exams";
 import { toastifyBox } from "../../../../../../../helper/toastifyBox";
+import useGetLang from "../../../../../../../hooks/useGetLang";
 
 export interface DomainType {
   id: number;
@@ -151,15 +156,15 @@ export default function ExamsSidebar() {
   const dispatch = useAppDispatch();
   const domains = useAppSelector(({ exams }) => exams.domains);
   const { t } = useTranslation();
+  const { lang } = useGetLang();
 
   useEffect(() => {
     const fetchDomains = async () => {
       const { data } = await axiosDefault.get(
         `${API_EXAMS.domains}?course_id=${course_id}`,
       );
-      const domains = [...data.data];
-      dispatch(setDomains(domains));
-      console.log(domains);
+      const domainsArr = [...data.data];
+      dispatch(setDomains(domainsArr));
     };
     fetchDomains();
   }, [course_id, dispatch]);
@@ -171,7 +176,13 @@ export default function ExamsSidebar() {
           <AccordionCard.Panel key={domain.id}>
             <AccordionCard.Title className="grow">
               <div className="flex items-center justify-between gap-4">
-                <span className="">{domain?.name.ar}</span>
+                <span className="">
+                  {lang === "en"
+                    ? domain.name.en
+                    : lang === "ar"
+                      ? domain.name.ar
+                      : undefined}
+                </span>
               </div>
             </AccordionCard.Title>
             <AccordionCard.Content className="py-0 pe-0">
@@ -181,13 +192,33 @@ export default function ExamsSidebar() {
                     <AccordionCard.Panel key={subdomain.id}>
                       <AccordionCard.Title className="grow">
                         <div className="flex items-center justify-between gap-4">
-                          <span className="">{subdomain?.name.ar}</span>
+                          <span className="">
+                            {lang === "en"
+                              ? subdomain.name.en
+                              : lang === "ar"
+                                ? subdomain.name.ar
+                                : undefined}
+                          </span>
                         </div>
                       </AccordionCard.Title>
                       <AccordionCard.Content>
-                        {subdomain.assessments?.map(({id, name}) => (
-                          <span onClick={() => dispatch(setActiveAssessment(id))}>{name.ar}</span>
-                        ))}
+                        {subdomain.assessments?.map(
+                          ({ id, name, questions }) => (
+                            <h3
+                              className="cursor-pointer text-indigo-900 hover:underline"
+                              key={id}
+                              onClick={() =>
+                                {dispatch(setExamQuestions(questions));dispatch(setAssessmentId(id))}
+                              }
+                            >
+                              {lang === "en"
+                                ? name.en
+                                : lang === "ar"
+                                  ? name.ar
+                                  : undefined}
+                            </h3>
+                          ),
+                        )}
                         <AddDomainModal
                           modalType="assessment"
                           subDomainId={subdomain.id}
@@ -197,8 +228,18 @@ export default function ExamsSidebar() {
                   ))}
                 </AccordionCard>
               ) : undefined}
-              {domain.assessments?.map(({id, name}) => (
-                <span onClick={() => dispatch(setActiveAssessment(id))}>{name.ar}</span>
+              {domain.assessments?.map(({ id, name, questions }) => (
+                <h3
+                  className="cursor-pointer text-indigo-900 hover:underline"
+                  key={id}
+                  onClick={() => {dispatch(setExamQuestions(questions));dispatch(setAssessmentId(id))}}
+                >
+                  {lang === "en"
+                    ? name.en
+                    : lang === "ar"
+                      ? name.ar
+                      : undefined}
+                </h3>
               ))}
               {domain.assessments?.length ? undefined : (
                 <AddDomainModal modalType="subdomain" domainId={domain.id} />

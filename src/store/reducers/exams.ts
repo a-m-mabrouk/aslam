@@ -14,7 +14,8 @@ interface ExamType {
   examAnswers: ExamAnswer[];
   examsSideNavState: boolean;
   domains: DomainType[];
-  activeAssessment: number | null;
+  examQuestions: Question[] | null;
+  assessmentId: number | null;
 }
 
 interface SetAnswerPayload {
@@ -33,7 +34,8 @@ const initialState: ExamType = {
   examAnswers: [],
   examsSideNavState: false,
   domains: [],
-  activeAssessment: null,
+  examQuestions: null,
+  assessmentId: null
 };
 
 const examsSlice = createSlice({
@@ -84,8 +86,11 @@ const examsSlice = createSlice({
     setDomains: (state, { payload }: PayloadAction<DomainType[]>) => {
       state.domains = payload;
     },
-    setActiveAssessment: (state, {payload}: PayloadAction<number | null>) => {
-      state.activeAssessment = payload;
+    setExamQuestions: (state, {payload}: PayloadAction<Question[] | null>) => {
+      state.examQuestions = payload;
+    },
+    setAssessmentId: (state, {payload}: PayloadAction<number | null>) => {
+      state.assessmentId = payload;
     }
   },
 });
@@ -100,7 +105,8 @@ export const {
   showSideNav,
   hideSideNav,
   setDomains,
-  setActiveAssessment
+  setExamQuestions,
+  setAssessmentId
 } = examsSlice.actions;
 
 export default examsSlice.reducer;
