@@ -22,6 +22,7 @@ import {
   FlagIcon as FlagIconOutline,
   CalculatorIcon,
   PencilSquareIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 import Question from "./question";
 import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
@@ -54,7 +55,7 @@ function DrawingBoardContainer() {
 export default function ExamInterface({
   questions,
   examTime,
-  onEndExam
+  onEndExam,
 }: {
   questions: Question[];
   examTime: number;
@@ -133,57 +134,82 @@ export default function ExamInterface({
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between bg-gray-200 p-4">
-        <div id="calc-parent">
-          <Popover content={<Calculator />} placement="top">
-            <Button>
-              <CalculatorIcon className="size-5" />
-              {t("calculator")}
-            </Button>
-          </Popover>
+      <header className="grid gap-2 bg-gray-200 p-4">
+        <div className="flex justify-between">
+          <div>
+            <p className="flex">
+              <ClockIcon className="size-6" /> {t("remainingTime")}{" "}
+              {formatTime(timeRemaining)}
+            </p>
+            <p className="ps-6">
+              {t("question")} {currentQuestionIndex + 1} {t("of")}{" "}
+              {questions?.length}
+            </p>
+          </div>
+          <div>
+            <Popover content={<DrawingBoardContainer />} placement="top">
+              <Button>
+                <PencilSquareIcon className="size-5" />
+                {t("board")}
+              </Button>
+            </Popover>
+          </div>
+          <div id="calc-parent">
+            <Popover content={<Calculator />} placement="top">
+              <Button>
+                <CalculatorIcon className="size-5" />
+                {t("calculator")}
+              </Button>
+            </Popover>
+          </div>
         </div>
-        <div>
-          <Popover content={<DrawingBoardContainer />} placement="top">
-            <Button>
-              <PencilSquareIcon className="size-5" />
-              {t("board")}
-            </Button>
-          </Popover>
-        </div>
-        <div>
-          <p>
-            {t("remainingTime")} {formatTime(timeRemaining)}
-          </p>
-          <Progress progress={progress} color="indigo" className="mt-2 border-2 border-blue-400" />
-        </div>
-        <div>
-          <p>
-            {t("question")} {currentQuestionIndex + 1} {t("of")}{" "}
-            {questions?.length}
-          </p>
-        </div>
-        <div className="flex">
-          <span
-            onClick={isPaused ? resumeTimer : pauseTimer}
-            color="gray"
-            className="mr-2"
-          >
-            {isPaused ? (
-              <PlayIcon className="size-8 cursor-pointer" />
-            ) : (
-              <PauseIcon className="size-8 cursor-pointer" />
-            )}
-          </span>
-          <span onClick={()=> {setEndExamModal(true)}} color="red">
-            <StopIcon className="size-8 cursor-pointer" />
-          </span>
-          <span onClick={() => dispatch(setIsFlagged(currentQuestionIndex))}>
-            {examAnswers[currentQuestionIndex]?.isFlagged ? (
-              <FlagIconSolid className="size-8 cursor-pointer fill-red-700" />
-            ) : (
-              <FlagIconOutline className="size-8 cursor-pointer text-gray-700" />
-            )}
-          </span>
+        <div className="grid grid-cols-12">
+          <div className="col-start-1 col-end-3 flex">
+            <span
+              className="flex cursor-pointer gap-1 text-gray-700"
+              onClick={() => dispatch(setIsFlagged(currentQuestionIndex))}
+            >
+              {examAnswers[currentQuestionIndex]?.isFlagged ? (
+                <>
+                  <FlagIconSolid className="size-5 fill-red-700" />
+                  <span className="text-red-700">{t("unFlagQue")}</span>
+                </>
+              ) : (
+                <>
+                  <FlagIconOutline className="size-5 text-gray-700" />
+                  <span>{t("flagQue")}</span>
+                </>
+              )}
+            </span>
+          </div>
+          <div className="col-start-4 col-end-10">
+            <Progress
+              progress={progress}
+              color="indigo"
+              className="mt-2 h-auto border-2 border-blue-400"
+            />
+          </div>
+          <div className="col-start-11 col-end-13 flex justify-around">
+            <span
+              onClick={isPaused ? resumeTimer : pauseTimer}
+              color="gray"
+              className="mr-2"
+            >
+              {isPaused ? (
+                <PlayIcon className="size-8 cursor-pointer" />
+              ) : (
+                <PauseIcon className="size-8 cursor-pointer" />
+              )}
+            </span>
+            <span
+              onClick={() => {
+                setEndExamModal(true);
+              }}
+              color="red"
+            >
+              <StopIcon className="size-8 cursor-pointer" />
+            </span>
+          </div>
         </div>
       </header>
 
@@ -222,27 +248,40 @@ export default function ExamInterface({
         >
           <FlagIconOutline className="size-5" /> {t("flaggedQuestions")}
         </Button>
-        {currentQuestionIndex === questions?.length - 1?
-        <Button
-          onClick={()=> {setEndExamModal(true)}}
-          color="red"
-        >
-          {t("endExam")}
-        </Button>:
-        <Button
-          onClick={goToNextQuestion}
-          color="green"
-        >
-          {t("next")}
-        </Button>}
-        
+        {currentQuestionIndex === questions?.length - 1 ? (
+          <Button
+            onClick={() => {
+              setEndExamModal(true);
+            }}
+            color="red"
+          >
+            {t("endExam")}
+          </Button>
+        ) : (
+          <Button onClick={goToNextQuestion} color="green">
+            {t("next")}
+          </Button>
+        )}
       </footer>
-      <Modal show={endExamModal} size="md" onClose={() => setEndExamModal(false)}>
+      <Modal
+        show={endExamModal}
+        size="md"
+        onClose={() => setEndExamModal(false)}
+      >
         <Modal.Header>{t("description")}</Modal.Header>
         <Modal.Body>
           <div className="flex justify-around">
-            <Button className="bg-red-700" onClick={stopExam}>End</Button>
-            <Button className="" onClick={()=> {setEndExamModal(false)}}>Cancel</Button>
+            <Button className="bg-red-700" onClick={stopExam}>
+              End
+            </Button>
+            <Button
+              className=""
+              onClick={() => {
+                setEndExamModal(false);
+              }}
+            >
+              Cancel
+            </Button>
           </div>
         </Modal.Body>
       </Modal>

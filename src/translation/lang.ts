@@ -160,6 +160,8 @@ export const resources = {
       addAssessment: "Add assessment",
       exams: "Exams",
       noQuestions: "No questions",
+      flagQue: "Flag",
+      unFlagQue: "Unflag",
     },
   },
   ar: {
@@ -321,6 +323,8 @@ export const resources = {
       addAssessment: "إضافة امتحان",
       exams: "الامتحانات",
       noQuestions: "لا توجد أسئلة",
+      flagQue: "حدد للمراجعة",
+      unFlagQue: "إلغاء التحديد",
     },
   },
 };

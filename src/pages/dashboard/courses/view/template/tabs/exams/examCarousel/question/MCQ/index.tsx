@@ -99,7 +99,7 @@ export default function QuestionMCQ({
               onChange={handleRadioChange}
               value={opt.option}
             />
-            <label htmlFor={`option-${i + 1}`} className="ms-2">
+            <label htmlFor={`option-${i + 1}`} className="ms-2 cursor-pointer">
               {opt.option}
             </label>
           </li>
