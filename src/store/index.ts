@@ -4,6 +4,7 @@ import authReducer from "./reducers/auth";
 import forgetpasswordReducer from "./reducers/forgetpassword";
 import examsReducer from "./reducers/exams";
 import studentsReducer from "./reducers/students";
+import examsDomainsReducer from "./reducers/examsDomains";
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
     forgetpassword: forgetpasswordReducer,
     exams: examsReducer,
     students: studentsReducer,
+    examsDomains: examsDomainsReducer,
   },
 });
 

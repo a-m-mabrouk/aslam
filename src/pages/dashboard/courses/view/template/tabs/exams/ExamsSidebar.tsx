@@ -1,54 +1,25 @@
 import { FormEventHandler, useEffect, useState } from "react";
 import { Button, Modal, TextInput } from "flowbite-react";
-
-import { API_EXAMS } from "../../../../../../../router/routes/apiRoutes";
 import { AccordionCard } from "../../../../../../../components/accordion";
-import axiosDefault from "../../../../../../../utilities/axios";
 import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../../../../../../store";
 import {
   setExamQuestions,
-  setDomains,
   setAssessmentId,
 } from "../../../../../../../store/reducers/exams";
-import { toastifyBox } from "../../../../../../../helper/toastifyBox";
 import useGetLang from "../../../../../../../hooks/useGetLang";
+import { TrashIcon } from "@heroicons/react/24/outline";
+import { addAssessment, addDomain, addSubdomain, fetchDomains } from "../../../../../../../store/reducers/examsDomains";
 
-export interface DomainType {
-  id: number;
-  course_id: 1;
-  name: {
-    ar: string;
-    en: string;
-  };
-  assessments: AssessmentType[];
-  subdomains?: DomainType[];
-}
-export interface AssessmentType {
-  id: number;
-  module_id: null;
-  course_id: number;
-  domain_id: number | null;
-  subdomain_id: number | null;
-  name: {
-    ar: string;
-    en: string;
-  };
-  questions: Question[];
-}
 
-interface AddNewModalProps {
-  modalType: "assessment" | "subdomain" | "domain";
-  domainId?: number | null;
-  subDomainId?: number | null;
-}
 
 export function AddDomainModal({
   modalType,
   domainId = null,
   subDomainId = null,
 }: AddNewModalProps) {
+  const dispatch = useAppDispatch();
   const { t } = useTranslation("exams");
   const { id: courseId } = useParams();
 
@@ -87,14 +58,15 @@ export function AddDomainModal({
     formData.forEach((value, key) => {
       obj[key] = value;
     });
-    const url =
-      modalType === "domain"
-        ? API_EXAMS.domains
-        : modalType === "subdomain"
-          ? API_EXAMS.subdomain
-          : API_EXAMS.assessments;
-    const { data } = await axiosDefault.post(url, obj);
-    toastifyBox("success", data.message);
+
+    if (modalType === "domain") {
+      dispatch(addDomain(obj));
+    } else if (modalType === "subdomain") {
+      dispatch(addSubdomain(obj));
+    } else {
+      dispatch(addAssessment(obj));
+    }
+    // toastifyBox("success", data.message);
     onCloseModal();
   };
 
@@ -154,28 +126,32 @@ export function AddDomainModal({
 export default function ExamsSidebar() {
   const { id: course_id } = useParams();
   const dispatch = useAppDispatch();
-  const domains = useAppSelector(({ exams }) => exams.domains);
+  const domains = useAppSelector(({ examsDomains }) => examsDomains.domains);
+  console.log(domains);
+  
   const { t } = useTranslation("exams");
   const { lang } = useGetLang();
 
+  const handleDeleteDomain = (id: number) => {
+    console.log(id, " delete");
+    
+  }
+
   useEffect(() => {
-    const fetchDomains = async () => {
-      const { data } = await axiosDefault.get(
-        `${API_EXAMS.domains}?course_id=${course_id}`,
-      );
-      const domainsArr = [...data.data];
-      dispatch(setDomains(domainsArr));
-    };
-    fetchDomains();
+    dispatch(fetchDomains(+course_id!));
   }, [course_id, dispatch]);
 
   return (
     <>
       <AccordionCard>
-        {domains.map((domain) => (
+        {domains?.map((domain) => (
           <AccordionCard.Panel key={domain.id}>
             <AccordionCard.Title className="grow">
               <div className="flex items-center justify-between gap-4">
+                <TrashIcon className="size-5" onClick={(event) => {
+                  event.stopPropagation();
+                  handleDeleteDomain(domain.id);
+                }} />
                 <span className="">
                   {lang === "en"
                     ? domain.name.en

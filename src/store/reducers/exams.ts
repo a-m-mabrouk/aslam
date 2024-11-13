@@ -1,34 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DomainType } from "../../pages/dashboard/courses/view/template/tabs/exams/ExamsSidebar";
-
-export interface ExamAnswer {
-  selectedOpt: string;
-  showAnsClicked: boolean;
-  isFlagged: boolean;
-  domain: string;
-  chapter: string;
-  answerstate: "wrong" | "correct" | "skipped";
-}
-
-interface ExamType {
-  examAnswers: ExamAnswer[];
-  examsSideNavState: boolean;
-  domains: DomainType[];
-  examQuestions: Question[];
-  assessmentId: number | null;
-}
-
-interface SetAnswerPayload {
-  questionIndex: number;
-  queAnsDetails: {
-    selectedOpt: string;
-    showAnsClicked: boolean;
-    isFlagged: boolean;
-    domain: string;
-    chapter: string;
-    answerstate: "wrong" | "correct" | "skipped";
-  };
-}
 
 const initialState: ExamType = {
   examAnswers: [],

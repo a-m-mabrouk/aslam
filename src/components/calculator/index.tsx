@@ -1,80 +1,139 @@
-import React, { useState } from 'react';
-import { Button } from 'flowbite-react';
-import { create, all } from 'mathjs';
+import { useState } from "react";
+import { Button, Radio } from "flowbite-react";
+import { BackspaceIcon } from "@heroicons/react/24/outline";
 
-type Operator = '+' | '-' | '*' | '/' | '%' | '^' | '√' | 'sin' | 'cos' | 'tan' | 'log' | 'ln' | 'π' | 'e';
+const Calculator = () => {
+  const [calc, setCalc] = useState<string>("");
+  const [runtimeAns, setRuntimeAns] = useState<string>("0");
+  const [anglFunc, setAnglFunc] = useState<"Deg" | "Rad">("Deg");
 
-const math = create(all, {
-  number: 'number',
-  precision: 14
-});
-
-const Calculator: React.FC = () => {
-  const [display, setDisplay] = useState<string>('');
-  const [result, setResult] = useState<number | null>(null);
-
-  const handleButtonClick = (value: string | Operator) => {
-    switch (value) {
-      case 'C':
-        setDisplay('');
-        setResult(null);
-        break;
-      case '=':
-        calculateResult();
-        break;
-      case 'π':
-        setDisplay(display + math.pi);
-        break;
-      case 'e':
-        setDisplay(display + math.e);
-        break;
-      case '√':
-        setDisplay(display + 'sqrt(');
-        break;
-      case '^':
-        setDisplay(display + '^');
-        break;
-      default:
-        setDisplay(display + value);
-        break;
-    }
+  const handleButtonClick = (value: string) => {
+    setCalc((prevInput) => (prevInput === "Error" ? value : prevInput + value));
   };
 
-  const calculateResult = () => {
+  const handleClear = () => setCalc("");
+  const handleDelete = () => setCalc((prevInput) => prevInput.slice(0, -1));
+  const handleCalculate = () => {
     try {
-      const evalResult = math.evaluate(display);
-      setResult(evalResult);
-      setDisplay(`${evalResult}`);
-    } catch (error) {
-      setDisplay('Error');
+      const sanitizedCalc = calc.replace(/(?<!\d)0+(?=\d)/g, ""); // Remove leading zeros
+      const result = eval(
+        sanitizedCalc
+          .replaceAll(
+            "sin(",
+            anglFunc === "Deg" ? "Math.sin(Math.PI / 180*" : "Math.sin(",
+          )
+          .replaceAll(
+            "cos(",
+            anglFunc === "Deg" ? "Math.cos(Math.PI / 180*" : "Math.cos(",
+          )
+          .replaceAll(
+            "tan(",
+            anglFunc === "Deg" ? "Math.tan(Math.PI / 180*" : "Math.tan(",
+          )
+          .replaceAll("ln", "Math.log")
+          .replaceAll("log", "Math.log10")
+          .replaceAll("√", "Math.sqrt")
+          .replaceAll("π", "Math.PI")
+          .replaceAll("ANS", `${runtimeAns}`)
+          .replaceAll("^", "**")
+          .replaceAll("%", "/100")
+          .replaceAll("e^(", "Math.exp(")
+          .replaceAll("E", "10**")
+      ).toString();
+      setCalc(result);
+      setRuntimeAns(result);
+    } catch {
+      setCalc("Error");
     }
   };
-
-  const buttons = [
-    { label: 'C', style: 'bg-orange-400' }, { label: '(', style: 'bg-blue-300' }, { label: ')', style: 'bg-blue-300' }, { label: '<=', style: 'bg-orange-400' },
-    { label: '%', style: 'bg-blue-300' }, { label: 'x l', style: 'bg-blue-300' }, { label: 'x^', style: 'bg-blue-300' },
-    { label: '7', style: 'bg-gray-400' }, { label: '8', style: 'bg-gray-400' }, { label: '9', style: 'bg-gray-400' }, { label: '*', style: 'bg-blue-300' }, { label: '/', style: 'bg-blue-300' },
-    { label: 'ln', style: 'bg-blue-300' }, { label: 'e', style: 'bg-blue-300' },
-    { label: '4', style: 'bg-gray-400' }, { label: '5', style: 'bg-gray-400' }, { label: '6', style: 'bg-gray-400' }, { label: '+', style: 'bg-blue-300' }, { label: '-', style: 'bg-blue-300' },
-    { label: 'x²', style: 'bg-blue-300' }, { label: '√', style: 'bg-blue-300' },
-    { label: '1', style: 'bg-gray-400' }, { label: '2', style: 'bg-gray-400' }, { label: '3', style: 'bg-gray-400' }, { label: 'sin', style: 'bg-blue-300' }, { label: 'tan', style: 'bg-blue-300' },
-    { label: '±', style: 'bg-blue-300' }, { label: '0', style: 'bg-gray-400' }, { label: '.', style: 'bg-blue-300' }, { label: '=', style: 'bg-orange-400' },
-    { label: 'π', style: 'bg-blue-300' }, { label: '°', style: 'bg-blue-300' }, { label: 'rad', style: 'bg-blue-300' }
-  ];
+  
 
   return (
-    <div className="max-w-md mx-auto bg-[#fdf6e3] p-4 rounded-lg shadow-lg">
-      <div className="bg-gray-800 text-white p-4 rounded-md text-right text-2xl mb-4 h-16">
-        {display || result || '0'}
+    <div className="mx-auto flex flex-col gap-1 rounded-lg border border-gray-300 bg-white p-2 shadow-md">
+      {/* Display */}
+      <div className="flex min-h-[45px] items-center justify-end rounded-md border border-gray-200 bg-gray-50 p-2 text-lg font-semibold text-gray-800">
+        {calc || "0"}
       </div>
-      <div className="grid grid-cols-7 gap-2">
-        {buttons.map((btn, index) => (
+
+      {/* Angle Selection */}
+      <div className="flex items-center justify-between">
+        <div className="flex cursor-pointer items-center gap-2">
+          <Radio
+            id="rad-mode"
+            name="angle-mode"
+            value="Rad"
+            checked={anglFunc === "Rad"}
+            onChange={() => setAnglFunc("Rad")}
+            className="text-blue-600"
+          />
+          <label className="cursor-pointer" htmlFor="rad-mode">Rad</label>
+        </div>
+        <div className="flex cursor-pointer items-center gap-2">
+          <Radio
+            id="deg-mode"
+            name="angle-mode"
+            value="Deg"
+            checked={anglFunc === "Deg"}
+            onChange={() => setAnglFunc("Deg")}
+            className="text-blue-600"
+          />
+          <label className="cursor-pointer" htmlFor="deg-mode">Deg</label>
+        </div>
+      </div>
+
+      {/* Buttons */}
+      <div className="grid grid-cols-4 gap-1">
+        {[
+          { label: "AC", action: handleClear, variant: "special" },
+          { label: "(", action: () => handleButtonClick("(") },
+          { label: ")", action: () => handleButtonClick(")") },
+          { label: "%", action: () => handleButtonClick("%") },
+          { label: "sin", action: () => handleButtonClick("sin(") },
+          { label: "cos", action: () => handleButtonClick("cos(") },
+          { label: "tan", action: () => handleButtonClick("tan(") },
+          { label: "ln", action: () => handleButtonClick("ln(") },
+          { label: "7", action: () => handleButtonClick("7") },
+          { label: "8", action: () => handleButtonClick("8") },
+          { label: "9", action: () => handleButtonClick("9") },
+          { label: "÷", action: () => handleButtonClick("/") },
+          { label: "4", action: () => handleButtonClick("4") },
+          { label: "5", action: () => handleButtonClick("5") },
+          { label: "6", action: () => handleButtonClick("6") },
+          { label: "×", action: () => handleButtonClick("*") },
+          { label: "1", action: () => handleButtonClick("1") },
+          { label: "2", action: () => handleButtonClick("2") },
+          { label: "3", action: () => handleButtonClick("3") },
+          { label: "−", action: () => handleButtonClick("-") },
+          { label: "0", action: () => handleButtonClick("0") },
+          { label: ".", action: () => handleButtonClick(".") },
+          { label: <BackspaceIcon className="size-5" />, action: handleDelete },
+          { label: "+", action: () => handleButtonClick("+") },
+          {
+            label: "ANS",
+            action: () => handleButtonClick("ANS"),
+            variant: "secondary",
+          },
+          {
+            label: "^",
+            action: () => handleButtonClick("^"),
+            variant: "secondary",
+          },
+          { label: "=", action: handleCalculate, variant: "primary" },
+        ].map(({ label, action, variant = "default" }, index) => (
           <Button
             key={index}
-            onClick={() => handleButtonClick(btn.label as Operator | string)}
-            className={`p-2 rounded-lg text-xl font-semibold ${btn.style} text-black`}
+            onClick={action}
+            className={`h-9 w-11 p-0 text-xs ${
+              variant === "primary"
+                ? "bg-blue-500 text-white hover:bg-blue-600"
+                : variant === "special"
+                  ? "bg-red-500 text-white hover:bg-red-600"
+                  : variant === "secondary"
+                    ? "bg-gray-200 text-black"
+                    : "bg-gray-600"
+            }`}
           >
-            {btn.label}
+            {label}
           </Button>
         ))}
       </div>

@@ -5,3 +5,4 @@ type ErrorResponse = {
     [key: string]: unknown;
   };
 };
+

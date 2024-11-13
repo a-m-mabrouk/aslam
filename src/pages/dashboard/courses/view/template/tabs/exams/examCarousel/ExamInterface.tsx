@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
   Progress,
@@ -31,8 +31,9 @@ import {
   setShowAnsClicked,
 } from "../../../../../../../../store/reducers/exams";
 import { useTranslation } from "react-i18next";
-import { Calculator } from "react-advanced-calculator";
-import "react-advanced-calculator/dist/styles/calculator.css";
+import Calculator from "../../../../../../../../components/calculator";
+// import { Calculator } from "react-advanced-calculator";
+// import "react-advanced-calculator/dist/styles/calculator.css";
 
 type FlaggedQuestionType = Question & { queIndex: number };
 
@@ -71,17 +72,37 @@ export default function ExamInterface({
   const [descModal, setDescModal] = useState(false);
   const [flagsModal, setFlagsModal] = useState(false);
   const [allQuestionsModal, setAllQuestionsModal] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [borderColor, setBorderColor] = useState<string>("border-gray-300");
+  const [timerColor, setTimerColor] = useState<string>("");
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const overIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const startTimer = () => {
-    intervalRef.current = setInterval(() => {
-      setTimeRemaining((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
-    }, 1000);
+  const clearTimerInterval = () => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
   };
+  const clearColorInterval = () => {
+    if (overIntervalRef.current) clearInterval(overIntervalRef.current);
+  };
+  const startTimeoutAnimation = useCallback(() => {
+    clearTimerInterval();
+    overIntervalRef.current = setInterval(() => {
+      setBorderColor((prev) =>
+        prev === "border-gray-300" ? "border-red-500" : "border-gray-300",
+      );
+      setTimerColor((prev) => (prev === "" ? "text-red-500" : ""));
+    }, 1000);
+  }, []);
+  const startTimer = useCallback(() => {
+    timerIntervalRef.current = setInterval(() => {
+      setTimeRemaining((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
+      timeRemaining === 0 && startTimeoutAnimation();
+    }, 1000);
+  }, [startTimeoutAnimation, timeRemaining]);
 
   const pauseTimer = () => {
     setIsPaused(true);
-    if (intervalRef.current) clearInterval(intervalRef.current);
+    clearTimerInterval();
+    clearColorInterval();
   };
 
   const resumeTimer = () => {
@@ -97,9 +118,10 @@ export default function ExamInterface({
   useEffect(() => {
     if (!isPaused) startTimer();
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      clearTimerInterval();
+      clearColorInterval();
     };
-  }, [isPaused]);
+  }, [isPaused, startTimer]);
 
   const progress = ((examTime - timeRemaining) / examTime) * 100;
 
@@ -132,12 +154,14 @@ export default function ExamInterface({
     .map((e) => ({ ...questions[e], queIndex: e }));
 
   return (
-    <div className="flex h-full flex-col">
+    <div
+      className={`flex h-full flex-col overflow-hidden rounded-[10px] border-2 ${borderColor}`}
+    >
       {/* Header */}
       <header className="grid gap-2 bg-gray-200 p-4">
         <div className="flex justify-between">
           <div>
-            <p className="flex">
+            <p className={`flex ${timerColor}`}>
               <ClockIcon className="size-6" /> {t("remainingTime")}{" "}
               {formatTime(timeRemaining)}
             </p>
@@ -193,7 +217,7 @@ export default function ExamInterface({
             <span
               onClick={isPaused ? resumeTimer : pauseTimer}
               color="gray"
-              className="mr-2"
+              className={`mr-2 size-8 ${!timeRemaining ? "pointer-events-none opacity-50" : ""}`}
             >
               {isPaused ? (
                 <PlayIcon className="size-8 cursor-pointer" />
@@ -206,6 +230,7 @@ export default function ExamInterface({
                 setEndExamModal(true);
               }}
               color="red"
+              className={`size-8`}
             >
               <StopIcon className="size-8 cursor-pointer" />
             </span>

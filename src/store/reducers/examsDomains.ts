@@ -1,0 +1,253 @@
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { API_EXAMS } from "../../router/routes/apiRoutes";
+import axiosDefault from "../../utilities/axios";
+
+interface DomainState {
+  domains: DomainType[];
+  loading: boolean;
+  error: null | string;
+}
+interface FetchDomainPayload {
+  success: boolean;
+  errors: boolean;
+  message: string;
+  data: DomainType[];
+}
+
+interface AddDomainPayload {
+  success: boolean;
+  errors: boolean;
+  message: string;
+  data: {
+    course_id: number;
+    id: number;
+    name: {
+      ar: string;
+      en: string;
+    };
+  };
+}
+interface AddSubdomainPayload {
+  success: boolean;
+  errors: boolean;
+  message: string;
+  data: {
+    domain_id: number;
+    id: number;
+    name: {
+      ar: string;
+      en: string;
+    };
+  };
+}
+interface AddAssessmentPayload {
+  success: boolean;
+  errors: boolean;
+  message: string;
+  data: {
+    course_id: number;
+    module_id: null;
+    domain_id: number | null;
+    subdomain_id: number | null;
+    id: number;
+    name: {
+      ar: string;
+      en: string;
+    };
+  };
+}
+
+const initialState: DomainState = {
+  domains: [],
+  loading: false,
+  error: null,
+};
+
+// Async thunk for fetching students
+export const fetchDomains = createAsyncThunk(
+  "domains/fetchDomains",
+  async (course_id: number) => {
+    const response = await axiosDefault.get(API_EXAMS.domains, {
+      params: { course_id },
+    });
+    return response.data;
+  },
+);
+export const addDomain = createAsyncThunk(
+  "domains/addDomain",
+  async (domainData: unknown) => {
+    const response = await axiosDefault.post(API_EXAMS.domains, domainData);
+    return response.data;
+  },
+);
+export const addSubdomain = createAsyncThunk(
+  "domains/addSubdomain",
+  async (subdomainData: unknown) => {
+    const response = await axiosDefault.post(
+      API_EXAMS.subdomain,
+      subdomainData,
+    );
+    return response.data;
+  },
+);
+export const addAssessment = createAsyncThunk(
+  "domains/addAssessment",
+  async (assessmentData: unknown) => {
+    const response = await axiosDefault.post(
+      API_EXAMS.assessments,
+      assessmentData,
+    );
+    console.log(response.data);
+    return response.data;
+  },
+);
+export const deleteDomain = createAsyncThunk(
+  "domains/deleteDomain",
+  async (domainId: unknown) => {
+    const response = await axiosDefault.delete(`${API_EXAMS.domains}/${domainId}`);
+    return response.data;
+  },
+);
+export const deleteSubdomain = createAsyncThunk(
+  "domains/deleteSubdomain",
+  async (subdomainId: unknown) => {
+    const response = await axiosDefault.delete(`${API_EXAMS.subdomain}/${subdomainId}`);
+    return response.data;
+  },
+);
+export const deleteAssessment = createAsyncThunk(
+  "domains/deleteAssessment",
+  async (assessmentId: unknown) => {
+    const response = await axiosDefault.delete(`${API_EXAMS.assessments}/${assessmentId}`);
+    return response.data;
+  },
+);
+
+// Create examsDomains slice
+const examsDomains = createSlice({
+  name: "examsDomains",
+  initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchDomains.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        fetchDomains.fulfilled,
+        (state, action: PayloadAction<FetchDomainPayload>) => {
+          state.domains = action.payload.data;
+          state.loading = false;
+        },
+      )
+      .addCase(fetchDomains.rejected, (state, action) => {
+        state.domains = [];
+        state.error = action.error.message || "Failed to fetch students";
+        state.loading = false;
+      })
+      .addCase(addDomain.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        addDomain.fulfilled,
+        (state, action: PayloadAction<AddDomainPayload>) => {
+          const { data } = action.payload;
+          const domain = {
+            id: data.id,
+            course_id: +data.course_id,
+            name: data.name,
+            subdomains: [],
+            assessments: [],
+          };
+          state.domains.push(domain);
+          state.loading = false;
+        },
+      )
+      .addCase(addDomain.rejected, (state, action) => {
+        state.domains = [];
+        state.error = action.error.message || "Failed to fetch students";
+        state.loading = false;
+      })
+      .addCase(addSubdomain.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        addSubdomain.fulfilled,
+        (state, action: PayloadAction<AddSubdomainPayload>) => {
+          const { data } = action.payload;
+          const subdomain = {
+            id: data.id,
+            domain_id: +data.domain_id,
+            name: data.name,
+            assessments: [],
+          };
+          state.domains.forEach((domain) => {
+            if (domain.id === subdomain.domain_id) {
+              domain.subdomains?.push({
+                ...subdomain,
+                course_id: domain.course_id,
+              });
+            }
+          });
+          state.loading = false;
+        },
+      )
+      .addCase(addSubdomain.rejected, (state, action) => {
+        state.domains = [];
+        state.error = action.error.message || "Failed to fetch students";
+        state.loading = false;
+      })
+      .addCase(addAssessment.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        addAssessment.fulfilled,
+        (state, action: PayloadAction<AddAssessmentPayload>) => {
+          const { data } = action.payload;
+          const assessment = {
+            id: data.id,
+            course_id: +data.course_id,
+            domain_id: data.domain_id ? +data.domain_id : null,
+            subdomain_id: data.subdomain_id ? +data.subdomain_id : null,
+            name: data.name,
+          };
+          if (assessment.domain_id) {
+            state.domains.forEach((domain) => {
+              if (domain.id === assessment.domain_id) {
+                domain.assessments.push({
+                  ...assessment,
+                  module_id: null,
+                  questions: [],
+                });
+              }
+            });
+          }
+          if (assessment.subdomain_id) {
+            state.domains.forEach((domain) => {
+              domain.subdomains?.forEach((subdomain) => {
+                if (subdomain.id === assessment.subdomain_id) {
+                  subdomain.assessments.push({
+                    ...assessment,
+                    module_id: null,
+                    questions: [],
+                  });
+                }
+              });
+            });
+          }
+          state.loading = false;
+        },
+      )
+      .addCase(addAssessment.rejected, (state, action) => {
+        state.domains = [];
+        state.error = action.error.message || "Failed to fetch students";
+        state.loading = false;
+      });
+  },
+});
+
+export default examsDomains.reducer;
