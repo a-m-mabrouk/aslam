@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Radio } from "flowbite-react";
 import { BackspaceIcon } from "@heroicons/react/24/outline";
+import { evaluate } from "mathjs";
 
 const Calculator = () => {
   const [calc, setCalc] = useState<string>("");
@@ -13,40 +14,34 @@ const Calculator = () => {
 
   const handleClear = () => setCalc("");
   const handleDelete = () => setCalc((prevInput) => prevInput.slice(0, -1));
+  
   const handleCalculate = () => {
     try {
-      const sanitizedCalc = calc.replace(/(?<!\d)0+(?=\d)/g, ""); // Remove leading zeros
-      const result = eval(
-        sanitizedCalc
-          .replaceAll(
-            "sin(",
-            anglFunc === "Deg" ? "Math.sin(Math.PI / 180*" : "Math.sin(",
-          )
-          .replaceAll(
-            "cos(",
-            anglFunc === "Deg" ? "Math.cos(Math.PI / 180*" : "Math.cos(",
-          )
-          .replaceAll(
-            "tan(",
-            anglFunc === "Deg" ? "Math.tan(Math.PI / 180*" : "Math.tan(",
-          )
-          .replaceAll("ln", "Math.log")
-          .replaceAll("log", "Math.log10")
-          .replaceAll("√", "Math.sqrt")
-          .replaceAll("π", "Math.PI")
-          .replaceAll("ANS", `${runtimeAns}`)
-          .replaceAll("^", "**")
-          .replaceAll("%", "/100")
-          .replaceAll("e^(", "Math.exp(")
-          .replaceAll("E", "10**")
-      ).toString();
+      let sanitizedCalc = calc
+        .replaceAll("ANS", runtimeAns)
+        .replaceAll("π", "pi") // mathjs uses "pi" for π
+        .replaceAll("√", "sqrt")
+        .replaceAll("^", "**")
+        .replaceAll("%", "/100")
+        .replaceAll("ln", "log")
+        .replaceAll("log", "log10")
+        .replaceAll("e^", "exp");
+
+      // Add angle mode functionality
+      if (anglFunc === "Deg") {
+        sanitizedCalc = sanitizedCalc
+          .replaceAll("sin(", "sin(deg(")
+          .replaceAll("cos(", "cos(deg(")
+          .replaceAll("tan(", "tan(deg(");
+      }
+
+      const result = evaluate(sanitizedCalc).toString();
       setCalc(result);
       setRuntimeAns(result);
     } catch {
       setCalc("Error");
     }
   };
-  
 
   return (
     <div className="mx-auto flex flex-col gap-1 rounded-lg border border-gray-300 bg-white p-2 shadow-md">
@@ -108,16 +103,8 @@ const Calculator = () => {
           { label: ".", action: () => handleButtonClick(".") },
           { label: <BackspaceIcon className="size-5" />, action: handleDelete },
           { label: "+", action: () => handleButtonClick("+") },
-          {
-            label: "ANS",
-            action: () => handleButtonClick("ANS"),
-            variant: "secondary",
-          },
-          {
-            label: "^",
-            action: () => handleButtonClick("^"),
-            variant: "secondary",
-          },
+          { label: "ANS", action: () => handleButtonClick("ANS"), variant: "secondary" },
+          { label: "^", action: () => handleButtonClick("^"), variant: "secondary" },
           { label: "=", action: handleCalculate, variant: "primary" },
         ].map(({ label, action, variant = "default" }, index) => (
           <Button
@@ -127,10 +114,10 @@ const Calculator = () => {
               variant === "primary"
                 ? "bg-blue-500 text-white hover:bg-blue-600"
                 : variant === "special"
-                  ? "bg-red-500 text-white hover:bg-red-600"
-                  : variant === "secondary"
-                    ? "bg-gray-200 text-black"
-                    : "bg-gray-600"
+                ? "bg-red-500 text-white hover:bg-red-600"
+                : variant === "secondary"
+                ? "bg-gray-200 text-black"
+                : "bg-gray-600"
             }`}
           >
             {label}

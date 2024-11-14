@@ -37,7 +37,7 @@ export default function Students() {
     }
     const time = search? 1000 : 0;
     
-    const clear: NodeJS.Timeout = setTimeout(
+    const clear: number = setTimeout(
       () => dispatch(fetchStudents({ search, page })),
       time,
     );

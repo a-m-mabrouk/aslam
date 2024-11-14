@@ -72,8 +72,8 @@ export default function ExamInterface({
   const [allQuestionsModal, setAllQuestionsModal] = useState(false);
   const [borderColor, setBorderColor] = useState<string>("border-gray-300");
   const [timerColor, setTimerColor] = useState<string>("");
-  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const overIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timerIntervalRef = useRef<number | null>(null);
+  const overIntervalRef = useRef<number | null>(null);
 
   const clearTimerInterval = () => {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);

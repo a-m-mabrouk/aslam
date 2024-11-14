@@ -69,7 +69,7 @@ export default function ExamInterface({
   const [descModal, setDescModal] = useState(false);
   const [flagsModal, setFlagsModal] = useState(false);
   const [allQuestionsModal, setAllQuestionsModal] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<number | null>(null);
 
   const startTimer = () => {
     intervalRef.current = setInterval(() => {
