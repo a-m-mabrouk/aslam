@@ -19,7 +19,7 @@ export default function QuestionMCQ({
 }) {
   const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
-  const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
+  const {examAnswers, review} = useAppSelector(({ exams }) => exams);
   const selectedOptionsArr = JSON.parse(
     examAnswers[questionIndex]?.selectedOpt || "[]",
   );
@@ -73,7 +73,7 @@ export default function QuestionMCQ({
         const isSelected = selectedOpt.includes(opt.option);
         // const isCorrect = examAnswers[questionIndex]?.answerstate === "correct";
         const isCorrect = opt.answer === "true";
-        const checkDisabled = examAnswers[questionIndex]?.showAnsClicked;
+        const checkDisabled = examAnswers[questionIndex]?.showAnsClicked || review;
         console.log(isCorrect, selectedOpt, opt.option);
 
         // const ansClass = !checkDisabled? "border-gray-300": isSelected && !isCorrect ? "border-red-800 border-2": !isSelected && isCorrect? "border-green-800 border-2": 'border-gray-300';

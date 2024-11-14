@@ -5,6 +5,7 @@ import {
   resetExam,
   setAnswer,
   setExamQuestions,
+  setReview,
 } from "../../../../../../../store/reducers/exams";
 import ExamInterface from "./examCarousel/ExamInterface";
 import ExamDetails from "./examCarousel/ExamDetails";
@@ -44,6 +45,7 @@ const ExamComponent = () => {
   };
   const handleEndExam = () => {
     setIsExamEnded(true);
+    dispatch(setReview(true));
   };
 
   const handleSetQuestions = useCallback((ques: Question[]) => {

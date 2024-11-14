@@ -5,7 +5,8 @@ const initialState: ExamType = {
   examsSideNavState: false,
   domains: [],
   examQuestions: [],
-  assessmentId: null
+  assessmentId: null,
+  review: false,
 };
 
 const examsSlice = createSlice({
@@ -14,6 +15,7 @@ const examsSlice = createSlice({
   reducers: {
     resetExam: (state) => {
       state.examAnswers = [];
+      state.review = false;
     },
     setAnswer: (state, { payload }: PayloadAction<SetAnswerPayload>) => {
       const { questionIndex, queAnsDetails } = payload;
@@ -42,6 +44,9 @@ const examsSlice = createSlice({
     },
     setShowAnsClicked: (state, { payload }: PayloadAction<number>) => {
       state.examAnswers[payload].showAnsClicked = true;
+    },
+    setReview: (state, { payload }: PayloadAction<boolean>) => {
+      state.review = payload;
     },
     setIsFlagged: (state, { payload }: PayloadAction<number>) => {
       state.examAnswers[payload].isFlagged =
@@ -76,7 +81,8 @@ export const {
   hideSideNav,
   setDomains,
   setExamQuestions,
-  setAssessmentId
+  setAssessmentId,
+  setReview
 } = examsSlice.actions;
 
 export default examsSlice.reducer;

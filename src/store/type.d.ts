@@ -13,6 +13,7 @@ interface ExamAnswer {
     domains: DomainType[];
     examQuestions: Question[];
     assessmentId: number | null;
+    review: boolean;
   }
   
   interface SetAnswerPayload {
