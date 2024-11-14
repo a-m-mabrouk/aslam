@@ -10,7 +10,7 @@ import {
 } from "../../../../../../../store/reducers/exams";
 import useGetLang from "../../../../../../../hooks/useGetLang";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { addAssessment, addDomain, addSubdomain, fetchDomains } from "../../../../../../../store/reducers/examsDomains";
+import { addAssessment, addDomain, addSubdomain, deleteDomain, deleteSubdomain, fetchDomains } from "../../../../../../../store/reducers/examsDomains";
 
 
 
@@ -52,9 +52,7 @@ export function AddDomainModal({
   const addNewHandler: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-
     const obj: Record<string, unknown> = {};
-
     formData.forEach((value, key) => {
       obj[key] = value;
     });
@@ -66,7 +64,6 @@ export function AddDomainModal({
     } else {
       dispatch(addAssessment(obj));
     }
-    // toastifyBox("success", data.message);
     onCloseModal();
   };
 
@@ -133,8 +130,15 @@ export default function ExamsSidebar() {
   const { lang } = useGetLang();
 
   const handleDeleteDomain = (id: number) => {
-    console.log(id, " delete");
+    dispatch(deleteDomain(id));
+  }
+  const handleDeleteSubdomain = (id: number) => {
+    dispatch(deleteSubdomain(id));
+  }
+  const handleDeleteAssessment = (id: number) => {
+    console.log(id);
     
+    // dispatch(deleteAssessment(id));
   }
 
   useEffect(() => {
@@ -168,6 +172,10 @@ export default function ExamsSidebar() {
                     <AccordionCard.Panel key={subdomain.id}>
                       <AccordionCard.Title className="grow">
                         <div className="flex items-center justify-between gap-4">
+                        <TrashIcon className="size-5" onClick={(event) => {
+                  event.stopPropagation();
+                  handleDeleteSubdomain(subdomain.id);
+                }} />
                           <span className="">
                             {lang === "en"
                               ? subdomain.name.en
@@ -181,12 +189,16 @@ export default function ExamsSidebar() {
                         {subdomain.assessments?.map(
                           ({ id, name, questions }) => (
                             <h3
-                              className="cursor-pointer text-indigo-900 hover:underline"
+                              className="flex cursor-pointer text-indigo-900 hover:underline"
                               key={id}
                               onClick={() =>
                                 {dispatch(setExamQuestions(questions));dispatch(setAssessmentId(id))}
                               }
                             >
+                              <TrashIcon className="size-5" onClick={(event) => {
+                  event.stopPropagation();
+                  handleDeleteAssessment(id);
+                }} />
                               {lang === "en"
                                 ? name.en
                                 : lang === "ar"
@@ -206,15 +218,20 @@ export default function ExamsSidebar() {
               ) : undefined}
               {domain.assessments?.map(({ id, name, questions }) => (
                 <h3
-                  className="cursor-pointer text-indigo-900 hover:underline"
+                  className="flex cursor-pointer text-indigo-900 hover:underline"
                   key={id}
-                  onClick={() => {dispatch(setExamQuestions(questions));dispatch(setAssessmentId(id))}}
                 >
+                  <TrashIcon className="size-5" onClick={(event) => {
+                  event.stopPropagation();
+                  handleDeleteAssessment(id);
+                }} />
+                  <span onClick={() => {dispatch(setExamQuestions(questions));dispatch(setAssessmentId(id))}}>
                   {lang === "en"
                     ? name.en
                     : lang === "ar"
                       ? name.ar
                       : undefined}
+                  </span>
                 </h3>
               ))}
               {domain.assessments?.length ? undefined : (

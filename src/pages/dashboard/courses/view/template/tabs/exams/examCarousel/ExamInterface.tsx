@@ -32,8 +32,6 @@ import {
 } from "../../../../../../../../store/reducers/exams";
 import { useTranslation } from "react-i18next";
 import Calculator from "../../../../../../../../components/calculator";
-// import { Calculator } from "react-advanced-calculator";
-// import "react-advanced-calculator/dist/styles/calculator.css";
 
 type FlaggedQuestionType = Question & { queIndex: number };
 

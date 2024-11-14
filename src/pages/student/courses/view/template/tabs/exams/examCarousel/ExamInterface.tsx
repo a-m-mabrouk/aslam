@@ -30,8 +30,7 @@ import {
   setShowAnsClicked,
 } from "../../../../../../../../store/reducers/exams";
 import { useTranslation } from "react-i18next";
-import { Calculator } from "react-advanced-calculator";
-import "react-advanced-calculator/dist/styles/calculator.css";
+import Calculator from "../../../../../../../../components/calculator";
 
 type FlaggedQuestionType = Question & { queIndex: number };
 

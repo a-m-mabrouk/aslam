@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { API_EXAMS } from "../../router/routes/apiRoutes";
 import axiosDefault from "../../utilities/axios";
+import { toastifyBox } from "../../helper/toastifyBox";
 
 interface DomainState {
   domains: DomainType[];
@@ -105,14 +106,14 @@ export const deleteDomain = createAsyncThunk(
   "domains/deleteDomain",
   async (domainId: unknown) => {
     const response = await axiosDefault.delete(`${API_EXAMS.domains}/${domainId}`);
-    return response.data;
+    return {...response.data, id: domainId};
   },
 );
 export const deleteSubdomain = createAsyncThunk(
   "domains/deleteSubdomain",
   async (subdomainId: unknown) => {
     const response = await axiosDefault.delete(`${API_EXAMS.subdomain}/${subdomainId}`);
-    return response.data;
+    return {...response.data, id: subdomainId};
   },
 );
 export const deleteAssessment = createAsyncThunk(
@@ -134,8 +135,7 @@ const examsDomains = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        fetchDomains.fulfilled,
+      .addCase(fetchDomains.fulfilled,
         (state, action: PayloadAction<FetchDomainPayload>) => {
           state.domains = action.payload.data;
           state.loading = false;
@@ -150,10 +150,9 @@ const examsDomains = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        addDomain.fulfilled,
+      .addCase(addDomain.fulfilled,
         (state, action: PayloadAction<AddDomainPayload>) => {
-          const { data } = action.payload;
+          const { data, message } = action.payload;
           const domain = {
             id: data.id,
             course_id: +data.course_id,
@@ -163,6 +162,7 @@ const examsDomains = createSlice({
           };
           state.domains.push(domain);
           state.loading = false;
+          toastifyBox("success", message);
         },
       )
       .addCase(addDomain.rejected, (state, action) => {
@@ -174,10 +174,9 @@ const examsDomains = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        addSubdomain.fulfilled,
+      .addCase(addSubdomain.fulfilled,
         (state, action: PayloadAction<AddSubdomainPayload>) => {
-          const { data } = action.payload;
+          const { data, message } = action.payload;
           const subdomain = {
             id: data.id,
             domain_id: +data.domain_id,
@@ -193,6 +192,7 @@ const examsDomains = createSlice({
             }
           });
           state.loading = false;
+          toastifyBox("success", message);
         },
       )
       .addCase(addSubdomain.rejected, (state, action) => {
@@ -204,10 +204,9 @@ const examsDomains = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(
-        addAssessment.fulfilled,
+      .addCase(addAssessment.fulfilled,
         (state, action: PayloadAction<AddAssessmentPayload>) => {
-          const { data } = action.payload;
+          const { data, message } = action.payload;
           const assessment = {
             id: data.id,
             course_id: +data.course_id,
@@ -240,9 +239,101 @@ const examsDomains = createSlice({
             });
           }
           state.loading = false;
+          toastifyBox("success", message)
         },
       )
       .addCase(addAssessment.rejected, (state, action) => {
+        state.domains = [];
+        state.error = action.error.message || "Failed to fetch students";
+        state.loading = false;
+      })
+      .addCase(deleteDomain.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteDomain.fulfilled,
+        (state, action: PayloadAction<{
+          id: number;
+          success: boolean;
+          errors: boolean;
+          message: string;
+      }>) => {
+          const { message, id } = action.payload;
+          state.domains = state.domains.filter(domain => domain.id !== id)
+          state.loading = false;
+          toastifyBox("success", message);
+        },
+      )
+      .addCase(deleteDomain.rejected, (state, action) => {
+        state.domains = [];
+        state.error = action.error.message || "Failed to fetch students";
+        state.loading = false;
+      })
+      .addCase(deleteSubdomain.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteSubdomain.fulfilled,
+        (state, action: PayloadAction<{
+          id: number;
+          success: boolean;
+          errors: boolean;
+          message: string;
+      }>) => {
+          const { id, message } = action.payload;
+          state.domains = state.domains.map((domain) =>  ({...domain, subdomains: domain.subdomains?.filter(subdomain => subdomain.id !== id)}))
+          state.loading = false;
+          toastifyBox("success", message);
+        },
+      )
+      .addCase(deleteSubdomain.rejected, (state, action) => {
+        state.domains = [];
+        state.error = action.error.message || "Failed to fetch students";
+        state.loading = false;
+      })
+      .addCase(deleteAssessment.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteAssessment.fulfilled,
+        (state, action: PayloadAction<AddAssessmentPayload>) => {
+          const { data, message } = action.payload;
+          const assessment = {
+            id: data.id,
+            course_id: +data.course_id,
+            domain_id: data.domain_id ? +data.domain_id : null,
+            subdomain_id: data.subdomain_id ? +data.subdomain_id : null,
+            name: data.name,
+          };
+          if (assessment.domain_id) {
+            state.domains.forEach((domain) => {
+              if (domain.id === assessment.domain_id) {
+                domain.assessments.push({
+                  ...assessment,
+                  module_id: null,
+                  questions: [],
+                });
+              }
+            });
+          }
+          if (assessment.subdomain_id) {
+            state.domains.forEach((domain) => {
+              domain.subdomains?.forEach((subdomain) => {
+                if (subdomain.id === assessment.subdomain_id) {
+                  subdomain.assessments.push({
+                    ...assessment,
+                    module_id: null,
+                    questions: [],
+                  });
+                }
+              });
+            });
+          }
+          state.loading = false;
+          toastifyBox("success", message)
+        },
+      )
+      .addCase(deleteAssessment.rejected, (state, action) => {
         state.domains = [];
         state.error = action.error.message || "Failed to fetch students";
         state.loading = false;
