@@ -124,7 +124,6 @@ export default function ExamsSidebar() {
   const { id: course_id } = useParams();
   const dispatch = useAppDispatch();
   const domains = useAppSelector(({ examsDomains }) => examsDomains.domains);
-  console.log(domains);
   
   const { t } = useTranslation("exams");
   const { lang } = useGetLang();

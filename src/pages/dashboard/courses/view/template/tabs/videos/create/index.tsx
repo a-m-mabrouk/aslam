@@ -40,8 +40,6 @@ export default function CreateChapter() {
           course_id: id,
         });
 
-        console.log(data);
-
         setData((prev: CoursesListDatum) =>
           prev
             ? {

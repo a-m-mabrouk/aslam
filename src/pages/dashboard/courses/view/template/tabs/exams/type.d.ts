@@ -25,6 +25,7 @@ interface DroppableAreaProps {
 interface DraggableItemComponentProps {
   item: DraggableAreaProps;
   onDropBack: (item: DraggableAreaProps) => void;
+  checkDisabled: boolean;
 }
 
 interface DroppableAreaComponentProps {
@@ -33,6 +34,7 @@ interface DroppableAreaComponentProps {
   items: DraggableAreaProps[];
   onDropItem: (areaId: number, item: DraggableAreaProps) => void;
   onDropBack: (item: DraggableAreaProps) => void;
+  checkDisabled: boolean;
 }
 
 interface DomainType {

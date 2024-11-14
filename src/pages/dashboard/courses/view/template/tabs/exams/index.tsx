@@ -16,13 +16,11 @@ import { useTranslation } from "react-i18next";
 
 const ExamComponent = () => {
   const dispatch = useAppDispatch();
-  const {examAnswers, assessmentId, examQuestions: questions} = useAppSelector(({ exams }) => exams);
+  const { assessmentId, examQuestions: questions} = useAppSelector(({ exams }) => exams);
   const [isExamStarted, setIsExamStarted] = useState(false);
   const [isExamEnded, setIsExamEnded] = useState(false);
   const examTime = Math.round(questions.length * 1.33333 * 60);
   const {t} = useTranslation("exams");
-
-  console.log(examAnswers);
 
   const onStart = () => {
     setIsExamStarted(true);

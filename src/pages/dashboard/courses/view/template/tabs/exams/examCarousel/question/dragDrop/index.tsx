@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
@@ -35,7 +35,7 @@ export default function QuestionDragDrop({
   questionIndex: number;
 }) {
   const dispatch = useAppDispatch();
-  const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
+  const {examAnswers, review} = useAppSelector(({ exams }) => exams);
   const thisQueAnswers = examAnswers[questionIndex];
 
   const dragArray: DraggableAreaProps[] = question.options.map(
@@ -48,6 +48,7 @@ export default function QuestionDragDrop({
 
   const selectedOpt =
     thisQueAnswers?.selectedOpt && JSON.parse(thisQueAnswers?.selectedOpt);
+    const checkDisabled = examAnswers[questionIndex]?.showAnsClicked || review;
 
   const draggables = selectedOpt?.draggableItems || dragArray;
   const droppables = selectedOpt?.droppableAreas || dropArray;
@@ -107,6 +108,23 @@ export default function QuestionDragDrop({
       );
     }
   };
+  const isAnsweredRef = useRef<boolean>(false);
+  useEffect(()=> {
+    if (checkDisabled && !isAnsweredRef.current) {
+      setDraggableItems([]);
+      setDroppableAreas(question.options.map(({ answer }, id) => ({ id, label: answer, items: question.options.filter((_, i) => id === i).map(({option}, index) => ({id: index, label: option})) })));
+      isAnsweredRef.current = true;
+    }
+    if (!droppableAreas.some(area => area.items.length)) {
+      dispatch(setAnswerState({questionIndex, answerstate: "skipped"}))
+    } else {
+      if (droppableAreas.some(({items, id}) => items.some(inner => inner.id !== id))) {
+        dispatch(setAnswerState({questionIndex, answerstate: "wrong"}))
+      } else {
+        dispatch(setAnswerState({questionIndex, answerstate: "correct"}))
+      }
+    }
+  }, [checkDisabled, dispatch, droppableAreas, droppables, question.options, questionIndex])
 
   useEffect(() => {
     const answerstate = queAnswers.queAnsDetails.answerstate as "wrong" | "correct" | "skipped"; 
@@ -124,6 +142,7 @@ export default function QuestionDragDrop({
               key={item.id}
               item={item}
               onDropBack={handleDropBack}
+              checkDisabled={checkDisabled}
             />
           ))}
         </div>
@@ -137,6 +156,7 @@ export default function QuestionDragDrop({
               items={area.items}
               onDropItem={handleDropItem}
               onDropBack={handleDropBack}
+              checkDisabled={checkDisabled}
             />
           ))}
         </div>

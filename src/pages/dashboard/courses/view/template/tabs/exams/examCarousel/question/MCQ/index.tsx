@@ -71,12 +71,8 @@ export default function QuestionMCQ({
       {question.options.map((opt, i) => {
         const selectedOpt = examAnswers[questionIndex]?.selectedOpt;
         const isSelected = selectedOpt.includes(opt.option);
-        // const isCorrect = examAnswers[questionIndex]?.answerstate === "correct";
         const isCorrect = opt.answer === "true";
         const checkDisabled = examAnswers[questionIndex]?.showAnsClicked || review;
-        console.log(isCorrect, selectedOpt, opt.option);
-
-        // const ansClass = !checkDisabled? "border-gray-300": isSelected && !isCorrect ? "border-red-800 border-2": !isSelected && isCorrect? "border-green-800 border-2": 'border-gray-300';
         const ansClass = !checkDisabled
           ? "border-gray-300"
           : isSelected && !isCorrect

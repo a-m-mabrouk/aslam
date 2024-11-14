@@ -8,7 +8,6 @@ export default function StudentCourses() {
   const { t } = useTranslation("students");
   const { data } = useFetch<CoursesList>(API_COURSES.courses);
 
-  console.log(data);
   return (
     <div className={`container mx-auto p-4 `}>
       <TitleSection title={t("courses")} />

@@ -136,7 +136,7 @@ export default function ExamInterface({
   };
   const showAns = () => {
     dispatch(setShowAnsClicked(currentQuestionIndex));
-    setDescModal(true);
+    !questions[currentQuestionIndex].description? undefined: setDescModal(true);
   };
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -291,7 +291,7 @@ export default function ExamInterface({
         size="md"
         onClose={() => setEndExamModal(false)}
       >
-        <Modal.Header>{t("description")}</Modal.Header>
+        <Modal.Header>{t("endExamAssertion")}</Modal.Header>
         <Modal.Body>
           <div className="flex justify-around">
             <Button className="bg-red-700" onClick={stopExam}>
@@ -329,6 +329,7 @@ export default function ExamInterface({
             <TableBody>
               {flaggedQuestionsArr.map(({ queIndex, name }) => (
                 <TableRow
+                  key={queIndex}
                   onClick={() => {
                     setCurrentQuestionIndex(queIndex);
                     setFlagsModal(false);
@@ -358,6 +359,7 @@ export default function ExamInterface({
             <TableBody>
               {questions.map(({ name }, queIndex) => (
                 <TableRow
+                  key={queIndex}
                   onClick={() => {
                     setCurrentQuestionIndex(queIndex);
                     setAllQuestionsModal(false);
