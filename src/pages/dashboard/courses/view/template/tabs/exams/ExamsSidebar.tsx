@@ -20,6 +20,7 @@ export function AddDomainModal({
   subDomainId = null,
 }: AddNewModalProps) {
   const dispatch = useAppDispatch();
+  const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
   const { t } = useTranslation("exams");
   const { id: courseId } = useParams();
 
@@ -68,7 +69,7 @@ export function AddDomainModal({
   };
 
   return (
-    <>
+    isTeacher ? (<>
       <div
         className="cursor-pointer text-cyan-700 hover:underline"
         onClick={() => setOpenModal(true)}
@@ -116,7 +117,7 @@ export function AddDomainModal({
           </div>
         </Modal.Body>
       </Modal>
-    </>
+    </>) : <></>
   );
 }
 
@@ -124,7 +125,9 @@ export default function ExamsSidebar() {
   const { id: course_id } = useParams();
   const dispatch = useAppDispatch();
   const domains = useAppSelector(({ examsDomains }) => examsDomains.domains);
-  
+
+  const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
+
   const { t } = useTranslation("exams");
   const { lang } = useGetLang();
 
@@ -136,7 +139,7 @@ export default function ExamsSidebar() {
   }
   const handleDeleteAssessment = (id: number) => {
     console.log(id);
-    
+
     // dispatch(deleteAssessment(id));
   }
 
@@ -145,16 +148,16 @@ export default function ExamsSidebar() {
   }, [course_id, dispatch]);
 
   return (
-    <>
+    <div>
       <AccordionCard>
         {domains?.map((domain) => (
           <AccordionCard.Panel key={domain.id}>
             <AccordionCard.Title className="grow">
               <div className="flex items-center justify-between gap-4">
-                <TrashIcon className="size-5" onClick={(event) => {
+                {isTeacher ? <TrashIcon className="size-5" onClick={(event) => {
                   event.stopPropagation();
                   handleDeleteDomain(domain.id);
-                }} />
+                }} /> : undefined}
                 <span className="">
                   {lang === "en"
                     ? domain.name.en
@@ -171,10 +174,10 @@ export default function ExamsSidebar() {
                     <AccordionCard.Panel key={subdomain.id}>
                       <AccordionCard.Title className="grow">
                         <div className="flex items-center justify-between gap-4">
-                        <TrashIcon className="size-5" onClick={(event) => {
-                  event.stopPropagation();
-                  handleDeleteSubdomain(subdomain.id);
-                }} />
+                          {isTeacher ? <TrashIcon className="size-5" onClick={(event) => {
+                            event.stopPropagation();
+                            handleDeleteSubdomain(subdomain.id);
+                          }} /> : undefined}
                           <span className="">
                             {lang === "en"
                               ? subdomain.name.en
@@ -187,22 +190,20 @@ export default function ExamsSidebar() {
                       <AccordionCard.Content>
                         {subdomain.assessments?.map(
                           ({ id, name, questions }) => (
-                            <h3
-                              className="flex cursor-pointer text-indigo-900 hover:underline"
+                            <h3 className="flex cursor-pointer gap-2 p-2"
                               key={id}
-                              onClick={() =>
-                                {dispatch(setExamQuestions(questions));dispatch(setAssessmentId(id))}
-                              }
                             >
-                              <TrashIcon className="size-5" onClick={(event) => {
-                  event.stopPropagation();
-                  handleDeleteAssessment(id);
-                }} />
-                              {lang === "en"
-                                ? name.en
-                                : lang === "ar"
-                                  ? name.ar
-                                  : undefined}
+                              {isTeacher ? <TrashIcon className="size-5" onClick={(event) => {
+                                event.stopPropagation();
+                                handleDeleteAssessment(id);
+                              }} /> : undefined}
+                              <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => { dispatch(setExamQuestions(questions)); dispatch(setAssessmentId(id)) }}>
+                                {lang === "en"
+                                  ? name.en
+                                  : lang === "ar"
+                                    ? name.ar
+                                    : undefined}
+                              </span>
                             </h3>
                           ),
                         )}
@@ -217,26 +218,26 @@ export default function ExamsSidebar() {
               ) : undefined}
               {domain.assessments?.map(({ id, name, questions }) => (
                 <h3
-                  className="flex cursor-pointer text-indigo-900 hover:underline"
+                  className="flex cursor-pointer gap-2 p-2"
                   key={id}
                 >
-                  <TrashIcon className="size-5" onClick={(event) => {
-                  event.stopPropagation();
-                  handleDeleteAssessment(id);
-                }} />
-                  <span onClick={() => {dispatch(setExamQuestions(questions));dispatch(setAssessmentId(id))}}>
-                  {lang === "en"
-                    ? name.en
-                    : lang === "ar"
-                      ? name.ar
-                      : undefined}
+                  {isTeacher ? <TrashIcon className="size-5" onClick={(event) => {
+                    event.stopPropagation();
+                    handleDeleteAssessment(id);
+                  }} /> : undefined}
+                  <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => { dispatch(setExamQuestions(questions)); dispatch(setAssessmentId(id)) }}>
+                    {lang === "en"
+                      ? name.en
+                      : lang === "ar"
+                        ? name.ar
+                        : undefined}
                   </span>
                 </h3>
               ))}
               {domain.assessments?.length ? undefined : (
                 <AddDomainModal modalType="subdomain" domainId={domain.id} />
               )}
-              {!domain.subdomains?.length &&
+              {isTeacher && !domain.subdomains?.length &&
                 !domain.assessments?.length &&
                 t("or")}
               {domain.subdomains?.length ? undefined : (
@@ -247,6 +248,6 @@ export default function ExamsSidebar() {
         ))}
       </AccordionCard>
       <AddDomainModal modalType="domain" />
-    </>
+    </div>
   );
 }

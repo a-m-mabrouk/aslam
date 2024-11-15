@@ -32,6 +32,7 @@ import {
 } from "../../../../../../../../store/reducers/exams";
 import { useTranslation } from "react-i18next";
 import Calculator from "../../../../../../../../components/calculator";
+import { FullScreenButton } from "..";
 
 type FlaggedQuestionType = Question & { queIndex: number };
 
@@ -55,10 +56,12 @@ export default function ExamInterface({
   questions,
   examTime,
   onEndExam,
+  onFullscreen
 }: {
   questions: Question[];
   examTime: number;
   onEndExam: () => void;
+  onFullscreen: () => void;
 }) {
   const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
@@ -153,7 +156,7 @@ export default function ExamInterface({
 
   return (
     <div
-      className={`flex h-full flex-col overflow-hidden rounded-[10px] border-2 ${borderColor}`}
+      className={`flex h-full flex-col overflow-auto rounded-[10px] border-2 ${borderColor}`}
     >
       {/* Header */}
       <header className="grid gap-2 bg-gray-200 p-4">
@@ -243,7 +246,7 @@ export default function ExamInterface({
       />
 
       {/* Footer */}
-      <footer className="flex items-center justify-between bg-gray-200 p-4">
+      <footer className="flex min-h-fit w-full grow items-center justify-between overflow-x-auto bg-gray-200 p-4">
         <Button
           onClick={() => setAllQuestionsModal(true)}
           className="bg-indigo-600 text-white"
@@ -285,6 +288,7 @@ export default function ExamInterface({
             {t("next")}
           </Button>
         )}
+        <FullScreenButton onFullscreen={onFullscreen} />
       </footer>
       <Modal
         show={endExamModal}

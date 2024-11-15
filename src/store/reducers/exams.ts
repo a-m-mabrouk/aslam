@@ -2,7 +2,6 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: ExamType = {
   examAnswers: [],
-  examsSideNavState: false,
   domains: [],
   examQuestions: [],
   assessmentId: null,
@@ -52,12 +51,6 @@ const examsSlice = createSlice({
       state.examAnswers[payload].isFlagged =
         !state.examAnswers[payload].isFlagged;
     },
-    showSideNav: (state) => {
-      state.examsSideNavState = true;
-    },
-    hideSideNav: (state) => {
-      state.examsSideNavState = false;
-    },
     setDomains: (state, { payload }: PayloadAction<DomainType[]>) => {
       state.domains = payload;
     },
@@ -77,8 +70,6 @@ export const {
   setShowAnsClicked,
   setIsFlagged,
   setAnswerState,
-  showSideNav,
-  hideSideNav,
   setDomains,
   setExamQuestions,
   setAssessmentId,

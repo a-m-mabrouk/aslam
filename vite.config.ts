@@ -8,6 +8,11 @@ export default defineConfig({
     global: 'window',
     // require: 'window',
   },
+  resolve: {
+    alias: {
+      '@': '/src'
+    }
+  }
   // build: {
   //   outDir: "./build",
   //   // chunkSizeWarningLimit: 1600,

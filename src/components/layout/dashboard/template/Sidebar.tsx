@@ -4,8 +4,6 @@ import { DASHBOARD_ROUTES } from "../../../../router/routes/appRoutes";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Logo from "../../../logo";
-import { useAppSelector } from "../../../../store";
-import ExamsSidebar from "../../../../pages/dashboard/courses/view/template/tabs/exams/ExamsSidebar";
 const theme = {
   root: {
     inner:
@@ -13,9 +11,6 @@ const theme = {
   },
 };
 export default function DBSidebar() {
-  const examsSideNavState = useAppSelector(
-    ({ exams }) => exams.examsSideNavState,
-  );
   const { t } = useTranslation("common");
   return (
     <Sidebar
@@ -43,11 +38,6 @@ export default function DBSidebar() {
             </Sidebar.Item>
           ))}
         </Sidebar.ItemGroup>
-        {examsSideNavState && (
-          <Sidebar.ItemGroup>
-            <ExamsSidebar />
-          </Sidebar.ItemGroup>
-        )}
       </Sidebar.Items>
     </Sidebar>
   );

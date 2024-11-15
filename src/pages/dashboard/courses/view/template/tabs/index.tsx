@@ -9,24 +9,12 @@ import {
   FolderIcon,
 } from "@heroicons/react/24/outline";
 import Exams from "./exams";
-import { useAppDispatch } from "../../../../../../store";
-import { hideSideNav, showSideNav } from "../../../../../../store/reducers/exams";
 
 export default function Tabs() {
-  const dispatch = useAppDispatch();
   const { t } = useTranslation("viewCourse");
-
-  const handleTabChange = (tab: number) => {
-    if (tab === 2) {
-      dispatch(showSideNav());
-    } else {
-      dispatch(hideSideNav());
-    }
-    
-  };
   return (
     <BgCard>
-      <TabsCard handleActiveTabchange={(tabIndex) => handleTabChange(tabIndex)}>
+      <TabsCard>
         <TabsCard.TabItem title={t("videos")} icon={FolderIcon}>
           <Videos />
         </TabsCard.TabItem>

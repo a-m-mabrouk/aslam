@@ -11,7 +11,7 @@ import {
 import { ViewCourseContext } from "../..";
 import { useContext } from "react";
 import useGetLang from "../../../../../../hooks/useGetLang";
-import ExamComponentStudent from "./exams";
+import ExamComponent from "../../../../../dashboard/courses/view/template/tabs/exams";
 
 export default function Tabs() {
   const { t } = useTranslation("viewCourse");
@@ -30,7 +30,7 @@ export default function Tabs() {
           <Resources />
         </TabsCard.TabItem>
         <TabsCard.TabItem title={t("exams")} icon={DocumentIcon}>
-          <ExamComponentStudent />
+          <ExamComponent />
         </TabsCard.TabItem>
       </TabsCard>
     </BgCard>

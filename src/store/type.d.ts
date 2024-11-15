@@ -9,7 +9,6 @@ interface ExamAnswer {
   
   interface ExamType {
     examAnswers: ExamAnswer[];
-    examsSideNavState: boolean;
     domains: DomainType[];
     examQuestions: Question[];
     assessmentId: number | null;
