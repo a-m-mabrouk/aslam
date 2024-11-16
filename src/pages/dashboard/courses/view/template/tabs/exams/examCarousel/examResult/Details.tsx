@@ -27,7 +27,6 @@ export default function Details() {
   return (
     <div className="grid gap-6">
       <h2 className="text-center">تحليل النتيجة</h2>
-      <Button className="mx-auto">مراجعة</Button>
       <div>
         <h3>النتيجة حسب المجالات المعرفية</h3>
         <Table striped hoverable className="text-center">

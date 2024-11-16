@@ -42,6 +42,9 @@ const ExamComponent = () => {
   const { assessmentId, examQuestions: questions } = useAppSelector(
     ({ exams }) => exams
   );
+  const isTeacher = useAppSelector(
+    ({ auth }) => auth.role
+  ) === "teacher";
   const [isExamStarted, setIsExamStarted] = useState(false);
   const [isExamEnded, setIsExamEnded] = useState(false);
   
@@ -117,11 +120,11 @@ const ExamComponent = () => {
           
 
           {!assessmentId ? (
-            "No Assessment"
+            t("noAssessments")
           ) : !questions.length ? (
             <>
               <h4 className="mx-auto">{t("noQuestions")}</h4>
-              <UploadQuestions onAddQuestions={handleSetQuestions} />
+              {isTeacher? <UploadQuestions onAddQuestions={handleSetQuestions} /> : ""}
             </>
           ) : isExamEnded ? (
             <ExamResult />
