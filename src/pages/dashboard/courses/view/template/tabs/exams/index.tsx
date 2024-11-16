@@ -13,6 +13,7 @@ import UploadQuestions from "./uploadQuestions";
 import TitleSection from "../../../../../../../components/title";
 import { useTranslation } from "react-i18next";
 import ExamsSidebar from "./ExamsSidebar";
+import { ArrowsPointingInIcon, ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 
 export function FullScreenButton({onFullscreen}: {onFullscreen: () => void}) {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -28,10 +29,10 @@ export function FullScreenButton({onFullscreen}: {onFullscreen: () => void}) {
   }, []);
 
   return (
-    <div id="btn-fullscreen" className="size-11 cursor-pointer hover:bg-gray-600 hover:fill-white"
+    <div id="btn-fullscreen" className="flex size-9 cursor-pointer items-center justify-center"
             onClick={onFullscreen}
           >
-            {isFullscreen ? <svg viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5zm3-8H5v2h5V5H8zm6 11h2v-3h3v-2h-5zm2-11V5h-2v5h5V8z"></path></svg> : <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7zm-2-4h2V7h3V5H5zm12 7h-3v2h5v-5h-2zM14 5v2h3v3h2V5z"></path></svg>}
+            {isFullscreen ? <ArrowsPointingInIcon className="size-9 hover:size-8" /> : <ArrowsPointingOutIcon className="size-8 hover:size-9" />}
           </div>
   )
 }

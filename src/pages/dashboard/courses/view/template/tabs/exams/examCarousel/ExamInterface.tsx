@@ -10,6 +10,7 @@ import {
   TableHeadCell,
   TableBody,
   TableCell,
+  Tooltip,
 } from "flowbite-react";
 import {
   PauseIcon,
@@ -23,6 +24,9 @@ import {
   CalculatorIcon,
   PencilSquareIcon,
   ClockIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
 import Question from "./question";
 import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
@@ -33,6 +37,7 @@ import {
 import { useTranslation } from "react-i18next";
 import Calculator from "../../../../../../../../components/calculator";
 import { FullScreenButton } from "..";
+import useGetLang from "../../../../../../../../hooks/useGetLang";
 
 type FlaggedQuestionType = Question & { queIndex: number };
 
@@ -51,6 +56,51 @@ function DrawingBoardContainer() {
     </div>
   );
 }
+function isFlaggedQuestion(que: Question): que is FlaggedQuestionType {
+  return (que as FlaggedQuestionType).queIndex !== undefined;
+}
+function PopoverQuestionsTable({ onChooseQue, ques }: { onChooseQue: (queIndex: number) => void; ques: FlaggedQuestionType[] | Question[] }) {
+  return (
+    <div className="max-h-[80vh] w-[50rem] max-w-[90vw] overflow-y-auto">
+      <Table striped className="text-center">
+        <TableHead>
+          <TableHeadCell>Que num</TableHeadCell>
+          <TableHeadCell className="max-w-96">Question</TableHeadCell>
+        </TableHead>
+        <TableBody>
+          {ques.map((que, i) => {
+            let index = i;
+            if (isFlaggedQuestion(que)) {
+              index = que.queIndex;
+            }
+            return (
+              <TableRow
+                key={index}
+                onClick={() => onChooseQue(index)}
+                className="hover:cursor-pointer hover:text-indigo-900 hover:underline"
+              >
+                <TableCell>{index + 1}</TableCell>
+                <TableCell className="max-w-96">{que.name}</TableCell>
+              </TableRow>
+            )
+          })}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
+
+function DescriptionBox({ desc }: { desc: string }) {
+  const { t } = useTranslation("exams")
+  return (
+    <div className="max-h-[80vh] w-96 max-w-[90vw] overflow-y-auto p-8">
+      <h2 className="text-green-900">{t("description")}</h2>
+      <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+        {desc}
+      </p>
+    </div>
+  )
+}
 
 export default function ExamInterface({
   questions,
@@ -63,6 +113,7 @@ export default function ExamInterface({
   onEndExam: () => void;
   onFullscreen: () => void;
 }) {
+  const { lang } = useGetLang()
   const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
   const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
@@ -77,6 +128,10 @@ export default function ExamInterface({
   const [timerColor, setTimerColor] = useState<string>("");
   const timerIntervalRef = useRef<number | null>(null);
   const overIntervalRef = useRef<number | null>(null);
+  const handleChooseQue = (queIndex: number) => {
+    setCurrentQuestionIndex(queIndex);
+    setFlagsModal(false);
+  }
 
   const clearTimerInterval = () => {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
@@ -139,7 +194,7 @@ export default function ExamInterface({
   };
   const showAns = () => {
     dispatch(setShowAnsClicked(currentQuestionIndex));
-    !questions[currentQuestionIndex].description? undefined: setDescModal(true);
+    // !questions[currentQuestionIndex].description ? undefined : setDescModal(true);
   };
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -156,7 +211,7 @@ export default function ExamInterface({
 
   return (
     <div
-      className={`flex h-full flex-col overflow-auto rounded-[10px] border-2 ${borderColor}`}
+      className={`grid h-full grid-rows-[auto_1fr_auto] overflow-auto rounded-[10px] border-2 ${borderColor}`}
     >
       {/* Header */}
       <header className="grid gap-2 bg-gray-200 p-4">
@@ -230,7 +285,7 @@ export default function ExamInterface({
               onClick={() => {
                 setEndExamModal(true);
               }}
-              color="red"
+
               className={`size-8`}
             >
               <StopIcon className="size-8 cursor-pointer" />
@@ -247,46 +302,51 @@ export default function ExamInterface({
 
       {/* Footer */}
       <footer className="flex min-h-fit w-full grow items-center justify-between overflow-x-auto bg-gray-200 p-4">
-        <Button
-          onClick={() => setAllQuestionsModal(true)}
-          className="bg-indigo-600 text-white"
-        >
-          <ListBulletIcon className="size-5" /> {t("viewAllQuestions")}
-        </Button>
-        <Button
-          onClick={goToPreviousQuestion}
-          disabled={currentQuestionIndex === 0}
-          color="red"
-        >
-          {t("prev")}
-        </Button>
-        <Button
-          onClick={showAns}
-          disabled={examAnswers[currentQuestionIndex]?.showAnsClicked}
-          color="yellow"
-        >
-          {t("correctAnswer")}
-        </Button>
-        <Button
-          onClick={() => setFlagsModal(true)}
-          disabled={!flaggedQuestionsArr.length}
-          className="bg-red-600 text-white hover:bg-red-700"
-        >
-          <FlagIconOutline className="size-5" /> {t("flaggedQuestions")}
-        </Button>
+        <Tooltip content={t("viewAllQuestions")}>
+          <Popover content={<PopoverQuestionsTable onChooseQue={handleChooseQue} ques={questions} />} placement="top">
+            <Button className="bg-indigo-600 text-white">
+              <ListBulletIcon className="size-5" />
+            </Button>
+          </Popover>
+        </Tooltip>
+
+        <Tooltip content={t("prev")}>
+          <Button onClick={goToPreviousQuestion} disabled={currentQuestionIndex === 0} color="green">
+            {lang === "en" ? <ChevronLeftIcon className="size-5" /> : < ChevronRightIcon className="size-5" />}
+          </Button>
+        </Tooltip>
+        
+        <Tooltip content={t("correctAnswer")}>
+          {
+            questions[currentQuestionIndex]?.description ?
+              <Popover content={<DescriptionBox desc={questions[currentQuestionIndex]?.description} />} placement="top">
+                <EyeIcon className="size-12 cursor-pointer border-2" onClick={showAns} />
+              </Popover>
+              :
+              <EyeIcon className="size-12 cursor-pointer border-2" onClick={showAns} />
+          }
+        </Tooltip>
+
+        <Tooltip content={t("flaggedQuestions")}>
+          <Popover content={<PopoverQuestionsTable onChooseQue={handleChooseQue} ques={flaggedQuestionsArr} />} placement="top">
+            <Button className="bg-red-600 text-white hover:bg-red-700" disabled={!flaggedQuestionsArr.length}>
+              <FlagIconOutline className="size-5" />
+            </Button>
+          </Popover>
+        </Tooltip>
+        
         {currentQuestionIndex === questions?.length - 1 ? (
-          <Button
-            onClick={() => {
-              setEndExamModal(true);
-            }}
-            color="red"
-          >
-            {t("endExam")}
-          </Button>
+          <Tooltip content={t("endExam")}>
+            <Button onClick={() => setEndExamModal(true)} color="green">
+              {lang === "ar" ? <ChevronLeftIcon className="size-5" /> : < ChevronRightIcon className="size-5" />}
+            </Button>
+          </Tooltip>
         ) : (
-          <Button onClick={goToNextQuestion} color="green">
-            {t("next")}
-          </Button>
+          <Tooltip content={t("next")}>
+            <Button onClick={goToNextQuestion} color="green">
+              {lang === "ar" ? <ChevronLeftIcon className="size-5" /> : < ChevronRightIcon className="size-5" />}
+            </Button>
+          </Tooltip>
         )}
         <FullScreenButton onFullscreen={onFullscreen} />
       </footer>
@@ -322,6 +382,8 @@ export default function ExamInterface({
           </div>
         </Modal.Body>
       </Modal>
+
+
       <Modal show={flagsModal} size="md" onClose={() => setFlagsModal(false)}>
         <Modal.Header>{t("flaggedQuestions")}</Modal.Header>
         <Modal.Body>
@@ -348,6 +410,7 @@ export default function ExamInterface({
           </Table>
         </Modal.Body>
       </Modal>
+
       <Modal
         show={allQuestionsModal}
         size="md"

@@ -3,8 +3,8 @@ import { useState, useMemo } from "react";
 import { Button } from "flowbite-react";
 import { useTranslation } from "react-i18next";
 import InputFile from "../../../../../../../../components/form/fileInput";
-import axiosDefault from "../../../../../../../../utilities/axios";
-import { API_EXAMS } from "../../../../../../../../router/routes/apiRoutes";
+// import axiosDefault from "../../../../../../../../utilities/axios";
+// import { API_EXAMS } from "../../../../../../../../router/routes/apiRoutes";
 import { useParams } from "react-router";
 import { useAppSelector } from "../../../../../../../../store";
 
@@ -137,18 +137,18 @@ export default function UploadQuestions({
 
     try {
       const questions = await processedQuestions;
-      console.log({questions,
+      console.log(JSON.stringify({questions,
         assessment_id,
         course_id: +id
-      });
+      }));
       
-      const { data } = await axiosDefault.post(API_EXAMS.questions,
-        JSON.stringify({questions,
-          assessment_id,
-          course_id: +id
-        })
-      );
-      console.log(data);
+      // const { data } = await axiosDefault.post(API_EXAMS.questions,
+      //   JSON.stringify({questions,
+      //     assessment_id,
+      //     course_id: +id
+      //   })
+      // );
+      // console.log(data);
       
       onAddQuestions(questions);
 

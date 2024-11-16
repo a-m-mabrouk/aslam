@@ -10,7 +10,7 @@ import {
 } from "../../../../../../../store/reducers/exams";
 import useGetLang from "../../../../../../../hooks/useGetLang";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { addAssessment, addDomain, addSubdomain, deleteDomain, deleteSubdomain, fetchDomains } from "../../../../../../../store/reducers/examsDomains";
+import { addAssessment, addDomain, addSubdomain, deleteAssessment, deleteDomain, deleteSubdomain, fetchDomains } from "../../../../../../../store/reducers/examsDomains";
 
 
 
@@ -140,7 +140,7 @@ export default function ExamsSidebar() {
   const handleDeleteAssessment = (id: number) => {
     console.log(id);
 
-    // dispatch(deleteAssessment(id));
+    dispatch(deleteAssessment(id));
   }
 
   useEffect(() => {
