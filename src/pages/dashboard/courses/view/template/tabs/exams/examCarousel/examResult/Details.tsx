@@ -1,4 +1,4 @@
-import { Button, Table } from "flowbite-react";
+import { Table } from "flowbite-react";
 import { useAppSelector } from "../../../../../../../../../store";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/solid";
 
