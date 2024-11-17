@@ -126,7 +126,6 @@ export default function ExamsSidebar() {
   const { id: course_id } = useParams();
   const dispatch = useAppDispatch();
   const domains = useAppSelector(({ examsDomains }) => examsDomains.domains);
-
   const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
 
   const { t } = useTranslation("exams");
@@ -190,7 +189,7 @@ export default function ExamsSidebar() {
                       </AccordionCard.Title>
                       <AccordionCard.Content>
                         {subdomain.assessments?.map(
-                          ({ id, name, questions }) => (
+                          ({ id, name, questions: ques }) => (
                             <h3 className="flex cursor-pointer gap-2 p-2"
                               key={id}
                             >
@@ -198,7 +197,7 @@ export default function ExamsSidebar() {
                                 event.stopPropagation();
                                 handleDeleteAssessment(id);
                               }} /> : undefined}
-                              <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => { dispatch(setExamQuestions(questions)); dispatch(setAssessmentId(id)); dispatch(setAssessmentName({en:name.en, ar: name.ar})); }}>
+                              <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => {dispatch(setExamQuestions(ques)); dispatch(setAssessmentId(id)); dispatch(setAssessmentName({en:name.en, ar: name.ar})); }}>
                                 {lang === "en"
                                   ? name.en
                                   : lang === "ar"
@@ -217,7 +216,7 @@ export default function ExamsSidebar() {
                   ))}
                 </AccordionCard>
               ) : undefined}
-              {domain.assessments?.map(({ id, name, questions }) => (
+              {domain.assessments?.map(({ id, name, questions: ques }) => (
                 <h3
                   className="flex cursor-pointer gap-2 p-2"
                   key={id}
@@ -226,7 +225,7 @@ export default function ExamsSidebar() {
                     event.stopPropagation();
                     handleDeleteAssessment(id);
                   }} /> : undefined}
-                  <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => { dispatch(setExamQuestions(questions)); dispatch(setAssessmentId(id)); dispatch(setAssessmentName({en:name.en, ar: name.ar})); }}>
+                  <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => {dispatch(setExamQuestions(ques)); dispatch(setAssessmentId(id)); dispatch(setAssessmentName({en:name.en, ar: name.ar})); }}>
                     {lang === "en"
                       ? name.en
                       : lang === "ar"

@@ -49,15 +49,15 @@ export default function QuestionDragDrop({
   );
 
   const initialDraggables = useMemo(
-    () => selectedOpt?.draggableItems || question.options.map(({ option: label }, id) => ({ id, label })),
-    [question.options, selectedOpt]
+    () => selectedOpt?.draggableItems || question?.question?.options.map(({ option: label }, id) => ({ id, label })),
+    [question?.question?.options, selectedOpt]
   );
 
   const initialDroppables = useMemo(
     () =>
       selectedOpt?.droppableAreas ||
-      question.options.map(({ answer: label }, id) => ({ id, label, items: [] })),
-    [question.options, selectedOpt]
+      question?.question?.options.map(({ answer: label }, id) => ({ id, label, items: [] })),
+    [question?.question?.options, selectedOpt]
   );
 
   const [draggableItems, setDraggableItems] = useState<DraggableAreaProps[]>(initialDraggables);
@@ -103,17 +103,17 @@ export default function QuestionDragDrop({
     if (checkDisabled && !isAnsweredRef.current) {
       setDraggableItems([]);
       setDroppableAreas(
-        question.options.map(({ answer }, id) => ({
+        question?.question?.options.map(({ answer }, id) => ({
           id,
           label: answer,
-          items: [{ id, label: question.options[id].option }],
+          items: [{ id, label: question?.question?.options[id].option }],
         }))
       );
       isAnsweredRef.current = true;
     }
 
     
-  }, [checkDisabled, dispatch, droppableAreas, question.options, questionIndex]);
+  }, [checkDisabled, dispatch, droppableAreas, question?.question?.options, questionIndex]);
   useEffect(() => {
     const selectedOpt = JSON.stringify({ draggableItems, droppableAreas });
     dispatch(setSelectedOpt({ questionIndex, selectedOpt }));

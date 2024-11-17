@@ -36,11 +36,12 @@ interface ExcelQuestion {
   drop6?: string;
 }
 
-export default function UploadQuestions({
-  onAddQuestions,
-}: {
-  onAddQuestions: (questions: Question[]) => void;
-}) {
+// export default function UploadQuestions({
+//   onAddQuestions,
+// }: {
+//   onAddQuestions: (questions: QuestionForUpload[]) => void;
+// }) {
+export default function UploadQuestions() {
   const { id } = useParams()
   const { t } = useTranslation("viewCourse");
   const [file, setFile] = useState<File | undefined>(undefined);
@@ -55,7 +56,7 @@ export default function UploadQuestions({
   
     const reader = new FileReader();
   
-    return new Promise<Question[]>((resolve, reject) => {
+    return new Promise<QuestionForUpload[]>((resolve, reject) => {
       reader.onload = (e) => {
         try {
           const data = new Uint8Array(e.target?.result as ArrayBuffer);
@@ -66,9 +67,9 @@ export default function UploadQuestions({
             defval: "",
           }) as ExcelQuestion[];
   
-          const questions: Question[] = rawQuestions.map((q) => {
+          const questions: QuestionForUpload[] = rawQuestions.map((q) => {
             const queType = q.type?.toLowerCase();
-            const customQuestion: Question = {
+            const customQuestion: QuestionForUpload = {
               type: q.type,
               chapter: q.chapter,
               domain: q.domain,
@@ -155,7 +156,7 @@ export default function UploadQuestions({
   
       console.log("Upload Success:", data);
   
-      onAddQuestions(questions);
+      // onAddQuestions(questions);
     } catch (error) {
       console.error("Error uploading file:", error);
     }

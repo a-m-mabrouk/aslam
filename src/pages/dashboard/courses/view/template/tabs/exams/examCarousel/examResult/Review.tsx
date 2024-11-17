@@ -42,7 +42,7 @@ export default function Review() {
         />
         <div>
           <h3>{t("explanation")}</h3>
-          <p>{questions[currentQuestionIndex]?.description}</p>
+          <p>{questions[currentQuestionIndex]?.question?.description}</p>
         </div>
       </section>
 

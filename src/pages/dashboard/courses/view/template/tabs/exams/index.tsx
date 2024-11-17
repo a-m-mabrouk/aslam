@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../../../../store";
 import {
   resetExam,
   setAnswer,
-  setExamQuestions,
   setReview,
 } from "../../../../../../../store/reducers/exams";
 import ExamInterface from "./examCarousel/ExamInterface";
@@ -85,7 +84,7 @@ const ExamComponent = () => {
   const onStart = () => {
     setIsExamStarted(true);
     dispatch(resetExam());
-    questions.forEach((q, questionIndex) =>
+    questions.forEach(({question}, questionIndex) =>
       dispatch(
         setAnswer({
           questionIndex,
@@ -93,8 +92,8 @@ const ExamComponent = () => {
             selectedOpt: "",
             showAnsClicked: false,
             isFlagged: false,
-            chapter: q.chapter || "",
-            domain: q.domain || "",
+            chapter: question?.chapter || "",
+            domain: question?.domain || "",
             answerstate: "skipped",
           },
         })
@@ -106,13 +105,6 @@ const ExamComponent = () => {
     setIsExamEnded(true);
     dispatch(setReview(true));
   };
-
-  const handleSetQuestions = useCallback(
-    (ques: Question[]) => {
-      dispatch(setExamQuestions(ques));
-    },
-    [dispatch]
-  );
 
   return (
     <div className="grid gap-4">
@@ -129,7 +121,8 @@ const ExamComponent = () => {
           {!questions.length ? (
             <>
               <h4 className="mx-auto">{t("noQuestions")}</h4>
-              {isTeacher? <UploadQuestions onAddQuestions={handleSetQuestions} /> : ""}
+              {/* {isTeacher? <UploadQuestions onAddQuestions={handleSetQuestions} /> : ""} */}
+              {isTeacher? <UploadQuestions /> : ""}
             </>
           ) : isExamEnded ? (
             <ExamResult />

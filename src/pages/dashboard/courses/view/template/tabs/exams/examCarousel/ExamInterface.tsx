@@ -80,7 +80,7 @@ function PopoverQuestionsTable({ onChooseQue, ques }: { onChooseQue: (queIndex: 
                 className="hover:cursor-pointer hover:text-indigo-900 hover:underline"
               >
                 <TableCell>{index + 1}</TableCell>
-                <TableCell className="max-w-96">{que.name}</TableCell>
+                <TableCell className="max-w-96">{que?.question?.name}</TableCell>
               </TableRow>
             )
           })}
@@ -121,16 +121,12 @@ export default function ExamInterface({
   const [timeRemaining, setTimeRemaining] = useState(examTime);
   const [isPaused, setIsPaused] = useState(false);
   const [endExamModal, setEndExamModal] = useState(false);
-  const [descModal, setDescModal] = useState(false);
-  const [flagsModal, setFlagsModal] = useState(false);
-  const [allQuestionsModal, setAllQuestionsModal] = useState(false);
   const [borderColor, setBorderColor] = useState<string>("border-gray-300");
   const [timerColor, setTimerColor] = useState<string>("");
   const timerIntervalRef = useRef<number | null>(null);
   const overIntervalRef = useRef<number | null>(null);
   const handleChooseQue = (queIndex: number) => {
     setCurrentQuestionIndex(queIndex);
-    setFlagsModal(false);
   }
 
   const clearTimerInterval = () => {
@@ -194,7 +190,6 @@ export default function ExamInterface({
   };
   const showAns = () => {
     dispatch(setShowAnsClicked(currentQuestionIndex));
-    // !questions[currentQuestionIndex].description ? undefined : setDescModal(true);
   };
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -318,8 +313,8 @@ export default function ExamInterface({
         
         <Tooltip content={t("correctAnswer")}>
           {
-            questions[currentQuestionIndex]?.description ?
-              <Popover content={<DescriptionBox desc={questions[currentQuestionIndex]?.description} />} placement="top">
+            questions[currentQuestionIndex]?.question?.description ?
+              <Popover content={<DescriptionBox desc={questions[currentQuestionIndex]?.question?.description} />} placement="top">
                 <EyeIcon className="size-12 cursor-pointer border-2" onClick={showAns} />
               </Popover>
               :
@@ -370,75 +365,6 @@ export default function ExamInterface({
               Cancel
             </Button>
           </div>
-        </Modal.Body>
-      </Modal>
-      <Modal show={descModal} size="md" onClose={() => setDescModal(false)}>
-        <Modal.Header>{t("description")}</Modal.Header>
-        <Modal.Body>
-          <div className="space-y-6 p-6">
-            <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-              {questions[currentQuestionIndex]?.description}
-            </p>
-          </div>
-        </Modal.Body>
-      </Modal>
-
-
-      <Modal show={flagsModal} size="md" onClose={() => setFlagsModal(false)}>
-        <Modal.Header>{t("flaggedQuestions")}</Modal.Header>
-        <Modal.Body>
-          <Table striped className="text-center">
-            <TableHead>
-              <TableHeadCell>Que num</TableHeadCell>
-              <TableHeadCell>Question</TableHeadCell>
-            </TableHead>
-            <TableBody>
-              {flaggedQuestionsArr.map(({ queIndex, name }) => (
-                <TableRow
-                  key={queIndex}
-                  onClick={() => {
-                    setCurrentQuestionIndex(queIndex);
-                    setFlagsModal(false);
-                  }}
-                  className="hover:cursor-pointer hover:text-indigo-900 hover:underline"
-                >
-                  <TableCell>{queIndex + 1}</TableCell>
-                  <TableCell>{name}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Modal.Body>
-      </Modal>
-
-      <Modal
-        show={allQuestionsModal}
-        size="md"
-        onClose={() => setAllQuestionsModal(false)}
-      >
-        <Modal.Header>{t("allQuestions")}</Modal.Header>
-        <Modal.Body>
-          <Table striped className="text-center">
-            <TableHead>
-              <TableHeadCell>Que num</TableHeadCell>
-              <TableHeadCell>Question</TableHeadCell>
-            </TableHead>
-            <TableBody>
-              {questions.map(({ name }, queIndex) => (
-                <TableRow
-                  key={queIndex}
-                  onClick={() => {
-                    setCurrentQuestionIndex(queIndex);
-                    setAllQuestionsModal(false);
-                  }}
-                  className="hover:cursor-pointer hover:text-indigo-900 hover:underline"
-                >
-                  <TableCell>{queIndex + 1}</TableCell>
-                  <TableCell>{name}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
         </Modal.Body>
       </Modal>
     </div>

@@ -10,13 +10,14 @@ const Question = memo(
     question: Question;
     questionIndex: number;
   }) => {
-
+    console.log(question);
+    
     let questionMarkup = <h2>You can only add MCQ & DragDrop question.</h2>;
-    if (question.type === "mcq") {
+    if (question?.question?.type === "mcq") {
       questionMarkup = (
         <QuestionMCQ question={question} questionIndex={questionIndex} />
       );
-    } else if (question.type === "dragdrop") {
+    } else if (question?.question?.type === "dragdrop") {
       questionMarkup = (
         <QuestionDragDrop question={question} questionIndex={questionIndex} />
       );
@@ -24,7 +25,7 @@ const Question = memo(
 
     return (
       <main className="grow p-4">
-        <h2>{question.name}</h2>
+        <h2>{question?.question?.name}</h2>
         {questionMarkup}
       </main>
     );

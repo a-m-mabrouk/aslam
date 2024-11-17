@@ -1,4 +1,4 @@
-interface Question {
+interface QuestionForUpload {
   type: "mcq" | "dragdrop";
   chapter?: string;
   domain?: string;
@@ -9,6 +9,11 @@ interface Question {
     option: string;
     answer: string;
   }[];
+}
+
+interface Question {
+  id: number;
+  question: QuestionForUpload;
 }
 
 interface DraggableAreaProps {
