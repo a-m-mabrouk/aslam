@@ -18,6 +18,7 @@
     "@heroicons/react": "^2.1.5",
     "@reduxjs/toolkit": "^2.2.7",
     "@tanstack/react-table": "^8.20.5",
+    "@types/react-canvas-draw": "^1.2.4",
     "axios": "^1.7.7",
     "dnd-multi-backend": "^8.0.3",
     "flowbite-react": "^0.10.1",
