@@ -9,9 +9,7 @@ const Question = memo(
   }: {
     question: Question;
     questionIndex: number;
-  }) => {
-    console.log(question);
-    
+  }) => {    
     let questionMarkup = <h2>You can only add MCQ & DragDrop question.</h2>;
     if (question?.question?.type === "mcq") {
       questionMarkup = (

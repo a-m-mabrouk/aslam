@@ -10,9 +10,8 @@ interface ExamAnswer {
   interface ExamType {
     examAnswers: ExamAnswer[];
     domains: DomainType[];
-    examQuestions: Question[];
-    assessmentId: number | null;
-    assessmentName: {en:string, ar: string} | null;
+    activeAssessment: AssessmentType | null;
+    isAssessmentRunning: boolean;
     review: boolean;
   }
   

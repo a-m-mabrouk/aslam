@@ -39,7 +39,7 @@ export default function Chapters() {
               <AccordionCard.Content>
                 <div className="grid gap-4">
                   {module?.lessons?.map((lesson, index) => (
-                    <div className="flex items-center gap-4">
+                    <div key={index} className="flex items-center gap-4">
                       <PlayerModal
                         key={index}
                         btn={

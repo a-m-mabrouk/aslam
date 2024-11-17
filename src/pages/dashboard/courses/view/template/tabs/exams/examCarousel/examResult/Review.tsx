@@ -6,7 +6,8 @@ import { Button } from "flowbite-react";
 
 export default function Review() {
   const { t } = useTranslation("exams");
-  const { examAnswers, examQuestions: questions } = useAppSelector(({ exams }) => exams);
+  const { examAnswers, activeAssessment } = useAppSelector(({ exams }) => exams);
+  const { questions } = activeAssessment!;
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   const goToNextQuestion = () => {

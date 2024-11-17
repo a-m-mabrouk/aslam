@@ -4,11 +4,6 @@ import { AccordionCard } from "../../../../../../../components/accordion";
 import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../../../../../../store";
-import {
-  setExamQuestions,
-  setAssessmentId,
-  setAssessmentName,
-} from "../../../../../../../store/reducers/exams";
 import useGetLang from "../../../../../../../hooks/useGetLang";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { addAssessment, addDomain, addSubdomain, deleteAssessment, deleteDomain, deleteSubdomain, fetchDomains } from "../../../../../../../store/reducers/examsDomains";
@@ -122,7 +117,7 @@ export function AddDomainModal({
   );
 }
 
-export default function ExamsSidebar() {
+export default function ExamsSidebar({onSelectAssessment}: {onSelectAssessment: (assessment: AssessmentType) => void}) {
   const { id: course_id } = useParams();
   const dispatch = useAppDispatch();
   const domains = useAppSelector(({ examsDomains }) => examsDomains.domains);
@@ -138,10 +133,9 @@ export default function ExamsSidebar() {
     dispatch(deleteSubdomain(id));
   }
   const handleDeleteAssessment = (id: number) => {
-    console.log(id);
-
     dispatch(deleteAssessment(id));
   }
+  
 
   useEffect(() => {
     dispatch(fetchDomains(+course_id!));
@@ -189,19 +183,19 @@ export default function ExamsSidebar() {
                       </AccordionCard.Title>
                       <AccordionCard.Content>
                         {subdomain.assessments?.map(
-                          ({ id, name, questions: ques }) => (
+                          (assessment) => (
                             <h3 className="flex cursor-pointer gap-2 p-2"
-                              key={id}
+                              key={assessment.id}
                             >
                               {isTeacher ? <TrashIcon className="size-5" onClick={(event) => {
                                 event.stopPropagation();
-                                handleDeleteAssessment(id);
+                                handleDeleteAssessment(assessment.id);
                               }} /> : undefined}
-                              <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => {dispatch(setExamQuestions(ques)); dispatch(setAssessmentId(id)); dispatch(setAssessmentName({en:name.en, ar: name.ar})); }}>
+                              <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => { onSelectAssessment(assessment); }}>
                                 {lang === "en"
-                                  ? name.en
+                                  ? assessment.name.en
                                   : lang === "ar"
-                                    ? name.ar
+                                    ? assessment.name.ar
                                     : undefined}
                               </span>
                             </h3>
@@ -216,20 +210,20 @@ export default function ExamsSidebar() {
                   ))}
                 </AccordionCard>
               ) : undefined}
-              {domain.assessments?.map(({ id, name, questions: ques }) => (
+              {domain.assessments?.map((assessment) => (
                 <h3
                   className="flex cursor-pointer gap-2 p-2"
-                  key={id}
+                  key={assessment.id}
                 >
                   {isTeacher ? <TrashIcon className="size-5" onClick={(event) => {
                     event.stopPropagation();
-                    handleDeleteAssessment(id);
+                    handleDeleteAssessment(assessment.id);
                   }} /> : undefined}
-                  <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => {dispatch(setExamQuestions(ques)); dispatch(setAssessmentId(id)); dispatch(setAssessmentName({en:name.en, ar: name.ar})); }}>
+                  <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => { onSelectAssessment(assessment); }}>
                     {lang === "en"
-                      ? name.en
+                      ? assessment.name.en
                       : lang === "ar"
-                        ? name.ar
+                        ? assessment.name.ar
                         : undefined}
                   </span>
                 </h3>

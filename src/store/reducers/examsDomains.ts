@@ -136,8 +136,6 @@ export const deleteAssessment = createAsyncThunk(
   "domains/deleteAssessment",
   async (assessmentId: unknown) => {
     const response = await axiosDefault.delete(`${API_EXAMS.assessments}/${assessmentId}`);
-    console.log(response);
-    
     return {...response.data, assessmentId };
   },
 );

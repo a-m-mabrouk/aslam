@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { toastifyBox } from "../../helper/toastifyBox";
 
 const initialState: ExamType = {
   examAnswers: [],
   domains: [],
-  examQuestions: [],
-  assessmentId: null,
-  assessmentName: null,
+  activeAssessment: null,
+  isAssessmentRunning: false,
   review: false,
 };
 
@@ -55,15 +55,16 @@ const examsSlice = createSlice({
     setDomains: (state, { payload }: PayloadAction<DomainType[]>) => {
       state.domains = payload;
     },
-    setExamQuestions: (state, {payload}: PayloadAction<Question[]>) => {
-      state.examQuestions = payload;
+    setActiveAssessment: (state, {payload}: PayloadAction<AssessmentType | null>) => {
+      if (state.isAssessmentRunning) {
+        toastifyBox("error", "Stop Exam first")
+      } else {
+        state.activeAssessment = payload;
+      }
     },
-    setAssessmentId: (state, {payload}: PayloadAction<number | null>) => {
-      state.assessmentId = payload;
+    setIsAssessmentRunning: (state, {payload}: PayloadAction<boolean>) => {
+      state.isAssessmentRunning = payload;
     },
-    setAssessmentName: (state, {payload}: PayloadAction<{en:string, ar: string} | null>) => {
-      state.assessmentName = payload;
-    }
   },
 });
 
@@ -75,9 +76,8 @@ export const {
   setIsFlagged,
   setAnswerState,
   setDomains,
-  setExamQuestions,
-  setAssessmentId,
-  setAssessmentName,
+  setActiveAssessment,
+  setIsAssessmentRunning,
   setReview
 } = examsSlice.actions;
 

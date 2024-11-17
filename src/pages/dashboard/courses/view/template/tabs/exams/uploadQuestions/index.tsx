@@ -6,7 +6,9 @@ import InputFile from "../../../../../../../../components/form/fileInput";
 import axiosDefault from "../../../../../../../../utilities/axios";
 import { API_EXAMS } from "../../../../../../../../router/routes/apiRoutes";
 import { useParams } from "react-router";
-import { useAppSelector } from "../../../../../../../../store";
+import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
+import { setActiveAssessment } from "../../../../../../../../store/reducers/exams";
+import { toastifyBox } from "../../../../../../../../helper/toastifyBox";
 
 interface ExcelQuestion {
   type: "mcq" | "dragdrop";
@@ -35,17 +37,13 @@ interface ExcelQuestion {
   drop5?: string;
   drop6?: string;
 }
-
-// export default function UploadQuestions({
-//   onAddQuestions,
-// }: {
-//   onAddQuestions: (questions: QuestionForUpload[]) => void;
-// }) {
 export default function UploadQuestions() {
   const { id } = useParams()
   const { t } = useTranslation("viewCourse");
   const [file, setFile] = useState<File | undefined>(undefined);
-  const {assessmentId: assessment_id} = useAppSelector(({ exams }) => exams)
+  const dispatch = useAppDispatch();
+  const {activeAssessment} = useAppSelector(({ exams }) => exams);
+  const {id: assessment_id} = activeAssessment!;
 
   const handleFileChange = (_: string, value: File | undefined) => {
     setFile(value);
@@ -119,11 +117,8 @@ export default function UploadQuestions() {
             } else {
               throw new Error("Invalid question type");
             }
-  
             return customQuestion;
           });
-  
-          console.log("Processed Questions:", questions); // Log resolved questions
           resolve(questions);
         } catch (error) {
           console.error("Error processing file:", error);
@@ -141,8 +136,6 @@ export default function UploadQuestions() {
   
     try {
       const questions = await processedQuestions;
-      console.log(questions.map(question => question.options));
-      
       const { data } = await axiosDefault.post(
         API_EXAMS.questions,
         { assessment_id, course_id: +id!, questions },
@@ -153,10 +146,9 @@ export default function UploadQuestions() {
           transformRequest: [(data) => JSON.stringify(data)],
         }
       );
-  
-      console.log("Upload Success:", data);
-  
-      // onAddQuestions(questions);
+      toastifyBox("success", data.message)
+      dispatch(setActiveAssessment(data.data))
+      
     } catch (error) {
       console.error("Error uploading file:", error);
     }

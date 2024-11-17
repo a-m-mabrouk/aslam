@@ -38,24 +38,55 @@ import { useTranslation } from "react-i18next";
 import Calculator from "../../../../../../../../components/calculator";
 import { FullScreenButton } from "..";
 import useGetLang from "../../../../../../../../hooks/useGetLang";
+import CanvasDraw from 'react-canvas-draw';
+
 
 type FlaggedQuestionType = Question & { queIndex: number };
 
-function DrawingBoardContainer() {
+const Whiteboard: React.FC = () => {
+  const canvasRef = useRef<CanvasDraw | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [dimensions, setDimensions] = useState({ width: 600, height: 400 });
+
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        setDimensions({
+          width: containerRef.current.offsetWidth,
+          height: containerRef.current.offsetHeight,
+        });
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+
+    return () => {
+      window.removeEventListener('resize', updateDimensions);
+    };
+  }, []);
+
   return (
     <div
-      className="max-h-60"
-      style={{
-        width: "60rem",
-        maxWidth: "90vw",
-        height: "60rem",
-        maxHeight: "60vh",
-      }}
+      ref={containerRef}
+      className="flex h-[80vh] w-[80vw] flex-col items-center rounded-lg bg-gray-100 shadow-md"
     >
-      {/* <DrawingBoard toolbarPlacement="left" /> */}
+      <CanvasDraw
+        ref={canvasRef}
+        canvasWidth={dimensions.width}
+        canvasHeight={dimensions.height}
+        brushColor="#000"
+        brushRadius={2}
+        className="rounded-lg border border-gray-300"
+      />
+      <div className="mt-4 flex space-x-2">
+        <Button onClick={() => canvasRef.current?.clear()}>Clear</Button>
+        <Button onClick={() => canvasRef.current?.undo()}>Undo</Button>
+      </div>
     </div>
   );
-}
+};
+
 function isFlaggedQuestion(que: Question): que is FlaggedQuestionType {
   return (que as FlaggedQuestionType).queIndex !== undefined;
 }
@@ -125,6 +156,7 @@ export default function ExamInterface({
   const [timerColor, setTimerColor] = useState<string>("");
   const timerIntervalRef = useRef<number | null>(null);
   const overIntervalRef = useRef<number | null>(null);
+  
   const handleChooseQue = (queIndex: number) => {
     setCurrentQuestionIndex(queIndex);
   }
@@ -222,7 +254,7 @@ export default function ExamInterface({
             </p>
           </div>
           <div>
-            <Popover content={<DrawingBoardContainer />} placement="top">
+            <Popover content={<Whiteboard />} placement="top">
               <Button>
                 <PencilSquareIcon className="size-5" />
                 {t("board")}

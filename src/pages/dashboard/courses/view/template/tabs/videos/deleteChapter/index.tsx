@@ -42,13 +42,12 @@ export default function DeleteChapter({ id }: { id: number }) {
   );
 
   return (
-    <button
+    <span
       title="delete course"
-      type="button"
       className=" grid size-8 place-items-center rounded-md border border-error-color bg-white/30 text-error-color"
       onClick={deleteCourse}
     >
       <TrashIcon className="size-6" />
-    </button>
+    </span>
   );
 }
