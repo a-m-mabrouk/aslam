@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from "../../../../../../../store";
 import {
   setExamQuestions,
   setAssessmentId,
+  setAssessmentName,
 } from "../../../../../../../store/reducers/exams";
 import useGetLang from "../../../../../../../hooks/useGetLang";
 import { TrashIcon } from "@heroicons/react/24/outline";
@@ -197,7 +198,7 @@ export default function ExamsSidebar() {
                                 event.stopPropagation();
                                 handleDeleteAssessment(id);
                               }} /> : undefined}
-                              <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => { dispatch(setExamQuestions(questions)); dispatch(setAssessmentId(id)) }}>
+                              <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => { dispatch(setExamQuestions(questions)); dispatch(setAssessmentId(id)); dispatch(setAssessmentName({en:name.en, ar: name.ar})); }}>
                                 {lang === "en"
                                   ? name.en
                                   : lang === "ar"
@@ -225,7 +226,7 @@ export default function ExamsSidebar() {
                     event.stopPropagation();
                     handleDeleteAssessment(id);
                   }} /> : undefined}
-                  <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => { dispatch(setExamQuestions(questions)); dispatch(setAssessmentId(id)) }}>
+                  <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => { dispatch(setExamQuestions(questions)); dispatch(setAssessmentId(id)); dispatch(setAssessmentName({en:name.en, ar: name.ar})); }}>
                     {lang === "en"
                       ? name.en
                       : lang === "ar"

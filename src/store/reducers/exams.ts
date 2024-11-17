@@ -5,6 +5,7 @@ const initialState: ExamType = {
   domains: [],
   examQuestions: [],
   assessmentId: null,
+  assessmentName: null,
   review: false,
 };
 
@@ -59,6 +60,9 @@ const examsSlice = createSlice({
     },
     setAssessmentId: (state, {payload}: PayloadAction<number | null>) => {
       state.assessmentId = payload;
+    },
+    setAssessmentName: (state, {payload}: PayloadAction<{en:string, ar: string} | null>) => {
+      state.assessmentName = payload;
     }
   },
 });
@@ -73,6 +77,7 @@ export const {
   setDomains,
   setExamQuestions,
   setAssessmentId,
+  setAssessmentName,
   setReview
 } = examsSlice.actions;
 

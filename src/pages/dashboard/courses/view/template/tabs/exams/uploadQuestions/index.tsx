@@ -3,8 +3,8 @@ import { useState, useMemo } from "react";
 import { Button } from "flowbite-react";
 import { useTranslation } from "react-i18next";
 import InputFile from "../../../../../../../../components/form/fileInput";
-// import axiosDefault from "../../../../../../../../utilities/axios";
-// import { API_EXAMS } from "../../../../../../../../router/routes/apiRoutes";
+import axiosDefault from "../../../../../../../../utilities/axios";
+import { API_EXAMS } from "../../../../../../../../router/routes/apiRoutes";
 import { useParams } from "react-router";
 import { useAppSelector } from "../../../../../../../../store";
 
@@ -41,10 +41,10 @@ export default function UploadQuestions({
 }: {
   onAddQuestions: (questions: Question[]) => void;
 }) {
-  const {id} = useParams()
+  const { id } = useParams()
   const { t } = useTranslation("viewCourse");
   const [file, setFile] = useState<File | undefined>(undefined);
-  const assessment_id = useAppSelector(({exams}) => exams.assessmentId)
+  const {assessmentId: assessment_id} = useAppSelector(({ exams }) => exams)
 
   const handleFileChange = (_: string, value: File | undefined) => {
     setFile(value);
@@ -52,20 +52,20 @@ export default function UploadQuestions({
 
   const processedQuestions = useMemo(() => {
     if (!file) return null;
-
+  
     const reader = new FileReader();
-
+  
     return new Promise<Question[]>((resolve, reject) => {
       reader.onload = (e) => {
         try {
           const data = new Uint8Array(e.target?.result as ArrayBuffer);
           const workbook = XLSX.read(data, { type: "array" });
           const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
+  
           const rawQuestions = XLSX.utils.sheet_to_json(sheet, {
             defval: "",
           }) as ExcelQuestion[];
-
+  
           const questions: Question[] = rawQuestions.map((q) => {
             const queType = q.type?.toLowerCase();
             const customQuestion: Question = {
@@ -77,7 +77,7 @@ export default function UploadQuestions({
               degree: q.degree,
               options: [],
             };
-
+  
             if (queType === "mcq") {
               type charIndex = "a" | "b" | "c" | "d" | "e" | "f";
               ["a", "b", "c", "d", "e", "f"].forEach((opt) => {
@@ -118,42 +118,46 @@ export default function UploadQuestions({
             } else {
               throw new Error("Invalid question type");
             }
-
+  
             return customQuestion;
           });
-
+  
+          console.log("Processed Questions:", questions); // Log resolved questions
           resolve(questions);
         } catch (error) {
+          console.error("Error processing file:", error);
           reject(error);
         }
       };
-
+  
       reader.readAsArrayBuffer(file);
     });
   }, [file]);
+  
 
   const handlefileUpload = async () => {
     if (!processedQuestions || !id || !assessment_id) return;
-
+  
     try {
       const questions = await processedQuestions;
-      console.log(JSON.stringify({questions,
-        assessment_id,
-        course_id: +id
-      }));
+      console.log(questions.map(question => question.options));
       
-      // const { data } = await axiosDefault.post(API_EXAMS.questions,
-      //   JSON.stringify({questions,
-      //     assessment_id,
-      //     course_id: +id
-      //   })
-      // );
-      // console.log(data);
-      
+      const { data } = await axiosDefault.post(
+        API_EXAMS.questions,
+        { assessment_id, course_id: +id!, questions },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          transformRequest: [(data) => JSON.stringify(data)],
+        }
+      );
+  
+      console.log("Upload Success:", data);
+  
       onAddQuestions(questions);
-
     } catch (error) {
-      console.error("Error processing file:", error);
+      console.error("Error uploading file:", error);
     }
   };
 

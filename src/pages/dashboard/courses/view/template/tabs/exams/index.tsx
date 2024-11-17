@@ -14,6 +14,7 @@ import TitleSection from "../../../../../../../components/title";
 import { useTranslation } from "react-i18next";
 import ExamsSidebar from "./ExamsSidebar";
 import { ArrowsPointingInIcon, ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
+import useGetLang from "../../../../../../../hooks/useGetLang";
 
 export function FullScreenButton({onFullscreen}: {onFullscreen: () => void}) {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -40,9 +41,10 @@ export function FullScreenButton({onFullscreen}: {onFullscreen: () => void}) {
 const ExamComponent = () => {
   const fullscreenDivRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const { assessmentId, examQuestions: questions } = useAppSelector(
+  const { assessmentId, examQuestions: questions, assessmentName } = useAppSelector(
     ({ exams }) => exams
   );
+  const { lang } = useGetLang();
   const isTeacher = useAppSelector(
     ({ auth }) => auth.role
   ) === "teacher";
@@ -122,7 +124,9 @@ const ExamComponent = () => {
 
           {!assessmentId ? (
             t("noAssessments")
-          ) : !questions.length ? (
+          ) : <>
+          <h2 className="py-4 text-center text-indigo-800">{lang === "en"? assessmentName?.en : assessmentName?.ar}</h2>
+          {!questions.length ? (
             <>
               <h4 className="mx-auto">{t("noQuestions")}</h4>
               {isTeacher? <UploadQuestions onAddQuestions={handleSetQuestions} /> : ""}
@@ -143,6 +147,7 @@ const ExamComponent = () => {
               onStart={onStart}
             />
           )}
+          </>}
         </div>
       </div>
     </div>

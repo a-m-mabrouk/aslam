@@ -12,6 +12,7 @@ interface ExamAnswer {
     domains: DomainType[];
     examQuestions: Question[];
     assessmentId: number | null;
+    assessmentName: {en:string, ar: string} | null;
     review: boolean;
   }
   
