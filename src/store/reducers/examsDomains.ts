@@ -120,50 +120,95 @@ export const addAssessment = createAsyncThunk(
 );
 export const editDomain = createAsyncThunk(
   "domains/editDomain",
-  async ({id, course_id, name_en, name_ar}: {id: number;course_id: number;name_en: string;name_ar: string}) => {
-    const response = await axiosDefault.put(`${API_EXAMS.domains}/${id}`, {course_id, name_en, name_ar});
+  async ({
+    id,
+    course_id,
+    name_en,
+    name_ar,
+  }: {
+    id: number;
+    course_id: number;
+    name_en: string;
+    name_ar: string;
+  }) => {
+    const response = await axiosDefault.post(`${API_EXAMS.domains}/${id}`, {
+      course_id,
+      name_en,
+      name_ar,
+      _method: "put",
+    });
     return response.data;
   },
 );
 export const editSubdomain = createAsyncThunk(
   "domains/editSubdomain",
-  async (subdomainData: unknown) => {
-    const response = await axiosDefault.post(
-      API_EXAMS.subdomain,
-      subdomainData,
-    );
+  async ({
+    id,
+    course_id,
+    name_en,
+    name_ar,
+  }: {
+    id: number;
+    course_id: number;
+    name_en: string;
+    name_ar: string;
+  }) => {
+    const response = await axiosDefault.post(`${API_EXAMS.subdomain}/${id}`, {
+      course_id,
+      name_en,
+      name_ar,
+      _method: "put",
+    });
     return response.data;
   },
 );
 export const editAssessment = createAsyncThunk(
   "domains/editAssessment",
-  async (assessmentData: unknown) => {
-    const response = await axiosDefault.post(
-      API_EXAMS.assessments,
-      assessmentData,
-    );
+  async ({
+    id,
+    course_id,
+    name_en,
+    name_ar,
+  }: {
+    id: number;
+    course_id: number;
+    name_en: string;
+    name_ar: string;
+  }) => {
+    const response = await axiosDefault.post(`${API_EXAMS.assessments}/${id}`, {
+      course_id,
+      name_en,
+      name_ar,
+      _method: "put",
+    });
     return response.data;
   },
 );
 export const deleteDomain = createAsyncThunk(
   "domains/deleteDomain",
   async (domainId: unknown) => {
-    const response = await axiosDefault.delete(`${API_EXAMS.domains}/${domainId}`);
-    return {...response.data, id: domainId};
+    const response = await axiosDefault.delete(
+      `${API_EXAMS.domains}/${domainId}`,
+    );
+    return { ...response.data, id: domainId };
   },
 );
 export const deleteSubdomain = createAsyncThunk(
   "domains/deleteSubdomain",
   async (subdomainId: unknown) => {
-    const response = await axiosDefault.delete(`${API_EXAMS.subdomain}/${subdomainId}`);
-    return {...response.data, id: subdomainId};
+    const response = await axiosDefault.delete(
+      `${API_EXAMS.subdomain}/${subdomainId}`,
+    );
+    return { ...response.data, id: subdomainId };
   },
 );
 export const deleteAssessment = createAsyncThunk(
   "domains/deleteAssessment",
   async (assessmentId: unknown) => {
-    const response = await axiosDefault.delete(`${API_EXAMS.assessments}/${assessmentId}`);
-    return {...response.data, assessmentId };
+    const response = await axiosDefault.delete(
+      `${API_EXAMS.assessments}/${assessmentId}`,
+    );
+    return { ...response.data, assessmentId };
   },
 );
 
@@ -178,7 +223,8 @@ const examsDomains = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchDomains.fulfilled,
+      .addCase(
+        fetchDomains.fulfilled,
         (state, action: PayloadAction<FetchDomainPayload>) => {
           state.domains = action.payload.data;
           state.loading = false;
@@ -193,7 +239,8 @@ const examsDomains = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(addDomain.fulfilled,
+      .addCase(
+        addDomain.fulfilled,
         (state, action: PayloadAction<AddDomainPayload>) => {
           const { data, message } = action.payload;
           const domain = {
@@ -209,7 +256,6 @@ const examsDomains = createSlice({
         },
       )
       .addCase(addDomain.rejected, (state, action) => {
-        
         state.error = action.error.message || "Failed to fetch students";
         state.loading = false;
       })
@@ -217,7 +263,8 @@ const examsDomains = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(addSubdomain.fulfilled,
+      .addCase(
+        addSubdomain.fulfilled,
         (state, action: PayloadAction<AddSubdomainPayload>) => {
           const { data, message } = action.payload;
           const subdomain = {
@@ -239,7 +286,6 @@ const examsDomains = createSlice({
         },
       )
       .addCase(addSubdomain.rejected, (state, action) => {
-        
         state.error = action.error.message || "Failed to fetch students";
         state.loading = false;
       })
@@ -247,7 +293,8 @@ const examsDomains = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(addAssessment.fulfilled,
+      .addCase(
+        addAssessment.fulfilled,
         (state, action: PayloadAction<AddAssessmentPayload>) => {
           const { data, message } = action.payload;
           const assessment = {
@@ -282,11 +329,10 @@ const examsDomains = createSlice({
             });
           }
           state.loading = false;
-          toastifyBox("success", message)
+          toastifyBox("success", message);
         },
       )
       .addCase(addAssessment.rejected, (state, action) => {
-        
         state.error = action.error.message || "Failed to fetch students";
         state.loading = false;
       })
@@ -294,21 +340,24 @@ const examsDomains = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(deleteDomain.fulfilled,
-        (state, action: PayloadAction<{
-          id: number;
-          success: boolean;
-          errors: boolean;
-          message: string;
-      }>) => {
+      .addCase(
+        deleteDomain.fulfilled,
+        (
+          state,
+          action: PayloadAction<{
+            id: number;
+            success: boolean;
+            errors: boolean;
+            message: string;
+          }>,
+        ) => {
           const { message, id } = action.payload;
-          state.domains = state.domains.filter(domain => domain.id !== id)
+          state.domains = state.domains.filter((domain) => domain.id !== id);
           state.loading = false;
           toastifyBox("success", message);
         },
       )
       .addCase(deleteDomain.rejected, (state, action) => {
-        
         state.error = action.error.message || "Failed to fetch students";
         state.loading = false;
       })
@@ -316,21 +365,29 @@ const examsDomains = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(deleteSubdomain.fulfilled,
-        (state, action: PayloadAction<{
-          id: number;
-          success: boolean;
-          errors: boolean;
-          message: string;
-      }>) => {
+      .addCase(
+        deleteSubdomain.fulfilled,
+        (
+          state,
+          action: PayloadAction<{
+            id: number;
+            success: boolean;
+            errors: boolean;
+            message: string;
+          }>,
+        ) => {
           const { id, message } = action.payload;
-          state.domains = state.domains.map((domain) =>  ({...domain, subdomains: domain.subdomains?.filter(subdomain => subdomain.id !== id)}))
+          state.domains = state.domains.map((domain) => ({
+            ...domain,
+            subdomains: domain.subdomains?.filter(
+              (subdomain) => subdomain.id !== id,
+            ),
+          }));
           state.loading = false;
           toastifyBox("success", message);
         },
       )
       .addCase(deleteSubdomain.rejected, (state, action) => {
-        
         state.error = action.error.message || "Failed to fetch students";
         state.loading = false;
       })
@@ -338,29 +395,43 @@ const examsDomains = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(deleteAssessment.fulfilled,
+      .addCase(
+        deleteAssessment.fulfilled,
         (state, action: PayloadAction<DeleteAssessmentPayload>) => {
           const { assessmentId, message } = action.payload;
 
-          state.domains = state.domains.map(domain => {
-            if (domain.assessments.some(assessment => assessment.id === assessmentId)) {
+          state.domains = state.domains.map((domain) => {
+            if (
+              domain.assessments.some(
+                (assessment) => assessment.id === assessmentId,
+              )
+            ) {
               return {
                 ...domain,
-                assessments: domain.assessments.filter(assessment => assessment.id !== assessmentId),
+                assessments: domain.assessments.filter(
+                  (assessment) => assessment.id !== assessmentId,
+                ),
               };
             }
-          
+
             if (domain.subdomains) {
-              const updatedSubdomains = domain.subdomains.map(subdomain => {
-                if (subdomain.assessments.some(assessment => assessment.id === assessmentId)) ({
-                  ...subdomain,
-                  assessments: subdomain.assessments.filter(assessment => assessment.id !== assessmentId),
-                })
+              const updatedSubdomains = domain.subdomains.map((subdomain) => {
+                if (
+                  subdomain.assessments.some(
+                    (assessment) => assessment.id === assessmentId,
+                  )
+                )
+                  ({
+                    ...subdomain,
+                    assessments: subdomain.assessments.filter(
+                      (assessment) => assessment.id !== assessmentId,
+                    ),
+                  });
                 return subdomain;
               });
               return { ...domain, subdomains: updatedSubdomains };
             }
-          
+
             return domain;
           });
           state.loading = false;
@@ -368,7 +439,6 @@ const examsDomains = createSlice({
         },
       )
       .addCase(deleteAssessment.rejected, (state, action) => {
-        
         state.error = action.error.message || "Failed to fetch students";
         state.loading = false;
       });

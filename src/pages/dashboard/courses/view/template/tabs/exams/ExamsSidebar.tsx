@@ -6,9 +6,19 @@ import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../../../../../../store";
 import useGetLang from "../../../../../../../hooks/useGetLang";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { addAssessment, addDomain, addSubdomain, deleteAssessment, deleteDomain, deleteSubdomain, editDomain, fetchDomains } from "../../../../../../../store/reducers/examsDomains";
-
-
+import {
+  addAssessment,
+  addDomain,
+  addSubdomain,
+  deleteAssessment,
+  deleteDomain,
+  deleteSubdomain,
+  editAssessment,
+  editDomain,
+  editSubdomain,
+  fetchDomains,
+} from "../../../../../../../store/reducers/examsDomains";
+import { toastifyBox } from "../../../../../../../helper/toastifyBox";
 
 export function AddDomainModal({
   modalType,
@@ -19,14 +29,25 @@ export function AddDomainModal({
 }: AddNewModalProps) {
   const dispatch = useAppDispatch();
   const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
-  // const domains = useAppSelector(({ examsDomains }) => examsDomains.domains);
   const { t } = useTranslation("exams");
   const { id: courseId } = useParams();
-  
-  const [openModal, setOpenModal] = useState<boolean>(false);
-  const [nameEn, setNameEn] = useState<string>(obj?.name?.en || "");
-  const [nameAr, setNameAr] = useState<string>(obj?.name?.ar || "");
 
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [nameEn, setNameEn] = useState<string>("");
+  const [nameAr, setNameAr] = useState<string>("");
+  const [modalKey, setModalKey] = useState<number>(0);
+
+  useEffect(() => {
+    if (openModal && obj) {
+      setNameEn(obj?.name?.en || "");
+      setNameAr(obj?.name?.ar || "");
+    }
+  }, [openModal, obj]);
+
+  function onOpenModal() {
+    setModalKey((prev) => prev + 1);
+    setOpenModal(true);
+  }
   function onCloseModal() {
     setOpenModal(false);
     setNameEn("");
@@ -34,17 +55,17 @@ export function AddDomainModal({
   }
 
   const modalObj = {
-    modalTitle: isEdit? t("editDomain") : t("addDomain"),
+    modalTitle: isEdit ? t("editDomain") : t("addDomain"),
     fieldEn1: "Domain title",
     fieldAr1: "عنوان النطاق",
   };
 
   if (modalType === "subdomain") {
-    modalObj.modalTitle = isEdit? t("editSubdomain") : t("addSubdomain");
+    modalObj.modalTitle = isEdit ? t("editSubdomain") : t("addSubdomain");
     modalObj.fieldEn1 = "Subdomain title";
     modalObj.fieldAr1 = "عنوان النطاق الفرعي";
   } else if (modalType === "assessment") {
-    modalObj.modalTitle = isEdit? t("editAssessment") : t("addAssessment");
+    modalObj.modalTitle = isEdit ? t("editAssessment") : t("addAssessment");
     modalObj.fieldEn1 = "Exam title";
     modalObj.fieldAr1 = "عنوان الامتحان";
   }
@@ -60,20 +81,54 @@ export function AddDomainModal({
     if (modalType === "domain") {
       if (isEdit) {
         if (obj?.course_id) {
-          dispatch(editDomain({id: obj?.id, course_id: obj?.course_id, name_en: nameEn, name_ar: nameAr}));
+          dispatch(
+            editDomain({
+              id: obj?.id,
+              course_id: obj?.course_id,
+              name_en: nameEn,
+              name_ar: nameAr,
+            }),
+          )
+            .unwrap()
+            .then((data) => {toastifyBox("success", data.message);dispatch(fetchDomains(obj?.course_id))})
+            .catch((err) => toastifyBox("error", err.message || "Failed!"));
         }
       } else {
         dispatch(addDomain(modalObj));
       }
     } else if (modalType === "subdomain") {
       if (isEdit) {
-        // dispatch(editSubdomain(modalObj));
+        if (obj?.course_id) {
+          dispatch(
+            editSubdomain({
+              id: obj?.id,
+              course_id: obj?.course_id,
+              name_en: nameEn,
+              name_ar: nameAr,
+            }),
+          )
+            .unwrap()
+            .then((data) => {toastifyBox("success", data.message);dispatch(fetchDomains(obj?.course_id))})
+            .catch((err) => toastifyBox("error", err.message || "Failed!"));
+        }
       } else {
         dispatch(addSubdomain(modalObj));
       }
     } else {
       if (isEdit) {
-        // dispatch(editAssessment(modalObj));
+        if (obj?.course_id) {
+          dispatch(
+            editAssessment({
+              id: obj?.id,
+              course_id: obj?.course_id,
+              name_en: nameEn,
+              name_ar: nameAr,
+            }),
+          )
+            .unwrap()
+            .then((data) => {toastifyBox("success", data.message);dispatch(fetchDomains(obj?.course_id))})
+            .catch((err) => toastifyBox("error", err.message || "Failed!"));
+        }
       } else {
         dispatch(addAssessment(modalObj));
       }
@@ -81,19 +136,26 @@ export function AddDomainModal({
     onCloseModal();
   };
 
-  return (
-    isTeacher ? (<>
-      {isEdit ? <PencilSquareIcon className="size-5" onClick={(event) => {
-        event.stopPropagation();
-        setOpenModal(true);
-      }} /> : <div
-        className="cursor-pointer text-cyan-700 hover:underline"
-        onClick={() => setOpenModal(true)}
-      >
-        + {modalObj.modalTitle}
-      </div>}
+  return isTeacher ? (
+    <>
+      {isEdit ? (
+        <PencilSquareIcon
+          className="size-5"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenModal();
+          }}
+        />
+      ) : (
+        <div
+          className="cursor-pointer text-cyan-700 hover:underline"
+          onClick={onOpenModal}
+        >
+          + {modalObj.modalTitle}
+        </div>
+      )}
 
-      <Modal show={openModal} size="md" onClose={onCloseModal} popup>
+      <Modal key={modalKey} show={openModal} size="md" onClose={onCloseModal} popup>
         <Modal.Header />
         <Modal.Body>
           <div className="space-y-6">
@@ -116,10 +178,20 @@ export function AddDomainModal({
                 required
               />
               {courseId && (
-                <input type="text" hidden defaultValue={courseId} name="course_id" />
+                <input
+                  type="text"
+                  hidden
+                  defaultValue={courseId}
+                  name="course_id"
+                />
               )}
               {domainId && (
-                <input type="text" hidden defaultValue={domainId} name="domain_id" />
+                <input
+                  type="text"
+                  hidden
+                  defaultValue={domainId}
+                  name="domain_id"
+                />
               )}
               {subDomainId && (
                 <input
@@ -134,11 +206,17 @@ export function AddDomainModal({
           </div>
         </Modal.Body>
       </Modal>
-    </>) : <></>
+    </>
+  ) : (
+    <></>
   );
 }
 
-export default function ExamsSidebar({ onSelectAssessment }: { onSelectAssessment: (assessment: AssessmentType) => void }) {
+export default function ExamsSidebar({
+  onSelectAssessment,
+}: {
+  onSelectAssessment: (assessment: AssessmentType) => void;
+}) {
   const { id: course_id } = useParams();
   const dispatch = useAppDispatch();
   const domains = useAppSelector(({ examsDomains }) => examsDomains.domains);
@@ -149,36 +227,38 @@ export default function ExamsSidebar({ onSelectAssessment }: { onSelectAssessmen
 
   const handleDeleteDomain = (id: number) => {
     dispatch(deleteDomain(id));
-  }
+  };
   const handleDeleteSubdomain = (id: number) => {
     dispatch(deleteSubdomain(id));
-  }
+  };
   const handleDeleteAssessment = (id: number) => {
     dispatch(deleteAssessment(id));
-  }
-
+  };
 
   useEffect(() => {
     dispatch(fetchDomains(+course_id!));
   }, [course_id, dispatch]);
 
   return (
-    <div>
+    <div className="md:w-72 md:min-w-64">
       <AccordionCard>
         {domains?.map((domain) => (
           <AccordionCard.Panel key={domain.id}>
             <AccordionCard.Title className="grow">
               <div className="flex items-center justify-between gap-4">
-                {isTeacher ?
+                {isTeacher ? (
                   <>
-                    <TrashIcon className="size-5" onClick={(event) => {
-                      event.stopPropagation();
-                      handleDeleteDomain(domain.id);
-                    }} />
+                    <TrashIcon
+                      className="size-5"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDeleteDomain(domain.id);
+                      }}
+                    />
 
                     <AddDomainModal modalType="domain" isEdit obj={domain} />
                   </>
-                  : undefined}
+                ) : undefined}
                 <span className="">
                   {lang === "en"
                     ? domain.name.en
@@ -195,10 +275,25 @@ export default function ExamsSidebar({ onSelectAssessment }: { onSelectAssessmen
                     <AccordionCard.Panel key={subdomain.id}>
                       <AccordionCard.Title className="grow">
                         <div className="flex items-center justify-between gap-4">
-                          {isTeacher ? <TrashIcon className="size-5" onClick={(event) => {
-                            event.stopPropagation();
-                            handleDeleteSubdomain(subdomain.id);
-                          }} /> : undefined}
+                          {isTeacher ? (
+                            <>
+                              <TrashIcon
+                                className="size-5"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  handleDeleteSubdomain(subdomain.id);
+                                }}
+                              />
+                              <AddDomainModal
+                                modalType="subdomain"
+                                isEdit
+                                obj={{
+                                  ...subdomain,
+                                  course_id: domain.course_id,
+                                }}
+                              />
+                            </>
+                          ) : undefined}
                           <span className="">
                             {lang === "en"
                               ? subdomain.name.en
@@ -209,25 +304,41 @@ export default function ExamsSidebar({ onSelectAssessment }: { onSelectAssessmen
                         </div>
                       </AccordionCard.Title>
                       <AccordionCard.Content>
-                        {subdomain.assessments?.map(
-                          (assessment) => (
-                            <h3 className="flex cursor-pointer gap-2 p-2"
-                              key={assessment.id}
+                        {subdomain.assessments?.map((assessment) => (
+                          <h3
+                            className="flex cursor-pointer gap-2 p-2"
+                            key={assessment.id}
+                          >
+                            {isTeacher ? (
+                              <>
+                                <TrashIcon
+                                  className="size-5"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    handleDeleteAssessment(assessment.id);
+                                  }}
+                                />
+                                <AddDomainModal
+                                  modalType="assessment"
+                                  isEdit
+                                  obj={assessment}
+                                />
+                              </>
+                            ) : undefined}
+                            <span
+                              className="cursor-pointer text-indigo-900 hover:underline"
+                              onClick={() => {
+                                onSelectAssessment(assessment);
+                              }}
                             >
-                              {isTeacher ? <TrashIcon className="size-5" onClick={(event) => {
-                                event.stopPropagation();
-                                handleDeleteAssessment(assessment.id);
-                              }} /> : undefined}
-                              <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => { onSelectAssessment(assessment); }}>
-                                {lang === "en"
-                                  ? assessment.name.en
-                                  : lang === "ar"
-                                    ? assessment.name.ar
-                                    : undefined}
-                              </span>
-                            </h3>
-                          ),
-                        )}
+                              {lang === "en"
+                                ? assessment.name.en
+                                : lang === "ar"
+                                  ? assessment.name.ar
+                                  : undefined}
+                            </span>
+                          </h3>
+                        ))}
                         <AddDomainModal
                           modalType="assessment"
                           subDomainId={subdomain.id}
@@ -242,11 +353,28 @@ export default function ExamsSidebar({ onSelectAssessment }: { onSelectAssessmen
                   className="flex cursor-pointer gap-2 p-2"
                   key={assessment.id}
                 >
-                  {isTeacher ? <TrashIcon className="size-5" onClick={(event) => {
-                    event.stopPropagation();
-                    handleDeleteAssessment(assessment.id);
-                  }} /> : undefined}
-                  <span className="cursor-pointer text-indigo-900 hover:underline" onClick={() => { onSelectAssessment(assessment); }}>
+                  {isTeacher ? (
+                    <>
+                      <TrashIcon
+                        className="size-5"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleDeleteAssessment(assessment.id);
+                        }}
+                      />
+                      <AddDomainModal
+                        modalType="assessment"
+                        isEdit
+                        obj={assessment}
+                      />
+                    </>
+                  ) : undefined}
+                  <span
+                    className="cursor-pointer text-indigo-900 hover:underline"
+                    onClick={() => {
+                      onSelectAssessment(assessment);
+                    }}
+                  >
                     {lang === "en"
                       ? assessment.name.en
                       : lang === "ar"
@@ -258,7 +386,8 @@ export default function ExamsSidebar({ onSelectAssessment }: { onSelectAssessmen
               {domain.assessments?.length ? undefined : (
                 <AddDomainModal modalType="subdomain" domainId={domain.id} />
               )}
-              {isTeacher && !domain.subdomains?.length &&
+              {isTeacher &&
+                !domain.subdomains?.length &&
                 !domain.assessments?.length &&
                 t("or")}
               {domain.subdomains?.length ? undefined : (

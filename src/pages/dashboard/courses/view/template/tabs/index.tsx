@@ -13,18 +13,18 @@ import Exams from "./exams";
 export default function Tabs() {
   const { t } = useTranslation("viewCourse");
   return (
-    <BgCard>
-      <TabsCard>
-        <TabsCard.TabItem title={t("videos")} icon={FolderIcon}>
-          <Videos />
-        </TabsCard.TabItem>
-        <TabsCard.TabItem title={t("resources")} icon={DocumentIcon}>
-          <Resources />
-        </TabsCard.TabItem>
-        <TabsCard.TabItem title={t("exams")} icon={DocumentTextIcon}>
-          <Exams />
-        </TabsCard.TabItem>
-      </TabsCard>
-    </BgCard>
+    <div><BgCard>
+    <TabsCard>
+      <TabsCard.TabItem title={t("videos")} icon={FolderIcon}>
+        <Videos />
+      </TabsCard.TabItem>
+      <TabsCard.TabItem title={t("resources")} icon={DocumentIcon}>
+        <Resources />
+      </TabsCard.TabItem>
+      <TabsCard.TabItem title={t("exams")} icon={DocumentTextIcon}>
+        <Exams />
+      </TabsCard.TabItem>
+    </TabsCard>
+  </BgCard></div>
   );
 }

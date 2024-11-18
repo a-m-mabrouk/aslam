@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Button,
   Progress,
-  Modal,
   Popover,
   TableHead,
   Table,
@@ -27,6 +26,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   EyeIcon,
+  ArrowLeftEndOnRectangleIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Question from "./question";
 import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
@@ -38,8 +39,8 @@ import { useTranslation } from "react-i18next";
 import Calculator from "../../../../../../../../components/calculator";
 import { FullScreenButton } from "..";
 import useGetLang from "../../../../../../../../hooks/useGetLang";
-import CanvasDraw from 'react-canvas-draw';
-
+import CanvasDraw from "react-canvas-draw";
+import DraggablePopup from "../../../../../../../../components/draggablePopover";
 
 type FlaggedQuestionType = Question & { queIndex: number };
 
@@ -59,10 +60,10 @@ const Whiteboard: React.FC = () => {
     };
 
     updateDimensions();
-    window.addEventListener('resize', updateDimensions);
+    window.addEventListener("resize", updateDimensions);
 
     return () => {
-      window.removeEventListener('resize', updateDimensions);
+      window.removeEventListener("resize", updateDimensions);
     };
   }, []);
 
@@ -90,7 +91,13 @@ const Whiteboard: React.FC = () => {
 function isFlaggedQuestion(que: Question): que is FlaggedQuestionType {
   return (que as FlaggedQuestionType).queIndex !== undefined;
 }
-function PopoverQuestionsTable({ onChooseQue, ques }: { onChooseQue: (queIndex: number) => void; ques: FlaggedQuestionType[] | Question[] }) {
+function PopoverQuestionsTable({
+  onChooseQue,
+  ques,
+}: {
+  onChooseQue: (queIndex: number) => void;
+  ques: FlaggedQuestionType[] | Question[];
+}) {
   return (
     <div className="max-h-[80vh] w-[50rem] max-w-[90vw] overflow-y-auto">
       <Table striped className="text-center">
@@ -111,55 +118,44 @@ function PopoverQuestionsTable({ onChooseQue, ques }: { onChooseQue: (queIndex: 
                 className="hover:cursor-pointer hover:text-indigo-900 hover:underline"
               >
                 <TableCell>{index + 1}</TableCell>
-                <TableCell className="max-w-96">{que?.question?.name}</TableCell>
+                <TableCell className="max-w-96">
+                  {que?.question?.name}
+                </TableCell>
               </TableRow>
-            )
+            );
           })}
         </TableBody>
       </Table>
     </div>
-  )
-}
-
-function DescriptionBox({ desc }: { desc: string }) {
-  const { t } = useTranslation("exams")
-  return (
-    <div className="max-h-[80vh] w-96 max-w-[90vw] overflow-y-auto p-8">
-      <h2 className="text-green-900">{t("description")}</h2>
-      <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-        {desc}
-      </p>
-    </div>
-  )
+  );
 }
 
 export default function ExamInterface({
   questions,
   examTime,
   onEndExam,
-  onFullscreen
+  onFullscreen,
 }: {
   questions: Question[];
   examTime: number;
   onEndExam: () => void;
   onFullscreen: () => void;
 }) {
-  const { lang } = useGetLang()
+  const { lang } = useGetLang();
   const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
   const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(examTime);
   const [isPaused, setIsPaused] = useState(false);
-  const [endExamModal, setEndExamModal] = useState(false);
   const [borderColor, setBorderColor] = useState<string>("border-gray-300");
   const [timerColor, setTimerColor] = useState<string>("");
   const timerIntervalRef = useRef<number | null>(null);
   const overIntervalRef = useRef<number | null>(null);
-  
+
   const handleChooseQue = (queIndex: number) => {
     setCurrentQuestionIndex(queIndex);
-  }
+  };
 
   const clearTimerInterval = () => {
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
@@ -195,7 +191,7 @@ export default function ExamInterface({
   };
 
   const stopExam = () => {
-    setEndExamModal(false);
+    closeEndExamPopupOpen();
     onEndExam();
   };
 
@@ -235,6 +231,14 @@ export default function ExamInterface({
     .map((examAnswer, i) => (examAnswer.isFlagged ? i : -1))
     .filter((i) => i !== -1)
     .map((e) => ({ ...questions[e], queIndex: e }));
+
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isEndExamPopupOpen, setIsEndExamPopupOpen] = useState(false);
+
+  const openPopup = () => setIsPopupOpen(true);
+  const closePopup = () => setIsPopupOpen(false);
+  const openEndExamPopupOpen = () => setIsEndExamPopupOpen(true);
+  const closeEndExamPopupOpen = () => setIsEndExamPopupOpen(false);
 
   return (
     <div
@@ -309,10 +313,8 @@ export default function ExamInterface({
               )}
             </span>
             <span
-              onClick={() => {
-                setEndExamModal(true);
-              }}
-
+              onClick={openEndExamPopupOpen}
+              title={t("endExam")}
               className={`size-8`}
             >
               <StopIcon className="size-8 cursor-pointer" />
@@ -330,75 +332,142 @@ export default function ExamInterface({
       {/* Footer */}
       <footer className="flex min-h-fit w-full grow items-center justify-between overflow-x-auto bg-gray-200 p-4">
         <Tooltip content={t("viewAllQuestions")}>
-          <Popover content={<PopoverQuestionsTable onChooseQue={handleChooseQue} ques={questions} />} placement="top">
+          <Popover
+            content={
+              <PopoverQuestionsTable
+                onChooseQue={handleChooseQue}
+                ques={questions}
+              />
+            }
+            placement="top"
+          >
             <Button className="bg-indigo-600 text-white">
               <ListBulletIcon className="size-5" />
             </Button>
           </Popover>
         </Tooltip>
 
-        {currentQuestionIndex === 0? undefined: <Tooltip content={t("prev")}>
-          <Button onClick={goToPreviousQuestion} disabled={currentQuestionIndex === 0} color="green">
-            {lang === "en" ? <ChevronLeftIcon className="size-5" /> : < ChevronRightIcon className="size-5" />}
+        <Tooltip
+          content={t("prev")}
+          className={`${currentQuestionIndex === 0 ? "invisible" : ""}`}
+        >
+          <Button
+            className={`${currentQuestionIndex === 0 ? "invisible" : ""}`}
+            onClick={goToPreviousQuestion}
+            disabled={currentQuestionIndex === 0}
+            color="green"
+          >
+            {lang === "en" ? (
+              <ChevronLeftIcon
+                className={`${currentQuestionIndex === 0 ? "invisible" : ""} size-5`}
+              />
+            ) : (
+              <ChevronRightIcon
+                className={`${currentQuestionIndex === 0 ? "invisible" : ""} size-5`}
+              />
+            )}
           </Button>
-        </Tooltip>}
-        
+        </Tooltip>
+
         <Tooltip content={t("correctAnswer")}>
-          {
-            questions[currentQuestionIndex]?.question?.description ?
-              <Popover content={<DescriptionBox desc={questions[currentQuestionIndex]?.question?.description} />} placement="top">
-                <EyeIcon className="size-12 cursor-pointer border-2" onClick={showAns} />
-              </Popover>
-              :
-              <EyeIcon className="size-12 cursor-pointer border-2" onClick={showAns} />
-          }
+          {questions[currentQuestionIndex]?.question?.description ? (
+            <>
+              <EyeIcon
+                className="size-12 cursor-pointer border-2"
+                onClick={() => {
+                  showAns();
+                  openPopup();
+                }}
+              />
+              <DraggablePopup
+                isOpen={isPopupOpen}
+                onClose={closePopup}
+                title={t("description")}
+              >
+                <div className="max-h-[80vh] w-96 max-w-[90vw] overflow-y-auto p-4">
+                  <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                    {questions[currentQuestionIndex]?.question?.description}
+                  </p>
+                </div>
+              </DraggablePopup>
+            </>
+          ) : (
+            <EyeIcon
+              className="size-12 cursor-pointer border-2"
+              onClick={showAns}
+            />
+          )}
         </Tooltip>
 
         <Tooltip content={t("flaggedQuestions")}>
-          <Popover content={<PopoverQuestionsTable onChooseQue={handleChooseQue} ques={flaggedQuestionsArr} />} placement="top">
-            <Button className="bg-red-600 text-white hover:bg-red-700" disabled={!flaggedQuestionsArr.length}>
+          <Popover
+            content={
+              <PopoverQuestionsTable
+                onChooseQue={handleChooseQue}
+                ques={flaggedQuestionsArr}
+              />
+            }
+            placement="top"
+          >
+            <Button
+              className="bg-red-600 text-white hover:bg-red-700"
+              disabled={!flaggedQuestionsArr.length}
+            >
               <FlagIconOutline className="size-5" />
             </Button>
           </Popover>
         </Tooltip>
-        
+
         {currentQuestionIndex === questions?.length - 1 ? (
           <Tooltip content={t("endExam")}>
-            <Button onClick={() => setEndExamModal(true)} color="green">
-              {lang === "ar" ? <ChevronLeftIcon className="size-5" /> : < ChevronRightIcon className="size-5" />}
+            <Button onClick={openEndExamPopupOpen} color="green">
+              {lang === "ar" ? (
+                <ArrowLeftEndOnRectangleIcon className="size-5" />
+              ) : (
+                <ChevronRightIcon className="size-5" />
+              )}
             </Button>
           </Tooltip>
         ) : (
           <Tooltip content={t("next")}>
             <Button onClick={goToNextQuestion} color="green">
-              {lang === "ar" ? <ChevronLeftIcon className="size-5" /> : < ChevronRightIcon className="size-5" />}
+              {lang === "ar" ? (
+                <ChevronLeftIcon className="size-5" />
+              ) : (
+                <ChevronRightIcon className="size-5" />
+              )}
             </Button>
           </Tooltip>
         )}
         <FullScreenButton onFullscreen={onFullscreen} />
       </footer>
-      <Modal
-        show={endExamModal}
-        size="md"
-        onClose={() => setEndExamModal(false)}
-      >
-        <Modal.Header>{t("endExamAssertion")}</Modal.Header>
-        <Modal.Body>
-          <div className="flex justify-around">
-            <Button className="bg-red-700" onClick={stopExam}>
-              End
-            </Button>
-            <Button
-              className=""
-              onClick={() => {
-                setEndExamModal(false);
-              }}
-            >
-              Cancel
-            </Button>
+      {isEndExamPopupOpen ? (
+        <div
+          className="fixed left-0 top-0 z-50 flex size-full items-center justify-center"
+          onClick={closeEndExamPopupOpen}
+        >
+          <div className="relative z-50 overflow-hidden rounded-xl bg-white shadow-lg">
+            <div className="flex justify-between bg-gray-300">
+              <XMarkIcon
+                className="size-10 cursor-pointer px-2 py-1"
+                onClick={closeEndExamPopupOpen}
+              />
+              <h2 className="flex items-center text-xl text-indigo-800">
+                {t("endExamAssertion")}
+              </h2>
+              <XMarkIcon className="invisible size-10 px-2 py-1" />
+            </div>
+            <div className="bg-white p-1 pt-0">
+              <div className="flex justify-around">
+                <Button className="bg-red-700" onClick={stopExam}>
+                  End
+                </Button>
+                <Button onClick={closeEndExamPopupOpen}>Cancel</Button>
+              </div>
+            </div>
           </div>
-        </Modal.Body>
-      </Modal>
+        </div>
+      ) : null}
     </div>
   );
 }
