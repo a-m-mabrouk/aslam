@@ -4,14 +4,24 @@ import { useTranslation } from "react-i18next";
 import Question from "../question";
 import { Button } from "flowbite-react";
 
-export default function Review() {
+export default function Review({wrongOnly = false}: {wrongOnly?: boolean}) {
   const { t } = useTranslation("exams");
   const { examAnswers, activeAssessment } = useAppSelector(({ exams }) => exams);
   const { questions } = activeAssessment!;
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
+  type ReviewQuestions = Question & {reviewIndex: number};
+  const reviewQuestions: ReviewQuestions[] = [];
+   examAnswers.forEach((ans, i) => {
+    if (wrongOnly) {
+      ans.answerstate === "wrong" && reviewQuestions.push({...questions[i], reviewIndex: i})
+    } else {
+      reviewQuestions.push({...questions[i], reviewIndex: i})
+    }
+  });
+  
   const goToNextQuestion = () => {
-    if (currentQuestionIndex < questions?.length - 1) {
+    if (currentQuestionIndex < reviewQuestions?.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     }
   };
@@ -30,7 +40,7 @@ export default function Review() {
       <header className="grid gap-2 bg-gray-200 p-4">
         <div className="flex justify-between">
           <p>
-          {`${t(examAnswers[currentQuestionIndex].answerstate)}: ${t("question")} ${currentQuestionIndex + 1} ${t("of")} ${questions?.length}`}
+          {`${t(examAnswers[currentQuestionIndex].answerstate)}: ${t("question")} ${reviewQuestions[currentQuestionIndex].reviewIndex + 1} ${t("of")} ${questions?.length}`}
           </p>
         </div>
       </header>
@@ -38,12 +48,12 @@ export default function Review() {
       {/* Question Content */}
       <section>
         <Question
-          question={questions[currentQuestionIndex]}
+          question={reviewQuestions[currentQuestionIndex]}
           questionIndex={currentQuestionIndex}
         />
         <div>
           <h3>{t("explanation")}</h3>
-          <p>{questions[currentQuestionIndex]?.question?.description}</p>
+          <p>{reviewQuestions[currentQuestionIndex]?.question?.description}</p>
         </div>
       </section>
 
@@ -59,7 +69,7 @@ export default function Review() {
         <Button
           onClick={goToNextQuestion}
           color="green"
-          disabled={currentQuestionIndex === questions?.length - 1}
+          disabled={currentQuestionIndex === reviewQuestions?.length - 1}
         >
           {t("next")}
         </Button>

@@ -337,11 +337,11 @@ export default function ExamInterface({
           </Popover>
         </Tooltip>
 
-        <Tooltip content={t("prev")}>
+        {currentQuestionIndex === 0? undefined: <Tooltip content={t("prev")}>
           <Button onClick={goToPreviousQuestion} disabled={currentQuestionIndex === 0} color="green">
             {lang === "en" ? <ChevronLeftIcon className="size-5" /> : < ChevronRightIcon className="size-5" />}
           </Button>
-        </Tooltip>
+        </Tooltip>}
         
         <Tooltip content={t("correctAnswer")}>
           {

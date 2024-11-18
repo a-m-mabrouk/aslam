@@ -118,6 +118,33 @@ export const addAssessment = createAsyncThunk(
     return response.data;
   },
 );
+export const editDomain = createAsyncThunk(
+  "domains/editDomain",
+  async ({id, course_id, name_en, name_ar}: {id: number;course_id: number;name_en: string;name_ar: string}) => {
+    const response = await axiosDefault.put(`${API_EXAMS.domains}/${id}`, {course_id, name_en, name_ar});
+    return response.data;
+  },
+);
+export const editSubdomain = createAsyncThunk(
+  "domains/editSubdomain",
+  async (subdomainData: unknown) => {
+    const response = await axiosDefault.post(
+      API_EXAMS.subdomain,
+      subdomainData,
+    );
+    return response.data;
+  },
+);
+export const editAssessment = createAsyncThunk(
+  "domains/editAssessment",
+  async (assessmentData: unknown) => {
+    const response = await axiosDefault.post(
+      API_EXAMS.assessments,
+      assessmentData,
+    );
+    return response.data;
+  },
+);
 export const deleteDomain = createAsyncThunk(
   "domains/deleteDomain",
   async (domainId: unknown) => {

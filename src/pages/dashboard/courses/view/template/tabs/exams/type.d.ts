@@ -68,4 +68,6 @@ interface AddNewModalProps {
   modalType: "assessment" | "subdomain" | "domain";
   domainId?: number | null;
   subDomainId?: number | null;
+  isEdit?: boolean;
+  obj?: DomainType | AssessmentType;
 }
