@@ -64,6 +64,7 @@ const ExamComponent = () => {
   const { questions, name: assessmentName } = activeAssessment
     ? activeAssessment
     : { questions: [], name: null };
+
   const { lang } = useGetLang();
   const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
   const [isExamEnded, setIsExamEnded] = useState(false);

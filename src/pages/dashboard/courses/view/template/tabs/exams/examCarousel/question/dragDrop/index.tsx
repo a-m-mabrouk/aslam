@@ -13,6 +13,7 @@ import {
 } from "../../../../../../../../../../store/reducers/exams";
 import DraggableItem from "./DraggableItem";
 import DroppableArea from "./DroppableArea";
+import { shuffle } from "../../../../../../../../../../utilities/shuffleArray";
 
 const backendOptions = {
   backends: [
@@ -123,14 +124,14 @@ export default function QuestionDragDrop({
     <DndProvider backend={MultiBackend} options={backendOptions}>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-2">
-          {draggableItems.map((item) => (
+          {shuffle(draggableItems.map((item) => (
             <DraggableItem
               key={item.id}
               item={item}
               onDropBack={handleDropBack}
               checkDisabled={checkDisabled}
             />
-          ))}
+          )))}
         </div>
 
         <div className="flex flex-col gap-2">

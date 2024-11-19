@@ -37,8 +37,8 @@ export default function Details() {
             <Table.HeadCell>صحيح%</Table.HeadCell>
           </Table.Head>
           <Table.Body>
-            {Object.keys(aggregatedData).map((key) => (
-              <Table.Row className="border-2">
+            {Object.keys(aggregatedData).map((key, i) => (
+              <Table.Row className="border-2" key={i}>
                 <Table.Cell>{key}</Table.Cell>
                 <Table.Cell>{aggregatedData[key].questionsCount}</Table.Cell>
                 <Table.Cell>

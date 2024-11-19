@@ -5,7 +5,7 @@ import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../../../../../../store";
 import useGetLang from "../../../../../../../hooks/useGetLang";
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon, TrashIcon, BookmarkIcon } from "@heroicons/react/24/outline";
 import {
   addAssessment,
   addDomain,
@@ -306,7 +306,7 @@ export default function ExamsSidebar({
                       <AccordionCard.Content>
                         {subdomain.assessments?.map((assessment) => (
                           <h3
-                            className="flex cursor-pointer gap-2 p-2"
+                            className="flex gap-2 p-2"
                             key={assessment.id}
                           >
                             {isTeacher ? (
@@ -324,7 +324,7 @@ export default function ExamsSidebar({
                                   obj={assessment}
                                 />
                               </>
-                            ) : undefined}
+                            ) : <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />}
                             <span
                               className="cursor-pointer text-indigo-900 hover:underline"
                               onClick={() => {
@@ -350,7 +350,7 @@ export default function ExamsSidebar({
               ) : undefined}
               {domain.assessments?.map((assessment) => (
                 <h3
-                  className="flex cursor-pointer gap-2 p-2"
+                  className="flex gap-2 p-2"
                   key={assessment.id}
                 >
                   {isTeacher ? (
@@ -368,7 +368,7 @@ export default function ExamsSidebar({
                         obj={assessment}
                       />
                     </>
-                  ) : undefined}
+                  ) : <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />}
                   <span
                     className="cursor-pointer text-indigo-900 hover:underline"
                     onClick={() => {

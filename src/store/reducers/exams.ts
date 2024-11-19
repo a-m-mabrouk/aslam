@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { toastifyBox } from "../../helper/toastifyBox";
+import { shuffle } from "../../utilities/shuffleArray";
 
 const initialState: ExamType = {
   examAnswers: [],
@@ -55,14 +56,28 @@ const examsSlice = createSlice({
     setDomains: (state, { payload }: PayloadAction<DomainType[]>) => {
       state.domains = payload;
     },
-    setActiveAssessment: (state, {payload}: PayloadAction<AssessmentType | null>) => {
+    setActiveAssessment: (
+      state,
+      { payload }: PayloadAction<AssessmentType | null>,
+    ) => {
       if (state.isAssessmentRunning) {
-        toastifyBox("error", "Stop Exam first")
+        toastifyBox("error", "Stop Exam first");
       } else {
-        state.activeAssessment = payload;
+        if (payload) {
+          const questions = payload.questions.map((que) => ({
+            ...que,
+            question: {
+              ...que.question,
+              options: shuffle(que.question.options),
+            },
+          }));
+          state.activeAssessment = !payload ? null : { ...payload, questions };
+        } else {
+          state.activeAssessment = payload;
+        }
       }
     },
-    setIsAssessmentRunning: (state, {payload}: PayloadAction<boolean>) => {
+    setIsAssessmentRunning: (state, { payload }: PayloadAction<boolean>) => {
       state.isAssessmentRunning = payload;
     },
   },
@@ -78,7 +93,7 @@ export const {
   setDomains,
   setActiveAssessment,
   setIsAssessmentRunning,
-  setReview
+  setReview,
 } = examsSlice.actions;
 
 export default examsSlice.reducer;
