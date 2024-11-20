@@ -4,22 +4,25 @@ import { useTranslation } from "react-i18next";
 import Question from "../question";
 import { Button } from "flowbite-react";
 
-export default function Review({wrongOnly = false}: {wrongOnly?: boolean}) {
+export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
   const { t } = useTranslation("exams");
-  const { examAnswers, activeAssessment } = useAppSelector(({ exams }) => exams);
+  const { examAnswers, activeAssessment } = useAppSelector(
+    ({ exams }) => exams,
+  );
   const { questions } = activeAssessment!;
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-  type ReviewQuestions = Question & {reviewIndex: number};
+  type ReviewQuestions = Question & { reviewIndex: number };
   const reviewQuestions: ReviewQuestions[] = [];
-   examAnswers.forEach((ans, i) => {
+  examAnswers.forEach((ans, i) => {
     if (wrongOnly) {
-      ans.answerstate === "wrong" && reviewQuestions.push({...questions[i], reviewIndex: i})
+      ans.answerstate === "wrong" &&
+        reviewQuestions.push({ ...questions[i], reviewIndex: i });
     } else {
-      reviewQuestions.push({...questions[i], reviewIndex: i})
+      reviewQuestions.push({ ...questions[i], reviewIndex: i });
     }
   });
-  
+
   const goToNextQuestion = () => {
     if (currentQuestionIndex < reviewQuestions?.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
@@ -40,7 +43,7 @@ export default function Review({wrongOnly = false}: {wrongOnly?: boolean}) {
       <header className="grid gap-2 bg-gray-200 p-4">
         <div className="flex justify-between">
           <p>
-          {`${t(examAnswers[reviewQuestions[currentQuestionIndex].reviewIndex].answerstate)}: ${t("question")} ${reviewQuestions[currentQuestionIndex].reviewIndex + 1} ${t("of")} ${questions?.length}`}
+            {`${t(examAnswers[reviewQuestions[currentQuestionIndex].reviewIndex].answerstate)}: ${t("question")} ${reviewQuestions[currentQuestionIndex].reviewIndex + 1} ${t("of")} ${questions?.length}`}
           </p>
         </div>
       </header>
@@ -51,10 +54,14 @@ export default function Review({wrongOnly = false}: {wrongOnly?: boolean}) {
           question={reviewQuestions[currentQuestionIndex]}
           questionIndex={reviewQuestions[currentQuestionIndex].reviewIndex}
         />
-        <div>
-          <h3>{t("explanation")}</h3>
-          <p>{reviewQuestions[currentQuestionIndex]?.question?.description}</p>
-        </div>
+        {reviewQuestions[currentQuestionIndex]?.question?.description ? (
+          <div className="p-4">
+            <h3 className="mb-3 text-xl text-indigo-600">{t("explanation")}</h3>
+            <p>
+              {reviewQuestions[currentQuestionIndex]?.question?.description}
+            </p>
+          </div>
+        ) : null}
       </section>
 
       {/* Footer */}

@@ -14,8 +14,11 @@ import UploadQuestions from "./uploadQuestions";
 import TitleSection from "../../../../../../../components/title";
 import { useTranslation } from "react-i18next";
 import ExamsSidebar from "./ExamsSidebar";
-import { ArrowsPointingInIcon, ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
+import { ArrowsPointingInIcon, ArrowsPointingOutIcon, TrashIcon } from "@heroicons/react/24/outline";
 import useGetLang from "../../../../../../../hooks/useGetLang";
+import { Button } from "flowbite-react";
+import axiosDefault from "../../../../../../../utilities/axios";
+import { API_EXAMS } from "../../../../../../../router/routes/apiRoutes";
 
 export function FullScreenButton({ onFullscreen }: { onFullscreen: () => void }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -98,6 +101,23 @@ const ExamComponent = () => {
     setIsExamEnded(false);
     dispatch(setActiveAssessment(assessment));
   }
+  const handleDeleteQuestion = async () => {
+    // setIsExamEnded(false);
+    // dispatch(deleteQuestions(activeAssessment));
+    console.log(activeAssessment);
+    
+    const {id: assessment_id, course_id, questions} = activeAssessment!;
+    console.log(assessment_id);
+    
+    try {
+      const response = await axiosDefault.post(`${API_EXAMS.questions}/${questions[0].id}`, {_method: "delete", course_id});
+      console.log(response);
+      
+    } catch (error) {
+      throw new Error("");
+    }
+    dispatch(setActiveAssessment(null));
+  }
   const onStart = () => {
     dispatch(setIsAssessmentRunning(true));
     dispatch(resetExam());
@@ -131,7 +151,7 @@ const ExamComponent = () => {
         <ExamsSidebar onSelectAssessment={handleSelectAssessment} />
         <div className="grow">
           {!activeAssessment ? undefined : (
-            <h2 className="py-4 text-center text-indigo-800">
+            <h2 className="py-4 text-center text-2xl text-indigo-800">
               {lang === "en" ? assessmentName?.en : assessmentName?.ar}
             </h2>
           )}
@@ -155,11 +175,16 @@ const ExamComponent = () => {
                     onFullscreen={toggleFullscreen}
                   />
                 ) : (
+                  <>
+                  <Button onClick={handleDeleteQuestion}>
+                    <TrashIcon className="size-5" />
+                  </Button>
                   <ExamDetails
                     questions={questions}
                     examTime={examTime}
                     onStart={onStart}
                   />
+                  </>
                 )}
               </>
             )}
