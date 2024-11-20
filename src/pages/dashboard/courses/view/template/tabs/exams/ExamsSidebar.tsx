@@ -240,7 +240,7 @@ export default function ExamsSidebar({
   }, [course_id, dispatch]);
 
   return (
-    <div className="md:w-72 md:min-w-64">
+    <div className="shrink-0 md:w-72 md:min-w-64">
       <AccordionCard>
         {domains?.map((domain) => (
           <AccordionCard.Panel key={domain.id}>

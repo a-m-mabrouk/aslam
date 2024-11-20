@@ -23,6 +23,7 @@ interface ExcelQuestion {
   d?: string;
   e?: string;
   f?: string;
+  images: string;
   answer: string;
   drag1: string;
   drag2: string;
@@ -38,12 +39,12 @@ interface ExcelQuestion {
   drop6?: string;
 }
 export default function UploadQuestions() {
-  const { id } = useParams()
+  const { id } = useParams();
   const { t } = useTranslation("viewCourse");
   const [file, setFile] = useState<File | undefined>(undefined);
   const dispatch = useAppDispatch();
-  const {activeAssessment} = useAppSelector(({ exams }) => exams);
-  const {id: assessment_id} = activeAssessment!;
+  const { activeAssessment } = useAppSelector(({ exams }) => exams);
+  const { id: assessment_id } = activeAssessment!;
 
   const handleFileChange = (_: string, value: File | undefined) => {
     setFile(value);
@@ -51,32 +52,32 @@ export default function UploadQuestions() {
 
   const processedQuestions = useMemo(() => {
     if (!file) return null;
-  
+
     const reader = new FileReader();
-  
+
     return new Promise<QuestionForUpload[]>((resolve, reject) => {
       reader.onload = (e) => {
         try {
           const data = new Uint8Array(e.target?.result as ArrayBuffer);
           const workbook = XLSX.read(data, { type: "array" });
           const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  
+
           const rawQuestions = XLSX.utils.sheet_to_json(sheet, {
             defval: "",
           }) as ExcelQuestion[];
-  
+
           const questions: QuestionForUpload[] = rawQuestions.map((q) => {
             const queType = q.type?.toLowerCase();
             const customQuestion: QuestionForUpload = {
               type: q.type,
               chapter: q.chapter,
               domain: q.domain,
-              name: q.questionText,
+              name: q.questionText + "<<0>>" + (q.images || ""),
               description: q.description,
               degree: q.degree,
               options: [],
             };
-  
+
             if (queType === "mcq") {
               type charIndex = "a" | "b" | "c" | "d" | "e" | "f";
               ["a", "b", "c", "d", "e", "f"].forEach((opt) => {
@@ -112,7 +113,7 @@ export default function UploadQuestions() {
                       option: optText,
                       answer: q[opt.replace("drag", "drop") as dropIndex]!,
                     });
-                }
+                },
               );
             } else {
               throw new Error("Invalid question type");
@@ -125,15 +126,14 @@ export default function UploadQuestions() {
           reject(error);
         }
       };
-  
+
       reader.readAsArrayBuffer(file);
     });
   }, [file]);
-  
 
   const handlefileUpload = async () => {
     if (!processedQuestions || !id || !assessment_id) return;
-  
+
     try {
       const questions = await processedQuestions;
       const { data } = await axiosDefault.post(
@@ -144,11 +144,10 @@ export default function UploadQuestions() {
             "Content-Type": "application/json",
           },
           transformRequest: [(data) => JSON.stringify(data)],
-        }
+        },
       );
-      toastifyBox("success", data.message)
-      dispatch(setActiveAssessment(data.data))
-      
+      toastifyBox("success", data.message);
+      dispatch(setActiveAssessment(data.data));
     } catch (error) {
       console.error("Error uploading file:", error);
     }

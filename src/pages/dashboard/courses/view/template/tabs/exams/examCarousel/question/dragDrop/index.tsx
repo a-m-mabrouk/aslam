@@ -119,19 +119,24 @@ export default function QuestionDragDrop({
     const selectedOpt = JSON.stringify({ draggableItems, droppableAreas });
     dispatch(setSelectedOpt({ questionIndex, selectedOpt }));
   }, [dispatch, draggableItems, droppableAreas, questionIndex]);
+  useEffect(() => {
+    setDraggableItems(prev => shuffle(prev));
+    console.log('rendered!');
+    
+  }, []);
 
   return (
     <DndProvider backend={MultiBackend} options={backendOptions}>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-2">
-          {shuffle(draggableItems.map((item) => (
+          {draggableItems.map((item) => (
             <DraggableItem
               key={item.id}
               item={item}
               onDropBack={handleDropBack}
               checkDisabled={checkDisabled}
             />
-          )))}
+          ))}
         </div>
 
         <div className="flex flex-col gap-2">

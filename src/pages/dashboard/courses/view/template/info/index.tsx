@@ -29,7 +29,7 @@ export default function CourseInfo() {
           alt={name?.[lang] || ""}
           img={photo || ""}
           size="xl"
-          className="flex-col md:flex-row"
+          className="flex-col md:grid md:grid-cols-[auto_1fr]"
         >
           <div className=" ms-4 grid gap-4">
             <h5 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -50,7 +50,7 @@ export default function CourseInfo() {
             <InfoItem
               title={t("description")}
               value={
-                <span className=" rounded-md border p-2">
+                <span className=" rounded-md p-2">
                   {description?.[lang] || ""}
                 </span>
               }
