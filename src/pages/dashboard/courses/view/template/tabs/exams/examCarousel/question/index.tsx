@@ -35,8 +35,8 @@ const Question = memo(
     return (
       <main className="grow p-4">
         {imagesArr ? (
-          <div id="head-imgs-container" className="flex">
-            {imagesArr.map(img => <img className="size-40" key={img + crypto.randomUUID()} src={img} alt="" />)}
+          <div id="head-imgs-container" className="flex gap-5">
+            {imagesArr.map(img => <img className="size-40 rounded border-2" key={img + crypto.randomUUID()} src={img} alt="" />)}
           </div>
         ) : null}
         <h2>{questionText}</h2>
