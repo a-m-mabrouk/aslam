@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type SyntheticEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   Button,
   Progress,
@@ -155,6 +161,9 @@ export default function ExamInterface({
 
   const handleChooseQue = (queIndex: number) => {
     setCurrentQuestionIndex(queIndex);
+    closeFlagQuestionsPopupOpen();
+    const fakeEvent = { stopPropagation: () => {} } as SyntheticEvent;
+    closeAllQuestionsPopupOpen(fakeEvent);
   };
 
   const clearTimerInterval = () => {
@@ -234,11 +243,21 @@ export default function ExamInterface({
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isEndExamPopupOpen, setIsEndExamPopupOpen] = useState(false);
+  const [isFlagQuestionsPopupOpen, setIsFlagQuestionsPopupOpen] =
+    useState(false);
+  const [isAllQuestionsPopupOpen, setIsAllQuestionsPopupOpen] = useState(false);
 
   const openPopup = () => setIsPopupOpen(true);
   const closePopup = () => setIsPopupOpen(false);
   const openEndExamPopupOpen = () => setIsEndExamPopupOpen(true);
+  const openFlagQuestionsPopupOpen = () => setIsFlagQuestionsPopupOpen(true);
+  const openAllQuestionsPopupOpen = () => setIsAllQuestionsPopupOpen(true);
   const closeEndExamPopupOpen = () => setIsEndExamPopupOpen(false);
+  const closeFlagQuestionsPopupOpen = () => setIsFlagQuestionsPopupOpen(false);
+  const closeAllQuestionsPopupOpen = (event: SyntheticEvent) => {
+    event.stopPropagation();
+    setIsAllQuestionsPopupOpen(false);
+  };
 
   return (
     <div
@@ -332,19 +351,38 @@ export default function ExamInterface({
       {/* Footer */}
       <footer className="flex min-h-fit w-full grow items-center justify-between overflow-x-auto bg-gray-200 p-4">
         <Tooltip content={t("viewAllQuestions")}>
-          <Popover
-            content={
-              <PopoverQuestionsTable
-                onChooseQue={handleChooseQue}
-                ques={questions}
-              />
-            }
-            placement="top"
+          {isAllQuestionsPopupOpen ? (
+            <div
+              className="fixed left-0 top-0 z-50 flex size-full items-center justify-center bg-black/20"
+              onClick={closeAllQuestionsPopupOpen}
+            >
+              <div
+                className="relative z-50 overflow-hidden rounded-xl bg-white shadow-lg"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between bg-gray-300">
+                  <XMarkIcon
+                    className="size-10 cursor-pointer px-2 py-1"
+                    onClick={closeAllQuestionsPopupOpen}
+                  />
+                  <h2>{t("viewAllQuestions")}</h2>
+                  <XMarkIcon className="invisible size-10 px-2 py-1" />
+                </div>
+                <div className="bg-white">
+                  <PopoverQuestionsTable
+                    onChooseQue={handleChooseQue}
+                    ques={questions}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : null}
+          <Button
+            className="bg-indigo-600 text-white"
+            onClick={openAllQuestionsPopupOpen}
           >
-            <Button className="bg-indigo-600 text-white">
-              <ListBulletIcon className="size-5" />
-            </Button>
-          </Popover>
+            <ListBulletIcon className="size-5" />
+          </Button>
         </Tooltip>
 
         <Tooltip
@@ -385,7 +423,7 @@ export default function ExamInterface({
                 title={t("description")}
               >
                 <div className="max-h-[80vh] w-96 max-w-[90vw] overflow-y-auto p-4">
-                  <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
+                  <p className="text-base leading-relaxed text-gray-500">
                     {questions[currentQuestionIndex]?.question?.description}
                   </p>
                 </div>
@@ -400,22 +438,39 @@ export default function ExamInterface({
         </Tooltip>
 
         <Tooltip content={t("flaggedQuestions")}>
-          <Popover
-            content={
-              <PopoverQuestionsTable
-                onChooseQue={handleChooseQue}
-                ques={flaggedQuestionsArr}
-              />
-            }
-            placement="top"
-          >
-            <Button
-              className="bg-red-600 text-white hover:bg-red-700"
-              disabled={!flaggedQuestionsArr.length}
+          {isFlagQuestionsPopupOpen ? (
+            <div
+              className="fixed left-0 top-0 z-50 flex size-full items-center justify-center bg-black/20"
+              onClick={closeFlagQuestionsPopupOpen}
             >
-              <FlagIconOutline className="size-5" />
-            </Button>
-          </Popover>
+              <div
+                className="relative z-50 overflow-hidden rounded-xl bg-white shadow-lg"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between bg-gray-300">
+                  <XMarkIcon
+                    className="size-10 cursor-pointer px-2 py-1"
+                    onClick={closeFlagQuestionsPopupOpen}
+                  />
+                  <h2>{t("flaggedQuestions")}</h2>
+                  <XMarkIcon className="invisible size-10 px-2 py-1" />
+                </div>
+                <div className="bg-white">
+                  <PopoverQuestionsTable
+                    onChooseQue={handleChooseQue}
+                    ques={flaggedQuestionsArr}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : null}
+          <Button
+            className="bg-red-600 text-white hover:bg-red-700"
+            disabled={!flaggedQuestionsArr.length}
+            onClick={openFlagQuestionsPopupOpen}
+          >
+            <FlagIconOutline className="size-5" />
+          </Button>
         </Tooltip>
 
         {currentQuestionIndex === questions?.length - 1 ? (
@@ -442,28 +497,22 @@ export default function ExamInterface({
         <FullScreenButton onFullscreen={onFullscreen} />
       </footer>
       {isEndExamPopupOpen ? (
-        <div
-          className="fixed left-0 top-0 z-50 flex size-full items-center justify-center"
-          onClick={closeEndExamPopupOpen}
-        >
+        <div className="fixed left-0 top-0 z-50 flex size-full items-center justify-center bg-black/20">
           <div className="relative z-50 overflow-hidden rounded-xl bg-white shadow-lg">
             <div className="flex justify-between bg-gray-300">
               <XMarkIcon
                 className="size-10 cursor-pointer px-2 py-1"
                 onClick={closeEndExamPopupOpen}
               />
-              <h2 className="flex items-center text-xl text-indigo-800">
+              {/* <XMarkIcon className="invisible size-10 px-2 py-1" /> */}
+            </div>
+            <div className="bg-white p-7 pb-0">
+              <h2 className="flex items-center text-xl">
                 {t("endExamAssertion")}
               </h2>
-              <XMarkIcon className="invisible size-10 px-2 py-1" />
-            </div>
-            <div className="bg-white p-1 pt-0">
-              <div className="flex justify-around">
-                <Button className="bg-red-700" onClick={stopExam}>
-                  End
-                </Button>
-                <Button onClick={closeEndExamPopupOpen}>Cancel</Button>
-              </div>
+              <Button className="mx-auto my-4 bg-red-700" onClick={stopExam}>
+                {lang === "en" ? "End exam" : "إنهاء الامتحان"}
+              </Button>
             </div>
           </div>
         </div>

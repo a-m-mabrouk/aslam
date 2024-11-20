@@ -140,7 +140,7 @@ export function AddDomainModal({
     <>
       {isEdit ? (
         <PencilSquareIcon
-          className="size-5"
+          className="size-5 cursor-pointer"
           onClick={(event) => {
             event.stopPropagation();
             onOpenModal();
@@ -249,7 +249,7 @@ export default function ExamsSidebar({
                 {isTeacher ? (
                   <>
                     <TrashIcon
-                      className="size-5"
+                      className="size-5 cursor-pointer"
                       onClick={(event) => {
                         event.stopPropagation();
                         handleDeleteDomain(domain.id);
@@ -278,7 +278,7 @@ export default function ExamsSidebar({
                           {isTeacher ? (
                             <>
                               <TrashIcon
-                                className="size-5"
+                                className="size-5 cursor-pointer"
                                 onClick={(event) => {
                                   event.stopPropagation();
                                   handleDeleteSubdomain(subdomain.id);
@@ -312,7 +312,7 @@ export default function ExamsSidebar({
                             {isTeacher ? (
                               <>
                                 <TrashIcon
-                                  className="size-5"
+                                  className="size-5 cursor-pointer"
                                   onClick={(event) => {
                                     event.stopPropagation();
                                     handleDeleteAssessment(assessment.id);
@@ -356,7 +356,7 @@ export default function ExamsSidebar({
                   {isTeacher ? (
                     <>
                       <TrashIcon
-                        className="size-5"
+                        className="size-5 cursor-pointer"
                         onClick={(event) => {
                           event.stopPropagation();
                           handleDeleteAssessment(assessment.id);
