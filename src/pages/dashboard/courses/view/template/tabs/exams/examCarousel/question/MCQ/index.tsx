@@ -13,13 +13,15 @@ import { toastifyBox } from "../../../../../../../../../../helper/toastifyBox";
 export default function QuestionMCQ({
   question,
   questionIndex,
+  imagesArr,
 }: {
   question: Question;
   questionIndex: number;
+  imagesArr: string[] | null;
 }) {
   const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
-  const {examAnswers, review} = useAppSelector(({ exams }) => exams);
+  const { examAnswers, review } = useAppSelector(({ exams }) => exams);
   const selectedOptionsArr = JSON.parse(
     examAnswers[questionIndex]?.selectedOpt || "[]",
   );
@@ -67,40 +69,59 @@ export default function QuestionMCQ({
     [correctOptionsArr, dispatch, questionIndex, selectedOptionsArr, t],
   );
   return (
-    <ul className="mt-4">
-      {question?.question?.options.map((opt, i) => {
-        const selectedOpt = examAnswers[questionIndex]?.selectedOpt;
-        const isSelected = selectedOpt.includes(opt.option);
-        const isCorrect = opt.answer === "true";
-        const checkDisabled = examAnswers[questionIndex]?.showAnsClicked || review;
-        const ansClass = !checkDisabled
-          ? "border-gray-300"
-          : isSelected && !isCorrect
-            ? "border-red-800 border-2"
-            : isSelected && isCorrect
-              ? "border-green-800 border-2"
-              : checkDisabled && !isSelected && isCorrect
-                ? "border-green-800 border-2"
-                : "border-gray-300";
-        return (
-          <li
-            key={opt.option}
-            className={`mt-2 border ${ansClass} rounded bg-transparent px-4 py-2 font-semibold ${checkDisabled ? "pointer-events-none opacity-70" : ""}`}
-          >
-            <input
-              type={correctOptionsArr.length > 1 ? "checkbox" : "radio"}
-              checked={selectedOptionsArr.includes(opt.option)}
-              name={`question-${questionIndex}`}
-              id={`option-${i + 1}`}
-              onChange={handleRadioChange}
-              value={opt.option}
+    <div className={imagesArr? "grid grid-cols-[1fr_1fr]": undefined}>
+      {imagesArr ? (
+        <div id="head-imgs-container" className="grid gap-5">
+          {imagesArr.map((img) => (
+            <img
+              className="size-40 rounded border-2"
+              key={img + crypto.randomUUID()}
+              src={img}
+              alt=""
             />
-            <label htmlFor={`option-${i + 1}`} className="ms-2 cursor-pointer">
-              {opt.option}
-            </label>
-          </li>
-        );
-      })}
-    </ul>
+          ))}
+        </div>
+      ) : null}
+
+      <ul className="mt-4">
+        {question?.question?.options.map((opt, i) => {
+          const selectedOpt = examAnswers[questionIndex]?.selectedOpt;
+          const isSelected = selectedOpt.includes(opt.option);
+          const isCorrect = opt.answer === "true";
+          const checkDisabled =
+            examAnswers[questionIndex]?.showAnsClicked || review;
+          const ansClass = !checkDisabled
+            ? "border-gray-300"
+            : isSelected && !isCorrect
+              ? "border-red-800 border-2"
+              : isSelected && isCorrect
+                ? "border-green-800 border-2"
+                : checkDisabled && !isSelected && isCorrect
+                  ? "border-green-800 border-2"
+                  : "border-gray-300";
+          return (
+            <li
+              key={opt.option}
+              className={`mt-2 border ${ansClass} rounded bg-transparent px-4 py-2 font-semibold ${checkDisabled ? "pointer-events-none opacity-70" : ""}`}
+            >
+              <input
+                type={correctOptionsArr.length > 1 ? "checkbox" : "radio"}
+                checked={selectedOptionsArr.includes(opt.option)}
+                name={`question-${questionIndex}`}
+                id={`option-${i + 1}`}
+                onChange={handleRadioChange}
+                value={opt.option}
+              />
+              <label
+                htmlFor={`option-${i + 1}`}
+                className="ms-2 cursor-pointer"
+              >
+                {opt.option}
+              </label>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

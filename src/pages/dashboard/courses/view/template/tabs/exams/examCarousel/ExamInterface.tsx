@@ -125,7 +125,7 @@ function PopoverQuestionsTable({
               >
                 <TableCell>{index + 1}</TableCell>
                 <TableCell className="max-w-96">
-                  {que?.question?.name}
+                  {que?.question?.name.split("<<0>>")[0]}
                 </TableCell>
               </TableRow>
             );
@@ -229,11 +229,14 @@ export default function ExamInterface({
     dispatch(setShowAnsClicked(currentQuestionIndex));
   };
   const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+    // const hours = Math.floor(seconds / 3600);
+    // const mins = Math.floor((seconds % 3600) / 60);
+    // const secs = seconds % 60;
+    // return `${hours}:${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
 
-    return `${hours}:${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
   const flaggedQuestionsArr: FlaggedQuestionType[] = examAnswers

@@ -14,13 +14,21 @@ import UploadQuestions from "./uploadQuestions";
 import TitleSection from "../../../../../../../components/title";
 import { useTranslation } from "react-i18next";
 import ExamsSidebar from "./ExamsSidebar";
-import { ArrowsPointingInIcon, ArrowsPointingOutIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowsPointingInIcon,
+  ArrowsPointingOutIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import useGetLang from "../../../../../../../hooks/useGetLang";
 import { Button } from "flowbite-react";
 import axiosDefault from "../../../../../../../utilities/axios";
 import { API_EXAMS } from "../../../../../../../router/routes/apiRoutes";
 
-export function FullScreenButton({ onFullscreen }: { onFullscreen: () => void }) {
+export function FullScreenButton({
+  onFullscreen,
+}: {
+  onFullscreen: () => void;
+}) {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleFullscreenChange = () => {
@@ -63,7 +71,9 @@ declare global {
 const ExamComponent = () => {
   const fullscreenDivRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const { activeAssessment, isAssessmentRunning } = useAppSelector(({ exams }) => exams);
+  const { activeAssessment, isAssessmentRunning } = useAppSelector(
+    ({ exams }) => exams,
+  );
   const { questions, name: assessmentName } = activeAssessment
     ? activeAssessment
     : { questions: [], name: null };
@@ -100,24 +110,26 @@ const ExamComponent = () => {
   const handleSelectAssessment = (assessment: AssessmentType) => {
     setIsExamEnded(false);
     dispatch(setActiveAssessment(assessment));
-  }
+  };
   const handleDeleteQuestion = async () => {
     // setIsExamEnded(false);
     // dispatch(deleteQuestions(activeAssessment));
     console.log(activeAssessment);
-    
-    const {id: assessment_id, course_id, questions} = activeAssessment!;
+
+    const { id: assessment_id, course_id, questions } = activeAssessment!;
     console.log(assessment_id);
-    
+
     try {
-      const response = await axiosDefault.post(`${API_EXAMS.questions}/${questions[0].id}`, {_method: "delete", course_id});
+      const response = await axiosDefault.post(
+        `${API_EXAMS.questions}/${questions[0].id}`,
+        { _method: "delete", course_id },
+      );
       console.log(response);
-      
     } catch (error) {
       throw new Error("");
     }
     dispatch(setActiveAssessment(null));
-  }
+  };
   const onStart = () => {
     dispatch(setIsAssessmentRunning(true));
     dispatch(resetExam());
@@ -133,8 +145,8 @@ const ExamComponent = () => {
             domain: question?.domain || "",
             answerstate: "skipped",
           },
-        })
-      )
+        }),
+      ),
     );
   };
 
@@ -176,14 +188,16 @@ const ExamComponent = () => {
                   />
                 ) : (
                   <>
-                  <Button onClick={handleDeleteQuestion}>
-                    <TrashIcon className="size-5" />
-                  </Button>
-                  <ExamDetails
-                    questions={questions}
-                    examTime={examTime}
-                    onStart={onStart}
-                  />
+                    {isTeacher ? (
+                      <Button onClick={handleDeleteQuestion}>
+                        <TrashIcon className="size-5" />
+                      </Button>
+                    ) : null}
+                    <ExamDetails
+                      questions={questions}
+                      examTime={examTime}
+                      onStart={onStart}
+                    />
                   </>
                 )}
               </>

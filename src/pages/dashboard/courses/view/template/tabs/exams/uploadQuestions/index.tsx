@@ -23,6 +23,9 @@ interface ExcelQuestion {
   d?: string;
   e?: string;
   f?: string;
+  g?: string;
+  h?: string;
+  i?: string;
   images: string;
   answer: string;
   drag1: string;
@@ -31,12 +34,20 @@ interface ExcelQuestion {
   drag4?: string;
   drag5?: string;
   drag6?: string;
+  drag7?: string;
+  drag8?: string;
+  drag9?: string;
+  drag10?: string;
   drop1: string;
   drop2: string;
   drop3?: string;
   drop4?: string;
   drop5?: string;
   drop6?: string;
+  drop7?: string;
+  drop8?: string;
+  drop9?: string;
+  drop10?: string;
 }
 export default function UploadQuestions() {
   const { id } = useParams();
@@ -79,8 +90,17 @@ export default function UploadQuestions() {
             };
 
             if (queType === "mcq") {
-              type charIndex = "a" | "b" | "c" | "d" | "e" | "f";
-              ["a", "b", "c", "d", "e", "f"].forEach((opt) => {
+              type charIndex =
+                | "a"
+                | "b"
+                | "c"
+                | "d"
+                | "e"
+                | "f"
+                | "g"
+                | "h"
+                | "i";
+              ["a", "b", "c", "d", "e", "f", "g", "h", "i"].forEach((opt) => {
                 const optText = q[opt as charIndex]?.toString().trim();
                 optText &&
                   customQuestion.options.push({
@@ -97,24 +117,41 @@ export default function UploadQuestions() {
                 | "drag3"
                 | "drag4"
                 | "drag5"
-                | "drag6";
+                | "drag6"
+                | "drag7"
+                | "drag8"
+                | "drag9"
+                | "drag10";
               type dropIndex =
                 | "drop1"
                 | "drop2"
                 | "drop3"
                 | "drop4"
                 | "drop5"
-                | "drop6";
-              ["drag1", "drag2", "drag3", "drag4", "drag5", "drag6"].forEach(
-                (opt) => {
-                  const optText = q[opt as dragIndex]?.toString().trim();
-                  optText &&
-                    customQuestion.options.push({
-                      option: optText,
-                      answer: q[opt.replace("drag", "drop") as dropIndex]!,
-                    });
-                },
-              );
+                | "drop6"
+                | "drop7"
+                | "drop8"
+                | "drop9"
+                | "drop10";
+              [
+                "drag1",
+                "drag2",
+                "drag3",
+                "drag4",
+                "drag5",
+                "drag6",
+                "drag7",
+                "drag8",
+                "drag9",
+                "drag10",
+              ].forEach((opt) => {
+                const optText = q[opt as dragIndex]?.toString().trim();
+                optText &&
+                  customQuestion.options.push({
+                    option: optText,
+                    answer: q[opt.replace("drag", "drop") as dropIndex]!,
+                  });
+              });
             } else {
               throw new Error("Invalid question type");
             }

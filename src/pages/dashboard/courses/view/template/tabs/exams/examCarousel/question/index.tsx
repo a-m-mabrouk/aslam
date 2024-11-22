@@ -24,7 +24,7 @@ const Question = memo(
     let questionMarkup = <h2>You can only add MCQ & DragDrop question.</h2>;
     if (question?.question?.type === "mcq") {
       questionMarkup = (
-        <QuestionMCQ question={question} questionIndex={questionIndex} />
+        <QuestionMCQ imagesArr={imagesArr} question={question} questionIndex={questionIndex} />
       );
     } else if (question?.question?.type === "dragdrop") {
       questionMarkup = (
@@ -33,13 +33,8 @@ const Question = memo(
     }
 
     return (
-      <main className="grow p-4">
-        {imagesArr ? (
-          <div id="head-imgs-container" className="flex gap-5">
-            {imagesArr.map(img => <img className="size-40 rounded border-2" key={img + crypto.randomUUID()} src={img} alt="" />)}
-          </div>
-        ) : null}
-        <h2>{questionText}</h2>
+      <main className="grow p-4 md:min-h-[30rem]">
+        <h2 className="mb-2">{questionText}</h2>
         {questionMarkup}
       </main>
     );

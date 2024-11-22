@@ -12,10 +12,13 @@ export default function ExamDetails({
 }) {
   const formattedTime = useMemo(() => {
     const formatTime = (seconds: number) => {
-      const hours = Math.floor(seconds / 3600);
-      const mins = Math.floor((seconds % 3600) / 60);
+      //   const hours = Math.floor(seconds / 3600);
+      //   const mins = Math.floor((seconds % 3600) / 60);
+      //   const secs = seconds % 60;
+      //   return `${hours}:${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
+      const mins = Math.floor(seconds / 60);
       const secs = seconds % 60;
-      return `${hours}:${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
+      return `${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
     };
     return formatTime(examTime);
   }, [examTime]);
