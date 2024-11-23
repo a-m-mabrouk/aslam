@@ -19,6 +19,8 @@ import {
   fetchDomains,
 } from "../../../../../../../store/reducers/examsDomains";
 import { toastifyBox } from "../../../../../../../helper/toastifyBox";
+import withReactContent from "sweetalert2-react-content";
+import Swal from "sweetalert2";
 
 export function AddDomainModal({
   modalType,
@@ -223,16 +225,48 @@ export default function ExamsSidebar({
   const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
 
   const { t } = useTranslation("exams");
+  const { t: tBtns } = useTranslation("buttons");
+  const { t: tAlert } = useTranslation("alerts");
   const { lang } = useGetLang();
 
   const handleDeleteDomain = (id: number) => {
-    dispatch(deleteDomain(id));
+    withReactContent(Swal).fire({
+      title: tAlert("deleteDomain"),
+      preConfirm: async () => {
+        dispatch(deleteDomain(id));
+      },
+      confirmButtonText: tBtns("confirm"),
+      icon: "warning",
+      denyButtonText: tBtns("cancel"),
+      showDenyButton: true,
+      showLoaderOnConfirm: true,
+    });
   };
   const handleDeleteSubdomain = (id: number) => {
-    dispatch(deleteSubdomain(id));
+    withReactContent(Swal).fire({
+      title: tAlert("deleteSubdomain"),
+      preConfirm: async () => {
+        dispatch(deleteSubdomain(id));
+      },
+      confirmButtonText: tBtns("confirm"),
+      icon: "warning",
+      denyButtonText: tBtns("cancel"),
+      showDenyButton: true,
+      showLoaderOnConfirm: true,
+    });
   };
   const handleDeleteAssessment = (id: number) => {
-    dispatch(deleteAssessment(id));
+    withReactContent(Swal).fire({
+      title: tAlert("deleteAssessment"),
+      preConfirm: async () => {
+        dispatch(deleteAssessment(id));
+      },
+      confirmButtonText: tBtns("confirm"),
+      icon: "warning",
+      denyButtonText: tBtns("cancel"),
+      showDenyButton: true,
+      showLoaderOnConfirm: true,
+    });
   };
 
   useEffect(() => {

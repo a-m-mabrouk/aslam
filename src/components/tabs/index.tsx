@@ -59,7 +59,6 @@ export function TabsCard({
   return (
     <Tabs
       onActiveTabChange={handleActiveTabchange}
-      aria-label="Tabs with underline"
       variant="underline"
       theme={theme}
     >

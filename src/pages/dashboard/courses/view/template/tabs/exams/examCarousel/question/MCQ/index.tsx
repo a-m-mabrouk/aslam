@@ -69,20 +69,7 @@ export default function QuestionMCQ({
     [correctOptionsArr, dispatch, questionIndex, selectedOptionsArr, t],
   );
   return (
-    <div className={imagesArr? "grid grid-cols-[1fr_1fr]": undefined}>
-      {imagesArr ? (
-        <div id="head-imgs-container" className="grid gap-5">
-          {imagesArr.map((img) => (
-            <img
-              className="size-40 rounded border-2"
-              key={img + crypto.randomUUID()}
-              src={img}
-              alt=""
-            />
-          ))}
-        </div>
-      ) : null}
-
+    <div className={imagesArr? "grid grid-cols-[3fr_2fr]": undefined}>
       <ul className="mt-4">
         {question?.question?.options.map((opt, i) => {
           const selectedOpt = examAnswers[questionIndex]?.selectedOpt;
@@ -122,6 +109,18 @@ export default function QuestionMCQ({
           );
         })}
       </ul>
+      {imagesArr ? (
+        <div id="head-imgs-container" className="grid gap-1">
+          {imagesArr.map((img) => (
+            <img
+              className="mx-auto size-4/5 rounded border-2"
+              key={img + crypto.randomUUID()}
+              src={img}
+              alt=""
+            />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

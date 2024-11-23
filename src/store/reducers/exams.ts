@@ -64,6 +64,7 @@ const examsSlice = createSlice({
         toastifyBox("error", "Stop Exam first");
       } else {
         if (payload) {
+          localStorage.setItem("activeAssessment", JSON.stringify(payload));
           const questions = payload.questions.map((que) => ({
             ...que,
             question: {

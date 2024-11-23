@@ -23,6 +23,8 @@ import useGetLang from "../../../../../../../hooks/useGetLang";
 import { Button } from "flowbite-react";
 import axiosDefault from "../../../../../../../utilities/axios";
 import { API_EXAMS } from "../../../../../../../router/routes/apiRoutes";
+import withReactContent from "sweetalert2-react-content";
+import Swal from "sweetalert2";
 
 export function FullScreenButton({
   onFullscreen,
@@ -74,6 +76,9 @@ const ExamComponent = () => {
   const { activeAssessment, isAssessmentRunning } = useAppSelector(
     ({ exams }) => exams,
   );
+  if (!activeAssessment && localStorage.getItem("activeAssessment")) {
+    dispatch(setActiveAssessment(JSON.parse(localStorage.getItem("activeAssessment")!)))
+  }
   const { questions, name: assessmentName } = activeAssessment
     ? activeAssessment
     : { questions: [], name: null };
@@ -84,6 +89,8 @@ const ExamComponent = () => {
 
   const examTime = Math.round(questions?.length * 1.33333 * 60);
   const { t } = useTranslation("exams");
+  const { t: tAlert } = useTranslation("alerts");
+  const { t: tBtns } = useTranslation("buttons");
 
   const toggleFullscreen = () => {
     const element = fullscreenDivRef.current;
@@ -112,23 +119,29 @@ const ExamComponent = () => {
     dispatch(setActiveAssessment(assessment));
   };
   const handleDeleteQuestion = async () => {
-    // setIsExamEnded(false);
-    // dispatch(deleteQuestions(activeAssessment));
+    const { id, course_id } = activeAssessment!;
     console.log(activeAssessment);
-
-    const { id: assessment_id, course_id, questions } = activeAssessment!;
-    console.log(assessment_id);
-
-    try {
-      const response = await axiosDefault.post(
-        `${API_EXAMS.questions}/${questions[0].id}`,
-        { _method: "delete", course_id },
-      );
-      console.log(response);
-    } catch (error) {
-      throw new Error("");
-    }
-    dispatch(setActiveAssessment(null));
+    
+    withReactContent(Swal).fire({
+      title: tAlert("deleteQuestions"),
+      preConfirm: async () => {
+        try {
+          const response = await axiosDefault.post(
+            `${API_EXAMS.assessments}/${id}`, { _method: "put", course_id, questions: [] },
+          );
+          console.log(response);
+          dispatch(setActiveAssessment(null));
+        } catch (error) {
+          throw new Error("");
+        }
+      },
+      confirmButtonText: tBtns("confirm"),
+      icon: "warning",
+      denyButtonText: tBtns("cancel"),
+      showDenyButton: true,
+      showLoaderOnConfirm: true,
+    });
+    
   };
   const onStart = () => {
     dispatch(setIsAssessmentRunning(true));

@@ -115,7 +115,11 @@ export const resources = {
       removeStudentCourse:
         "Are you sure you want to remove this course from student?",
       studentCourseRemoved: "Student course removed successfully",
-      notSubscibedToCourse: "You are not subscribed to this course"
+      notSubscibedToCourse: "You are not subscribed to this course",
+      deleteDomain: "Are you sure you want to delete this domain?",
+      deleteSubdomain: "Are you sure you want to delete this subdomain?",
+      deleteAssessment: "Are you sure you want to delete this assessment?",
+      deleteQuestions: "Are you sure you want to delete all questions of this assessment?",
     },
     students: {
       title: "Students",
@@ -285,7 +289,11 @@ export const resources = {
       resourceDeleted: "تم حذف الملف بنجاح",
       removeStudentCourse: "هل انت متأكد انك تريد حذف هذا الطالب من الدورة؟",
       studentCourseRemoved: "تم حذف الطالب من الدورة بنجاح",
-      notSubscibedToCourse: "أنت غير مشترك في هذه الدورة"
+      notSubscibedToCourse: "أنت غير مشترك في هذه الدورة",
+      deleteDomain: "هل أنت متأكد أنك تريد حذف هذا النطاق؟",
+      deleteSubdomain: "هل أنت متأكد أنك تريد حذف هذا النطاق الفرعي؟",
+      deleteAssessment: "هل أنت متأكد أنك تريد حذف هذا الامتحان؟",
+      deleteQuestions: "هل أنت متأكد أنك تريد حذف كل أسئلة هذا الامتحان؟",
     },
     students: {
       title: "الطلاب",
