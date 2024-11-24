@@ -9,7 +9,7 @@ export default function LangBtn({
 
   const handleLangChange = useCallback(() => {
     i18n.changeLanguage(i18n.language === "ar" ? "en" : "ar");
-    localStorage.setItem("lang", i18n.language === "ar" ? "en" : "ar");
+    localStorage.setItem("lang", i18n.language);
   }, [i18n]);
   return (
     <div

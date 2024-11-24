@@ -38,7 +38,9 @@ import {
 import Question from "./question";
 import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
 import {
+  setExamTimeRemaining,
   setIsFlagged,
+  setIsPaused,
   setShowAnsClicked,
 } from "../../../../../../../../store/reducers/exams";
 import { useTranslation } from "react-i18next";
@@ -150,10 +152,15 @@ export default function ExamInterface({
   const { lang } = useGetLang();
   const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
-  const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(examTime);
-  const [isPaused, setIsPaused] = useState(false);
+  const {
+    examAnswers,
+    isPaused,
+    examTimeRemaining: timeRemaining,
+    activeAssessQuestionIndex,
+  } = useAppSelector(({ exams }) => exams);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(
+    activeAssessQuestionIndex,
+  );
   const [borderColor, setBorderColor] = useState<string>("border-gray-300");
   const [timerColor, setTimerColor] = useState<string>("");
   const timerIntervalRef = useRef<number | null>(null);
@@ -183,19 +190,26 @@ export default function ExamInterface({
   }, []);
   const startTimer = useCallback(() => {
     timerIntervalRef.current = setInterval(() => {
-      setTimeRemaining((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
+      dispatch(setExamTimeRemaining(timeRemaining > 0 ? timeRemaining - 1 : 0));
       timeRemaining === 0 && startTimeoutAnimation();
     }, 1000);
-  }, [startTimeoutAnimation, timeRemaining]);
+  }, [dispatch, startTimeoutAnimation, timeRemaining]);
+
+  useEffect(() => {
+    if (timeRemaining === 0) {
+      startTimeoutAnimation();
+      dispatch(setIsPaused(true));
+    }
+  }, [dispatch, startTimeoutAnimation, timeRemaining]);
 
   const pauseTimer = () => {
-    setIsPaused(true);
+    dispatch(setIsPaused(true));
     clearTimerInterval();
     clearColorInterval();
   };
 
   const resumeTimer = () => {
-    setIsPaused(false);
+    dispatch(setIsPaused(false));
     startTimer();
   };
 
@@ -229,14 +243,14 @@ export default function ExamInterface({
     dispatch(setShowAnsClicked(currentQuestionIndex));
   };
   const formatTime = (seconds: number) => {
-    // const hours = Math.floor(seconds / 3600);
-    // const mins = Math.floor((seconds % 3600) / 60);
-    // const secs = seconds % 60;
-    // return `${hours}:${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
-
-    const mins = Math.floor(seconds / 60);
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    return `${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
+    return `${hours}:${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
+
+    // const mins = Math.floor(seconds / 60);
+    // const secs = seconds % 60;
+    // return `${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
   const flaggedQuestionsArr: FlaggedQuestionType[] = examAnswers
@@ -264,262 +278,280 @@ export default function ExamInterface({
 
   return (
     <div
-      className={`grid h-full grid-rows-[auto_1fr_auto] overflow-auto rounded-[10px] border-2 ${borderColor}`}
+      className={`grid grid-rows-[auto_1fr_auto] overflow-auto rounded-[10px] border-2 ${borderColor} relative`}
     >
-      {/* Header */}
-      <header className="grid gap-2 bg-gray-200 p-4">
-        <div className="flex justify-between">
-          <div>
-            <p className={`flex ${timerColor}`}>
-              <ClockIcon className="size-6" /> {t("remainingTime")}{" "}
-              {formatTime(timeRemaining)}
-            </p>
-            <p className="ps-6">
-              {t("question")} {currentQuestionIndex + 1} {t("of")}{" "}
-              {questions?.length}
-            </p>
-          </div>
-          <div>
-            <Popover content={<Whiteboard />} placement="top">
-              <Button>
-                <PencilSquareIcon className="size-5" />
-                {t("board")}
-              </Button>
-            </Popover>
-          </div>
-          <div id="calc-parent">
-            <Popover content={<Calculator />} placement="top">
-              <Button>
-                <CalculatorIcon className="size-5" />
-                {t("calculator")}
-              </Button>
-            </Popover>
-          </div>
+      <div
+        className={`absolute z-0 grid size-full place-content-center gap-5 bg-violet-50 ${isPaused ? "" : "hidden"}`}
+      >
+        <Button onClick={resumeTimer} className="mr-2 flex items-center">
+          <PlayIcon className="size-8 cursor-pointer" />
+          <span className="flex items-center">
+            {lang === "en" ? "Resume exam!" : "استئناف الامتحان!"}
+          </span>
+        </Button>
+        <div className="flex flex-col items-center gap-2 text-xl">
+          <span className="text-blue-600">
+            {lang === "ar" ? "الوقت المتبقي:" : "Remaining time:"}
+          </span>
+          <span>{formatTime(timeRemaining)}</span>
         </div>
-        <div className="grid grid-cols-12">
-          <div className="col-start-1 col-end-3 flex">
-            <span
-              className="flex cursor-pointer gap-1 text-gray-700"
-              onClick={() => dispatch(setIsFlagged(currentQuestionIndex))}
-            >
-              {examAnswers[currentQuestionIndex]?.isFlagged ? (
-                <>
-                  <FlagIconSolid className="size-5 fill-red-700" />
-                  <span className="text-red-700">{t("unFlagQue")}</span>
-                </>
-              ) : (
-                <>
-                  <FlagIconOutline className="size-5 text-gray-700" />
-                  <span>{t("flagQue")}</span>
-                </>
-              )}
-            </span>
+      </div>
+      <div className={isPaused ? "invisible z-10" : ""}>
+        {/* Header */}
+        <header className="grid gap-2 bg-gray-200 p-4">
+          <div className="flex justify-between">
+            <div>
+              <p className={`flex ${timerColor}`}>
+                <ClockIcon className="size-6" /> {t("remainingTime")}{" "}
+                {formatTime(timeRemaining)}
+              </p>
+              <p className="ps-6">
+                {t("question")} {currentQuestionIndex + 1} {t("of")}{" "}
+                {questions?.length}
+              </p>
+            </div>
+            <div>
+              <Popover content={<Whiteboard />} placement="top">
+                <Button>
+                  <PencilSquareIcon className="size-5" />
+                  {t("board")}
+                </Button>
+              </Popover>
+            </div>
+            <div id="calc-parent">
+              <Popover content={<Calculator />} placement="top">
+                <Button>
+                  <CalculatorIcon className="size-5" />
+                  {t("calculator")}
+                </Button>
+              </Popover>
+            </div>
           </div>
-          <div className="col-start-4 col-end-10">
-            <Progress
-              progress={progress}
-              color="indigo"
-              className="mt-2 h-auto border-2 border-blue-400"
-            />
-          </div>
-          <div className="col-start-11 col-end-13 flex justify-around">
-            <span
-              onClick={isPaused ? resumeTimer : pauseTimer}
-              color="gray"
-              className={`mr-2 size-8 ${!timeRemaining ? "pointer-events-none opacity-50" : ""}`}
-            >
-              {isPaused ? (
-                <PlayIcon className="size-8 cursor-pointer" />
-              ) : (
-                <PauseIcon className="size-8 cursor-pointer" />
-              )}
-            </span>
-            <span
-              onClick={openEndExamPopupOpen}
-              title={t("endExam")}
-              className={`size-8`}
-            >
-              <StopIcon className="size-8 cursor-pointer" />
-            </span>
-          </div>
-        </div>
-      </header>
-
-      {/* Question Content */}
-      <Question
-        question={questions[currentQuestionIndex]}
-        questionIndex={currentQuestionIndex}
-      />
-
-      {/* Footer */}
-      <footer className="flex min-h-fit w-full grow items-center justify-between overflow-x-auto bg-gray-200 p-4">
-        <Tooltip content={t("viewAllQuestions")}>
-          {isAllQuestionsPopupOpen ? (
-            <div
-              className="fixed left-0 top-0 z-50 flex size-full items-center justify-center bg-black/20"
-              onClick={closeAllQuestionsPopupOpen}
-            >
-              <div
-                className="relative z-50 overflow-hidden rounded-xl bg-white shadow-lg"
-                onClick={(e) => e.stopPropagation()}
+          <div className="grid grid-cols-12">
+            <div className="col-start-1 col-end-3 flex">
+              <span
+                className="flex cursor-pointer gap-1 text-gray-700"
+                onClick={() => dispatch(setIsFlagged(currentQuestionIndex))}
               >
-                <div className="flex justify-between bg-gray-300">
-                  <XMarkIcon
-                    className="size-10 cursor-pointer px-2 py-1"
-                    onClick={closeAllQuestionsPopupOpen}
-                  />
-                  <h2>{t("viewAllQuestions")}</h2>
-                  <XMarkIcon className="invisible size-10 px-2 py-1" />
-                </div>
-                <div className="bg-white">
-                  <PopoverQuestionsTable
-                    onChooseQue={handleChooseQue}
-                    ques={questions}
-                  />
+                {examAnswers[currentQuestionIndex]?.isFlagged ? (
+                  <>
+                    <FlagIconSolid className="size-5 fill-red-700" />
+                    <span className="text-red-700">{t("unFlagQue")}</span>
+                  </>
+                ) : (
+                  <>
+                    <FlagIconOutline className="size-5 text-gray-700" />
+                    <span>{t("flagQue")}</span>
+                  </>
+                )}
+              </span>
+            </div>
+            <div className="col-start-4 col-end-10">
+              <Progress
+                progress={progress}
+                color="indigo"
+                className="mt-2 h-auto border-2 border-blue-400"
+              />
+            </div>
+            <div className="col-start-11 col-end-13 flex justify-around">
+              <span
+                onClick={isPaused ? resumeTimer : pauseTimer}
+                color="gray"
+                className={`mr-2 size-8 ${!timeRemaining ? "pointer-events-none opacity-50" : ""}`}
+              >
+                {isPaused ? (
+                  <PlayIcon className="size-8 cursor-pointer" />
+                ) : (
+                  <PauseIcon className="size-8 cursor-pointer" />
+                )}
+              </span>
+              <span
+                onClick={openEndExamPopupOpen}
+                title={t("endExam")}
+                className={`size-8`}
+              >
+                <StopIcon className="size-8 cursor-pointer" />
+              </span>
+            </div>
+          </div>
+        </header>
+
+        {/* Question Content */}
+        <Question
+          question={questions[currentQuestionIndex]}
+          questionIndex={currentQuestionIndex}
+        />
+
+        {/* Footer */}
+        <footer className="flex min-h-fit w-full grow items-center justify-between overflow-x-auto bg-gray-200 p-4">
+          <Tooltip content={t("viewAllQuestions")}>
+            {isAllQuestionsPopupOpen ? (
+              <div
+                className="fixed left-0 top-0 z-50 flex size-full items-center justify-center bg-black/20"
+                onClick={closeAllQuestionsPopupOpen}
+              >
+                <div
+                  className="relative z-50 overflow-hidden rounded-xl bg-white shadow-lg"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex justify-between bg-gray-300">
+                    <XMarkIcon
+                      className="size-10 cursor-pointer px-2 py-1"
+                      onClick={closeAllQuestionsPopupOpen}
+                    />
+                    <h2>{t("viewAllQuestions")}</h2>
+                    <XMarkIcon className="invisible size-10 px-2 py-1" />
+                  </div>
+                  <div className="bg-white">
+                    <PopoverQuestionsTable
+                      onChooseQue={handleChooseQue}
+                      ques={questions}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : null}
-          <Button
-            className="bg-indigo-600 text-white"
-            onClick={openAllQuestionsPopupOpen}
-          >
-            <ListBulletIcon className="size-5" />
-          </Button>
-        </Tooltip>
+            ) : null}
+            <Button
+              className="bg-indigo-600 text-white"
+              onClick={openAllQuestionsPopupOpen}
+            >
+              <ListBulletIcon className="size-5" />
+            </Button>
+          </Tooltip>
 
-        <Tooltip
-          content={t("prev")}
-          className={`${currentQuestionIndex === 0 ? "invisible" : ""}`}
-        >
-          <Button
+          <Tooltip
+            content={t("prev")}
             className={`${currentQuestionIndex === 0 ? "invisible" : ""}`}
-            onClick={goToPreviousQuestion}
-            disabled={currentQuestionIndex === 0}
-            color="green"
           >
-            {lang === "en" ? (
-              <ChevronLeftIcon
-                className={`${currentQuestionIndex === 0 ? "invisible" : ""} size-5`}
-              />
-            ) : (
-              <ChevronRightIcon
-                className={`${currentQuestionIndex === 0 ? "invisible" : ""} size-5`}
-              />
-            )}
-          </Button>
-        </Tooltip>
+            <Button
+              className={`${currentQuestionIndex === 0 ? "invisible" : ""}`}
+              onClick={goToPreviousQuestion}
+              disabled={currentQuestionIndex === 0}
+              color="green"
+            >
+              {lang === "en" ? (
+                <ChevronLeftIcon
+                  className={`${currentQuestionIndex === 0 ? "invisible" : ""} size-5`}
+                />
+              ) : (
+                <ChevronRightIcon
+                  className={`${currentQuestionIndex === 0 ? "invisible" : ""} size-5`}
+                />
+              )}
+            </Button>
+          </Tooltip>
 
-        <Tooltip content={t("correctAnswer")}>
-          {questions[currentQuestionIndex]?.question?.description ? (
-            <>
+          <Tooltip content={t("correctAnswer")}>
+            {questions[currentQuestionIndex]?.question?.description ? (
+              <>
+                <EyeIcon
+                  className="size-12 cursor-pointer border-2"
+                  onClick={() => {
+                    showAns();
+                    openPopup();
+                  }}
+                />
+                <DraggablePopup
+                  isOpen={isPopupOpen}
+                  onClose={closePopup}
+                  title={t("description")}
+                >
+                  <div className="max-h-[80vh] w-96 max-w-[90vw] overflow-y-auto p-4">
+                    <p className="text-base leading-relaxed text-gray-500">
+                      {questions[currentQuestionIndex]?.question?.description}
+                    </p>
+                  </div>
+                </DraggablePopup>
+              </>
+            ) : (
               <EyeIcon
                 className="size-12 cursor-pointer border-2"
-                onClick={() => {
-                  showAns();
-                  openPopup();
-                }}
+                onClick={showAns}
               />
-              <DraggablePopup
-                isOpen={isPopupOpen}
-                onClose={closePopup}
-                title={t("description")}
-              >
-                <div className="max-h-[80vh] w-96 max-w-[90vw] overflow-y-auto p-4">
-                  <p className="text-base leading-relaxed text-gray-500">
-                    {questions[currentQuestionIndex]?.question?.description}
-                  </p>
-                </div>
-              </DraggablePopup>
-            </>
-          ) : (
-            <EyeIcon
-              className="size-12 cursor-pointer border-2"
-              onClick={showAns}
-            />
-          )}
-        </Tooltip>
+            )}
+          </Tooltip>
 
-        <Tooltip content={t("flaggedQuestions")}>
-          {isFlagQuestionsPopupOpen ? (
-            <div
-              className="fixed left-0 top-0 z-50 flex size-full items-center justify-center bg-black/20"
-              onClick={closeFlagQuestionsPopupOpen}
-            >
+          <Tooltip content={t("flaggedQuestions")}>
+            {isFlagQuestionsPopupOpen ? (
               <div
-                className="relative z-50 overflow-hidden rounded-xl bg-white shadow-lg"
-                onClick={(e) => e.stopPropagation()}
+                className="fixed left-0 top-0 z-50 flex size-full items-center justify-center bg-black/20"
+                onClick={closeFlagQuestionsPopupOpen}
               >
-                <div className="flex justify-between bg-gray-300">
-                  <XMarkIcon
-                    className="size-10 cursor-pointer px-2 py-1"
-                    onClick={closeFlagQuestionsPopupOpen}
-                  />
-                  <h2>{t("flaggedQuestions")}</h2>
-                  <XMarkIcon className="invisible size-10 px-2 py-1" />
-                </div>
-                <div className="bg-white">
-                  <PopoverQuestionsTable
-                    onChooseQue={handleChooseQue}
-                    ques={flaggedQuestionsArr}
-                  />
+                <div
+                  className="relative z-50 overflow-hidden rounded-xl bg-white shadow-lg"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex justify-between bg-gray-300">
+                    <XMarkIcon
+                      className="size-10 cursor-pointer px-2 py-1"
+                      onClick={closeFlagQuestionsPopupOpen}
+                    />
+                    <h2>{t("flaggedQuestions")}</h2>
+                    <XMarkIcon className="invisible size-10 px-2 py-1" />
+                  </div>
+                  <div className="bg-white">
+                    <PopoverQuestionsTable
+                      onChooseQue={handleChooseQue}
+                      ques={flaggedQuestionsArr}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-          ) : null}
-          <Button
-            className="bg-red-600 text-white hover:bg-red-700"
-            disabled={!flaggedQuestionsArr.length}
-            onClick={openFlagQuestionsPopupOpen}
-          >
-            <FlagIconOutline className="size-5" />
-          </Button>
-        </Tooltip>
+            ) : null}
+            <Button
+              className="bg-red-600 text-white hover:bg-red-700"
+              disabled={!flaggedQuestionsArr.length}
+              onClick={openFlagQuestionsPopupOpen}
+            >
+              <FlagIconOutline className="size-5" />
+            </Button>
+          </Tooltip>
 
-        {currentQuestionIndex === questions?.length - 1 ? (
-          <Tooltip content={t("endExam")}>
-            <Button onClick={openEndExamPopupOpen} color="green">
-              {lang === "ar" ? (
-                <ArrowLeftEndOnRectangleIcon className="size-5" />
-              ) : (
-                <ChevronRightIcon className="size-5" />
-              )}
-            </Button>
-          </Tooltip>
-        ) : (
-          <Tooltip content={t("next")}>
-            <Button onClick={goToNextQuestion} color="green">
-              {lang === "ar" ? (
-                <ChevronLeftIcon className="size-5" />
-              ) : (
-                <ChevronRightIcon className="size-5" />
-              )}
-            </Button>
-          </Tooltip>
-        )}
-        <FullScreenButton onFullscreen={onFullscreen} />
-      </footer>
-      {isEndExamPopupOpen ? (
-        <div className="fixed left-0 top-0 z-50 flex size-full items-center justify-center bg-black/20">
-          <div className="relative z-50 overflow-hidden rounded-xl bg-white shadow-lg">
-            <div className="flex justify-between bg-gray-300">
-              <XMarkIcon
-                className="size-10 cursor-pointer px-2 py-1"
-                onClick={closeEndExamPopupOpen}
-              />
-              {/* <XMarkIcon className="invisible size-10 px-2 py-1" /> */}
-            </div>
-            <div className="bg-white p-7 pb-0">
-              <h2 className="flex items-center text-xl">
-                {t("endExamAssertion")}
-              </h2>
-              <Button className="mx-auto my-4 bg-red-700" onClick={stopExam}>
-                {lang === "en" ? "End exam" : "إنهاء الامتحان"}
+          {currentQuestionIndex === questions?.length - 1 ? (
+            <Tooltip content={t("endExam")}>
+              <Button onClick={openEndExamPopupOpen} color="green">
+                {lang === "ar" ? (
+                  <ArrowLeftEndOnRectangleIcon className="size-5" />
+                ) : (
+                  <ChevronRightIcon className="size-5" />
+                )}
               </Button>
+            </Tooltip>
+          ) : (
+            <Tooltip content={t("next")}>
+              <Button onClick={goToNextQuestion} color="green">
+                {lang === "ar" ? (
+                  <ChevronLeftIcon className="size-5" />
+                ) : (
+                  <ChevronRightIcon className="size-5" />
+                )}
+              </Button>
+            </Tooltip>
+          )}
+          <FullScreenButton onFullscreen={onFullscreen} />
+        </footer>
+        {isEndExamPopupOpen ? (
+          <div className="fixed left-0 top-0 z-50 flex size-full items-center justify-center bg-black/20">
+            <div className="relative z-50 overflow-hidden rounded-xl bg-white shadow-lg">
+              <div className="flex justify-between bg-gray-300">
+                <XMarkIcon
+                  className="size-10 cursor-pointer px-2 py-1"
+                  onClick={closeEndExamPopupOpen}
+                />
+                {/* <XMarkIcon className="invisible size-10 px-2 py-1" /> */}
+              </div>
+              <div className="bg-white p-7 pb-0">
+                <h2 className="flex items-center text-xl">
+                  {t("endExamAssertion")}
+                </h2>
+                <Button className="mx-auto my-4 bg-red-700" onClick={stopExam}>
+                  {lang === "en" ? "End exam" : "إنهاء الامتحان"}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
     </div>
   );
 }

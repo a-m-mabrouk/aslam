@@ -1,6 +1,8 @@
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import QuestionMCQ from "./MCQ";
 import QuestionDragDrop from "./dragDrop";
+import { setActiveAssessQuestionIndex } from "../../../../../../../../../store/reducers/exams";
+import { useAppDispatch } from "../../../../../../../../../store";
 
 const Question = memo(
   ({
@@ -10,17 +12,15 @@ const Question = memo(
     question: Question;
     questionIndex: number;
   }) => {
+    const dispatch = useAppDispatch();
     const questionName = question?.question?.name.split("<<0>>");
     const questionText = questionName[0];
     const imagesArr = questionName[1] ? questionName[1].split("###") : null;
 
-    // const shuffle = useCallback((array: unknown[]) => {
-    //   for (let i = array.length - 1; i > 0; i--) {
-    //     const j = Math.floor(Math.random() * (i + 1));
-    //     [array[i], array[j]] = [array[j], array[i]];
-    //   }
-    //   return array;
-    // }, []);
+    useEffect(() => {
+      dispatch(setActiveAssessQuestionIndex(questionIndex));
+    }, [dispatch, questionIndex])
+    
     let questionMarkup = <h2>You can only add MCQ & DragDrop question.</h2>;
     if (question?.question?.type === "mcq") {
       questionMarkup = (

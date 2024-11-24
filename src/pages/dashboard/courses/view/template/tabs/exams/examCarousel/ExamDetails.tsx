@@ -1,5 +1,5 @@
 import { Button, Card } from "flowbite-react";
-import { useMemo } from "react";
+import useGetLang from "../../../../../../../../hooks/useGetLang";
 
 export default function ExamDetails({
   onStart,
@@ -10,18 +10,7 @@ export default function ExamDetails({
   questions: Question[];
   examTime: number;
 }) {
-  const formattedTime = useMemo(() => {
-    const formatTime = (seconds: number) => {
-      //   const hours = Math.floor(seconds / 3600);
-      //   const mins = Math.floor((seconds % 3600) / 60);
-      //   const secs = seconds % 60;
-      //   return `${hours}:${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
-      const mins = Math.floor(seconds / 60);
-      const secs = seconds % 60;
-      return `${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
-    };
-    return formatTime(examTime);
-  }, [examTime]);
+  const {lang} = useGetLang();
   return (
     <Card>
       <div className="flex justify-around">
@@ -35,7 +24,7 @@ export default function ExamDetails({
         </div>
         <div className="text-center">
           <h2 className="text-lg font-bold">مدة الاختبار</h2>
-          <p>{formattedTime}</p>
+          <p>{Math.round(examTime / 60)} {lang === 'ar'? "دقيقة" : "minutes"}</p>
         </div>
       </div>
       <ul className="ml-5 mt-4 list-disc text-right">

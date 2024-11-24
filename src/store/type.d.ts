@@ -13,6 +13,9 @@ interface ExamAnswer {
     activeAssessment: AssessmentType | null;
     isAssessmentRunning: boolean;
     review: boolean;
+    isPaused: boolean,
+    examTimeRemaining: number,
+    activeAssessQuestionIndex: number,
   }
   
   interface SetAnswerPayload {

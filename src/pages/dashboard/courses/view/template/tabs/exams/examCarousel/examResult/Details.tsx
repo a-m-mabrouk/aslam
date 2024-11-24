@@ -68,7 +68,7 @@ export default function Details() {
           </Table.Head>
           <Table.Body>
             {examAnswers.map((examAnswer, queIndex) => (
-              <Table.Row className="border-2">
+              <Table.Row className="border-2" key={queIndex}>
                 <Table.Cell>{queIndex + 1}</Table.Cell>
                 <Table.Cell>{examAnswer.domain}</Table.Cell>
                 <Table.Cell>{examAnswer.chapter}</Table.Cell>

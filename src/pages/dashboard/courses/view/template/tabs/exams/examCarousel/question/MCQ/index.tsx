@@ -73,7 +73,7 @@ export default function QuestionMCQ({
       <ul className="mt-4">
         {question?.question?.options.map((opt, i) => {
           const selectedOpt = examAnswers[questionIndex]?.selectedOpt;
-          const isSelected = selectedOpt.includes(opt.option);
+          const isSelected = selectedOpt?.includes(opt.option);
           const isCorrect = opt.answer === "true";
           const checkDisabled =
             examAnswers[questionIndex]?.showAnsClicked || review;

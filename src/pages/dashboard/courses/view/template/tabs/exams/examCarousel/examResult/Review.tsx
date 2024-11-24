@@ -43,7 +43,7 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
       <header className="grid gap-2 bg-gray-200 p-4">
         <div className="flex justify-between">
           <p>
-            {`${t(examAnswers[reviewQuestions[currentQuestionIndex].reviewIndex].answerstate)}: ${t("question")} ${reviewQuestions[currentQuestionIndex].reviewIndex + 1} ${t("of")} ${questions?.length}`}
+            {`${t(examAnswers[reviewQuestions[currentQuestionIndex]?.reviewIndex]?.answerstate)}: ${t("question")} ${reviewQuestions[currentQuestionIndex]?.reviewIndex + 1} ${t("of")} ${questions?.length}`}
           </p>
         </div>
       </header>
@@ -52,7 +52,7 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
       <section>
         <Question
           question={reviewQuestions[currentQuestionIndex]}
-          questionIndex={reviewQuestions[currentQuestionIndex].reviewIndex}
+          questionIndex={reviewQuestions[currentQuestionIndex]?.reviewIndex}
         />
         {reviewQuestions[currentQuestionIndex]?.question?.description ? (
           <div className="p-4">

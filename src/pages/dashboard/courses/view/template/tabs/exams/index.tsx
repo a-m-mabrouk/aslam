@@ -4,7 +4,9 @@ import {
   resetExam,
   setActiveAssessment,
   setAnswer,
+  setExamTimeRemaining,
   setIsAssessmentRunning,
+  setIsPaused,
   setReview,
 } from "../../../../../../../store/reducers/exams";
 import ExamInterface from "./examCarousel/ExamInterface";
@@ -17,14 +19,12 @@ import ExamsSidebar from "./ExamsSidebar";
 import {
   ArrowsPointingInIcon,
   ArrowsPointingOutIcon,
-  TrashIcon,
 } from "@heroicons/react/24/outline";
 import useGetLang from "../../../../../../../hooks/useGetLang";
-import { Button } from "flowbite-react";
-import axiosDefault from "../../../../../../../utilities/axios";
-import { API_EXAMS } from "../../../../../../../router/routes/apiRoutes";
-import withReactContent from "sweetalert2-react-content";
-import Swal from "sweetalert2";
+// import axiosDefault from "../../../../../../../utilities/axios";
+// import { API_EXAMS } from "../../../../../../../router/routes/apiRoutes";
+// import withReactContent from "sweetalert2-react-content";
+// import Swal from "sweetalert2";
 
 export function FullScreenButton({
   onFullscreen,
@@ -73,24 +73,18 @@ declare global {
 const ExamComponent = () => {
   const fullscreenDivRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const { activeAssessment, isAssessmentRunning } = useAppSelector(
-    ({ exams }) => exams,
-  );
-  if (!activeAssessment && localStorage.getItem("activeAssessment")) {
-    dispatch(setActiveAssessment(JSON.parse(localStorage.getItem("activeAssessment")!)))
-  }
-  const { questions, name: assessmentName } = activeAssessment
-    ? activeAssessment
-    : { questions: [], name: null };
+  const { activeAssessment, isAssessmentRunning } = useAppSelector(({ exams }) => exams);
+  const { questions, name: assessmentName } = activeAssessment ? activeAssessment : { questions: [], name: null };
 
   const { lang } = useGetLang();
   const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
   const [isExamEnded, setIsExamEnded] = useState(false);
 
-  const examTime = Math.round(questions?.length * 1.33333 * 60);
+  const questionTimeRatio = 1.2778;
+  const examTime = Math.round(questions?.length * questionTimeRatio * 60);
   const { t } = useTranslation("exams");
-  const { t: tAlert } = useTranslation("alerts");
-  const { t: tBtns } = useTranslation("buttons");
+  // const { t: tAlert } = useTranslation("alerts");
+  // const { t: tBtns } = useTranslation("buttons");
 
   const toggleFullscreen = () => {
     const element = fullscreenDivRef.current;
@@ -118,34 +112,36 @@ const ExamComponent = () => {
     setIsExamEnded(false);
     dispatch(setActiveAssessment(assessment));
   };
-  const handleDeleteQuestion = async () => {
-    const { id, course_id } = activeAssessment!;
-    console.log(activeAssessment);
+  // const handleDeleteQuestion = async () => {
+  //   const { id, course_id } = activeAssessment!;
+  //   console.log(activeAssessment);
     
-    withReactContent(Swal).fire({
-      title: tAlert("deleteQuestions"),
-      preConfirm: async () => {
-        try {
-          const response = await axiosDefault.post(
-            `${API_EXAMS.assessments}/${id}`, { _method: "put", course_id, questions: [] },
-          );
-          console.log(response);
-          dispatch(setActiveAssessment(null));
-        } catch (error) {
-          throw new Error("");
-        }
-      },
-      confirmButtonText: tBtns("confirm"),
-      icon: "warning",
-      denyButtonText: tBtns("cancel"),
-      showDenyButton: true,
-      showLoaderOnConfirm: true,
-    });
+  //   withReactContent(Swal).fire({
+  //     title: tAlert("deleteQuestions"),
+  //     preConfirm: async () => {
+  //       try {
+  //         const response = await axiosDefault.post(
+  //           `${API_EXAMS.assessments}/${id}`, { _method: "put", course_id, questions: [] },
+  //         );
+  //         console.log(response);
+  //         dispatch(setActiveAssessment(null));
+  //       } catch (error) {
+  //         throw new Error("");
+  //       }
+  //     },
+  //     confirmButtonText: tBtns("confirm"),
+  //     icon: "warning",
+  //     denyButtonText: tBtns("cancel"),
+  //     showDenyButton: true,
+  //     showLoaderOnConfirm: true,
+  //   });
     
-  };
+  // };
   const onStart = () => {
     dispatch(setIsAssessmentRunning(true));
     dispatch(resetExam());
+    dispatch(setIsPaused(false));
+    dispatch(setExamTimeRemaining(examTime));
     questions.forEach(({ question }, questionIndex) =>
       dispatch(
         setAnswer({
@@ -167,6 +163,7 @@ const ExamComponent = () => {
     setIsExamEnded(true);
     dispatch(setIsAssessmentRunning(false));
     dispatch(setReview(true));
+    dispatch(setIsPaused(false));
   };
 
   return (
@@ -201,11 +198,11 @@ const ExamComponent = () => {
                   />
                 ) : (
                   <>
-                    {isTeacher ? (
+                    {/* {isTeacher ? (
                       <Button onClick={handleDeleteQuestion}>
                         <TrashIcon className="size-5" />
                       </Button>
-                    ) : null}
+                    ) : null} */}
                     <ExamDetails
                       questions={questions}
                       examTime={examTime}
