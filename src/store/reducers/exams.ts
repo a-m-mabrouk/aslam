@@ -68,7 +68,7 @@ const examsSlice = createSlice({
     },
     setShowAnsClicked: (state, { payload }: PayloadAction<number>) => {
       const localExamAnswer = getParsedLocalStorage("examAnswers", []);
-      localExamAnswer[payload].selectedOpt = true;
+      localExamAnswer[payload].showAnsClicked = true;
       localStorage.setItem("examAnswers", JSON.stringify(localExamAnswer));
       state.examAnswers[payload].showAnsClicked = true;
     },
