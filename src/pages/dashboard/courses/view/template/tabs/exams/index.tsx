@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../../../../../../store";
 import {
   resetExam,
   setActiveAssessment,
+  setActiveAssessQuestionIndex,
   setAnswer,
   setExamTimeRemaining,
   setIsAssessmentRunning,
@@ -164,6 +165,7 @@ const ExamComponent = () => {
     dispatch(setIsAssessmentRunning(false));
     dispatch(setReview(true));
     dispatch(setIsPaused(false));
+    dispatch(setActiveAssessQuestionIndex(0));
   };
 
   return (
