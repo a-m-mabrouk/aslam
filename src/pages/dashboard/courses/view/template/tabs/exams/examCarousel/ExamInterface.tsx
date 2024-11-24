@@ -278,7 +278,7 @@ export default function ExamInterface({
 
   return (
     <div
-      className={`grid grid-rows-[auto_1fr_auto] overflow-auto rounded-[10px] border-2 ${borderColor} relative`}
+      className={`grid h-full overflow-auto rounded-[10px] border-2 ${borderColor} relative`}
     >
       <div
         className={`absolute z-0 grid size-full place-content-center gap-5 bg-violet-50 ${isPaused ? "" : "hidden"}`}
@@ -296,7 +296,7 @@ export default function ExamInterface({
           <span>{formatTime(timeRemaining)}</span>
         </div>
       </div>
-      <div className={isPaused ? "invisible z-10" : ""}>
+      <div className={`grid h-full grid-rows-[auto_1fr_auto] ${isPaused ? "invisible" : ""}`}>
         {/* Header */}
         <header className="grid gap-2 bg-gray-200 p-4">
           <div className="flex justify-between">
