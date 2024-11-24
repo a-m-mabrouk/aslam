@@ -93,7 +93,7 @@ export default function QuestionMCQ({
             >
               <input
                 type={correctOptionsArr.length > 1 ? "checkbox" : "radio"}
-                checked={selectedOptionsArr.includes(opt.option)}
+                checked={selectedOptionsArr?.includes(opt.option)}
                 name={`question-${questionIndex}`}
                 id={`option-${i + 1}`}
                 onChange={handleRadioChange}

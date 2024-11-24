@@ -105,7 +105,7 @@ export default function UploadQuestions() {
                 optText &&
                   customQuestion.options.push({
                     option: optText,
-                    answer: q.answer.replace(" ", "").split("-").includes(opt)
+                    answer: q.answer.replace(" ", "").split("-")?.includes(opt)
                       ? "true"
                       : "false",
                   });
