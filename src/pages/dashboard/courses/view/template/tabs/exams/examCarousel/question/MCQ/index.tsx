@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   useAppDispatch,
   useAppSelector,
@@ -10,14 +10,52 @@ import {
 import { useTranslation } from "react-i18next";
 import { toastifyBox } from "../../../../../../../../../../helper/toastifyBox";
 
+export function OptionEditable({
+  opt,
+  optIndex,
+}: {
+  opt: { option: string; answer: string };
+  optIndex: number;
+}) {
+  const [optText, setOptText] = useState<string>(opt.option);
+  const [isTrue, setIsTrue] = useState<boolean>(opt.answer === "true");
+  return (
+    <li
+      key={opt.option}
+      className={`mt-2 flex items-center rounded border bg-transparent px-4 py-2 font-semibold`}
+    >
+      <input
+        type="text"
+        hidden
+        name={`opt-${optIndex}`}
+        onChange={() => {}}
+        value={`{"option": "${optText}", "answer": "${isTrue}"}`}
+      />
+      <input
+        type="checkbox"
+        checked={isTrue}
+        onChange={() => setIsTrue((prev) => !prev)}
+        value={isTrue.toString()}
+      />
+      <textarea
+        className="ms-2 grow"
+        onInput={({ currentTarget }) => setOptText(currentTarget.value)}
+        defaultValue={optText}
+      ></textarea>
+    </li>
+  );
+}
+
 export default function QuestionMCQ({
   question,
   questionIndex,
   imagesArr,
+  editable,
 }: {
   question: Question;
   questionIndex: number;
   imagesArr: string[] | null;
+  editable: boolean;
 }) {
   const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
@@ -68,8 +106,31 @@ export default function QuestionMCQ({
     },
     [correctOptionsArr, dispatch, questionIndex, selectedOptionsArr, t],
   );
-  return (
-    <div className={imagesArr? "grid grid-cols-[3fr_2fr]": undefined}>
+  return editable ? (
+    <div className={imagesArr ? "grid" : undefined}>
+      {imagesArr ? (
+        <div id="head-imgs-container" className="grid gap-1">
+          <h4 className="text-xl">Image:</h4>
+          {imagesArr.map((img, i) => (
+            <input
+              type="text"
+              className="w-full"
+              name={`img-${i}`}
+              key={img + i}
+              defaultValue={img}
+            />
+          ))}
+        </div>
+      ) : null}
+      <ul className="mt-4">
+        <h4 className="text-xl">Options:</h4>
+        {question?.question?.options.map((opt, i) => (
+          <OptionEditable key={i} opt={opt} optIndex={i} />
+        ))}
+      </ul>
+    </div>
+  ) : (
+    <div className={imagesArr ? "grid grid-cols-[3fr_2fr]" : undefined}>
       <ul className="mt-4">
         {question?.question?.options.map((opt, i) => {
           const selectedOpt = examAnswers[questionIndex]?.selectedOpt;
@@ -111,10 +172,10 @@ export default function QuestionMCQ({
       </ul>
       {imagesArr ? (
         <div id="head-imgs-container" className="grid gap-1">
-          {imagesArr.map((img) => (
+          {imagesArr.map((img, i) => (
             <img
               className="mx-auto size-4/5 rounded border-2"
-              key={img + crypto.randomUUID()}
+              key={img + i}
               src={img}
               alt=""
             />
