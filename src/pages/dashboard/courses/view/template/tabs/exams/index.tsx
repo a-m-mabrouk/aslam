@@ -20,12 +20,14 @@ import ExamsSidebar from "./ExamsSidebar";
 import {
   ArrowsPointingInIcon,
   ArrowsPointingOutIcon,
+  // TrashIcon,
 } from "@heroicons/react/24/outline";
 import useGetLang from "../../../../../../../hooks/useGetLang";
 // import axiosDefault from "../../../../../../../utilities/axios";
 // import { API_EXAMS } from "../../../../../../../router/routes/apiRoutes";
 // import withReactContent from "sweetalert2-react-content";
 // import Swal from "sweetalert2";
+// import { Button } from "flowbite-react";
 
 export function FullScreenButton({
   onFullscreen,
@@ -114,17 +116,16 @@ const ExamComponent = () => {
     dispatch(setActiveAssessment(assessment));
   };
   // const handleDeleteQuestion = async () => {
-  //   const { id, course_id } = activeAssessment!;
-  //   console.log(activeAssessment);
-    
   //   withReactContent(Swal).fire({
   //     title: tAlert("deleteQuestions"),
   //     preConfirm: async () => {
   //       try {
-  //         const response = await axiosDefault.post(
-  //           `${API_EXAMS.assessments}/${id}`, { _method: "put", course_id, questions: [] },
+  //         activeAssessment?.questions.forEach(async ({id}) => {
+  //           const response = await axiosDefault.post(
+  //           `${API_EXAMS.questions}/${id}`, { _method: "delete"},
   //         );
   //         console.log(response);
+  //         })
   //         dispatch(setActiveAssessment(null));
   //       } catch (error) {
   //         throw new Error("");
