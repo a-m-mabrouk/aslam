@@ -33,11 +33,12 @@ const Question = memo(
   }) => {
     const [editable, setEditable] = useState<boolean>(false);
     const dispatch = useAppDispatch();
+    const review = useAppSelector(({ exams }) => exams.review);    
     const assessment_id = useAppSelector(({ exams }) => exams.activeAssessment?.id);
     const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
     const questionName = question?.question?.name.split("<<0>>");
-    const questionText = questionName[0];
-    const imagesArr = questionName[1] ? questionName[1].split("###") : null;
+    const questionText = questionName && questionName[0]? questionName[0]: '';
+    const imagesArr = questionName && questionName[1] ? questionName[1].split("###") : null;
 
     useEffect(() => {
       dispatch(setActiveAssessQuestionIndex(questionIndex));
@@ -99,7 +100,7 @@ const Question = memo(
 
     return (
       <main className="grow p-4 md:min-h-[30rem]">
-        {editable && isTeacher ? (
+        {editable && isTeacher && !review ? (
           <form onSubmit={(event) => handleEditQuestion(event)}>
             <div className="flex justify-center gap-2">
               <Button
@@ -125,7 +126,7 @@ const Question = memo(
           </form>
         ) : (
           <>
-            {isTeacher && question.question.type === "mcq" ? (
+            {isTeacher && !review && question?.question?.type === "mcq" ? (
               <Button className="!m-0 justify-self-center !p-0" onClick={() => setEditable(true)}>
                 <PencilSquareIcon className="size-5" />
               </Button>

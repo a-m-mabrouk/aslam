@@ -26,7 +26,7 @@ export default function DBSidebar() {
         </Sidebar.Logo>
         <Sidebar.ItemGroup>
           {SIDEBAR_ITEMS.map((item) => (
-            <Sidebar.Item key={item.name} icon={item.icon}>
+            <Sidebar.Item key={item.name} icon={item.icon} as="div">
               <NavLink
                 to={item.path}
                 className={({ isActive }: { isActive: boolean }) =>

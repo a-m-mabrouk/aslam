@@ -158,6 +158,7 @@ export default function ExamInterface({
     examTimeRemaining: timeRemaining,
     activeAssessQuestionIndex,
   } = useAppSelector(({ exams }) => exams);
+  const timeRemainingRef = useRef(timeRemaining);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(
     activeAssessQuestionIndex,
   );
@@ -196,12 +197,16 @@ export default function ExamInterface({
   }, [dispatch, startTimeoutAnimation, timeRemaining]);
 
   useEffect(() => {
-    if (timeRemaining === 0) {
+    timeRemainingRef.current = timeRemaining;
+  }, [timeRemaining]);
+
+  useEffect(() => {
+    if (timeRemainingRef.current === 0) {
       startTimeoutAnimation();
       dispatch(setIsPaused(true));
     }
-  }, [dispatch, startTimeoutAnimation, timeRemaining]);
-
+  }, [dispatch, startTimeoutAnimation]);
+  
   const pauseTimer = () => {
     dispatch(setIsPaused(true));
     clearTimerInterval();

@@ -43,10 +43,9 @@ export function DrawerSidebar() {
                   <Sidebar.ItemGroup>
                     {SIDEBAR_ITEMS.map((item) => (
                       <Sidebar.Item
-                        // as={NavLink}
                         key={item.name}
-                        // to={item.path}
                         icon={item.icon}
+                        as="div"
                       >
                         <NavLink
                           to={item.path}

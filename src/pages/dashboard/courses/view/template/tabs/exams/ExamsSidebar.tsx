@@ -5,7 +5,11 @@ import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "../../../../../../../store";
 import useGetLang from "../../../../../../../hooks/useGetLang";
-import { PencilSquareIcon, TrashIcon, BookmarkIcon } from "@heroicons/react/24/outline";
+import {
+  PencilSquareIcon,
+  TrashIcon,
+  BookmarkIcon,
+} from "@heroicons/react/24/outline";
 import {
   addAssessment,
   addDomain,
@@ -28,12 +32,13 @@ export function AddDomainModal({
   domainId = null,
   subDomainId = null,
   isEdit = false,
+  isButtonDisabled = false,
 }: AddNewModalProps) {
   const dispatch = useAppDispatch();
   const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
   const { t } = useTranslation("exams");
   const { id: courseId } = useParams();
-
+  const { lang } = useGetLang();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [nameEn, setNameEn] = useState<string>("");
   const [nameAr, setNameAr] = useState<string>("");
@@ -92,7 +97,10 @@ export function AddDomainModal({
             }),
           )
             .unwrap()
-            .then((data) => {toastifyBox("success", data.message);dispatch(fetchDomains(obj?.course_id))})
+            .then((data) => {
+              toastifyBox("success", data.message);
+              dispatch(fetchDomains(obj?.course_id));
+            })
             .catch((err) => toastifyBox("error", err.message || "Failed!"));
         }
       } else {
@@ -110,7 +118,10 @@ export function AddDomainModal({
             }),
           )
             .unwrap()
-            .then((data) => {toastifyBox("success", data.message);dispatch(fetchDomains(obj?.course_id))})
+            .then((data) => {
+              toastifyBox("success", data.message);
+              dispatch(fetchDomains(obj?.course_id));
+            })
             .catch((err) => toastifyBox("error", err.message || "Failed!"));
         }
       } else {
@@ -128,7 +139,10 @@ export function AddDomainModal({
             }),
           )
             .unwrap()
-            .then((data) => {toastifyBox("success", data.message);dispatch(fetchDomains(obj?.course_id))})
+            .then((data) => {
+              toastifyBox("success", data.message);
+              dispatch(fetchDomains(obj?.course_id));
+            })
             .catch((err) => toastifyBox("error", err.message || "Failed!"));
         }
       } else {
@@ -142,10 +156,19 @@ export function AddDomainModal({
     <>
       {isEdit ? (
         <PencilSquareIcon
-          className="size-5 cursor-pointer"
+          title={
+            isButtonDisabled
+              ? lang === "en"
+                ? "This assessment is already active"
+                : "هذا الامتحان نشط بالفعل"
+              : undefined
+          }
+          className={`size-5 ${isButtonDisabled ? "cursor-not-allowed" : "cursor-pointer"}`}
           onClick={(event) => {
             event.stopPropagation();
-            onOpenModal();
+            if (!isButtonDisabled) {
+              onOpenModal();
+            }
           }}
         />
       ) : (
@@ -157,7 +180,13 @@ export function AddDomainModal({
         </div>
       )}
 
-      <Modal key={modalKey} show={openModal} size="md" onClose={onCloseModal} popup>
+      <Modal
+        key={modalKey}
+        show={openModal}
+        size="md"
+        onClose={onCloseModal}
+        popup
+      >
         <Modal.Header />
         <Modal.Body>
           <div className="space-y-6">
@@ -221,6 +250,9 @@ export default function ExamsSidebar({
 }) {
   const { id: course_id } = useParams();
   const dispatch = useAppDispatch();
+  const activeAssessmentId = useAppSelector(
+    ({ exams }) => exams.activeAssessment?.id,
+  );
   const domains = useAppSelector(({ examsDomains }) => examsDomains.domains);
   const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
 
@@ -339,30 +371,49 @@ export default function ExamsSidebar({
                       </AccordionCard.Title>
                       <AccordionCard.Content>
                         {subdomain.assessments?.map((assessment) => (
-                          <h3
-                            className="flex gap-2 p-2"
-                            key={assessment.id}
-                          >
+                          <h3 className="flex gap-2 p-2" key={assessment.id}>
                             {isTeacher ? (
                               <>
                                 <TrashIcon
-                                  className="size-5 cursor-pointer"
+                                  title={
+                                    activeAssessmentId === assessment.id
+                                      ? lang === "en"
+                                        ? "This assessment is already active"
+                                        : "هذا الامتحان نشط بالفعل"
+                                      : undefined
+                                  }
+                                  className={`size-5 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer"}`}
                                   onClick={(event) => {
                                     event.stopPropagation();
-                                    handleDeleteAssessment(assessment.id);
+                                    if (activeAssessmentId !== assessment.id) {
+                                      handleDeleteAssessment(assessment.id);
+                                    }
                                   }}
                                 />
                                 <AddDomainModal
                                   modalType="assessment"
                                   isEdit
                                   obj={assessment}
+                                  isButtonDisabled={
+                                    activeAssessmentId === assessment.id
+                                  }
                                 />
                               </>
-                            ) : <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />}
+                            ) : (
+                              <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
+                            )}
                             <span
-                              className="cursor-pointer text-indigo-900 hover:underline"
+                              title={
+                                activeAssessmentId === assessment.id
+                                  ? lang === "en"
+                                    ? "This assessment is already active"
+                                    : "هذا الامتحان نشط بالفعل"
+                                  : undefined
+                              }
+                              className={`text-indigo-900 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
                               onClick={() => {
-                                onSelectAssessment(assessment);
+                                activeAssessmentId !== assessment.id &&
+                                  onSelectAssessment(assessment);
                               }}
                             >
                               {lang === "en"
@@ -384,29 +435,49 @@ export default function ExamsSidebar({
               ) : undefined}
               {domain.assessments?.map((assessment) => (
                 <h3
-                  className="flex gap-2 p-2"
+                  className={`flex gap-2 p-2  ${activeAssessmentId === assessment.id ? "select-none" : "cursor-pointer"}`}
                   key={assessment.id}
                 >
                   {isTeacher ? (
                     <>
                       <TrashIcon
-                        className="size-5 cursor-pointer"
+                        title={
+                          activeAssessmentId === assessment.id
+                            ? lang === "en"
+                              ? "This assessment is already active"
+                              : "هذا الامتحان نشط بالفعل"
+                            : undefined
+                        }
+                        className={`size-5 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer"}`}
                         onClick={(event) => {
                           event.stopPropagation();
-                          handleDeleteAssessment(assessment.id);
+                          if (activeAssessmentId !== assessment.id) {
+                            handleDeleteAssessment(assessment.id);
+                          }
                         }}
                       />
                       <AddDomainModal
                         modalType="assessment"
                         isEdit
                         obj={assessment}
+                        isButtonDisabled={activeAssessmentId === assessment.id}
                       />
                     </>
-                  ) : <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />}
+                  ) : (
+                    <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
+                  )}
                   <span
-                    className="cursor-pointer text-indigo-900 hover:underline"
+                    title={
+                      activeAssessmentId === assessment.id
+                        ? lang === "en"
+                          ? "This assessment is already active"
+                          : "هذا الامتحان نشط بالفعل"
+                        : undefined
+                    }
+                    className={`text-indigo-900 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
                     onClick={() => {
-                      onSelectAssessment(assessment);
+                      activeAssessmentId !== assessment.id &&
+                        onSelectAssessment(assessment);
                     }}
                   >
                     {lang === "en"

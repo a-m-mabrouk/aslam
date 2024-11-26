@@ -70,4 +70,5 @@ interface AddNewModalProps {
   subDomainId?: number | null;
   isEdit?: boolean;
   obj?: DomainType | AssessmentType;
+  isButtonDisabled?: boolean;
 }
