@@ -150,9 +150,15 @@ export default function QuestionMCQ({
           return (
             <li
               key={opt.option}
-              className={`mt-2 border ${ansClass} rounded bg-transparent px-4 py-2 font-semibold ${checkDisabled ? "pointer-events-none opacity-70" : ""}`}
+              className={`mt-2 border ${ansClass} rounded bg-transparent px-4 py-2 font-semibold ${checkDisabled ? "pointer-events-none opacity-70" : "cursor-pointer"}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                const target = e.target as HTMLLIElement;
+                target.querySelector('label')?.click();
+              }}
             >
               <input
+                className="cursor-pointer"
                 type={correctOptionsArr.length > 1 ? "checkbox" : "radio"}
                 checked={selectedOptionsArr?.includes(opt.option)}
                 name={`question-${questionIndex}`}
