@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   useAppDispatch,
   useAppSelector,
@@ -14,7 +14,7 @@ export function OptionEditable({
   opt,
   optIndex,
 }: {
-  opt: { option: string; answer: string };
+  opt: Option;
   optIndex: number;
 }) {
   const [optText, setOptText] = useState<string>(opt.option);
@@ -46,6 +46,53 @@ export function OptionEditable({
   );
 }
 
+export function OptionItem({
+  opt,
+  optIndex,
+  ansClass,
+  questionIndex,
+  onRadioChange,
+  checkDisabled,
+  correctOptionsArr,
+  selectedOptionsArr,
+}: {
+  opt: Option;
+  optIndex: number;
+  ansClass: string;
+  questionIndex: number;
+  onRadioChange: (value: string, checked: boolean) => void;
+  checkDisabled: boolean;
+  correctOptionsArr: string[];
+  selectedOptionsArr: string[];
+}) {
+  const buttonType = correctOptionsArr.length > 1 ? "checkbox" : "radio";
+  const optRef = useRef<HTMLInputElement | null>(null);
+  return (
+    <li
+      key={opt.option}
+      className={`mt-2 border ${ansClass} rounded bg-transparent px-4 py-2 font-semibold ${checkDisabled ? "pointer-events-none opacity-70" : "cursor-pointer"}`}
+      onClick={(e) => {
+        optRef.current?.click();
+        e.stopPropagation();
+      }}
+    >
+      <input
+        className="cursor-pointer"
+        type={buttonType}
+        checked={selectedOptionsArr?.includes(opt.option)}
+        name={`question-${questionIndex}`}
+        id={`option-${optIndex + 1}`}
+        onChange={({target}) => onRadioChange(opt.option, target.checked)}
+        value={opt.option}
+        ref={optRef}
+      />
+      <label htmlFor={`option-${optIndex + 1}`} className="ms-2 cursor-pointer">
+        {opt.option}
+      </label>
+    </li>
+  );
+}
+
 export default function QuestionMCQ({
   question,
   questionIndex,
@@ -73,8 +120,8 @@ export default function QuestionMCQ({
   );
 
   const handleRadioChange = useCallback(
-    ({ target }: { target: HTMLInputElement }) => {
-      const { value, checked } = target;
+    (value: string, checked: boolean ) => {
+      // const { value, checked } = target;
       let userAnswers: string[] = [];
       if (correctOptionsArr.length === 1) {
         userAnswers = [value];
@@ -106,6 +153,40 @@ export default function QuestionMCQ({
     },
     [correctOptionsArr, dispatch, questionIndex, selectedOptionsArr, t],
   );
+  // const handleRadioChange = useCallback(
+  //   ({ target }: { target: HTMLInputElement }) => {
+  //     const { value, checked } = target;
+  //     let userAnswers: string[] = [];
+  //     if (correctOptionsArr.length === 1) {
+  //       userAnswers = [value];
+  //     } else {
+  //       if (checked) {
+  //         if (selectedOptionsArr.length < correctOptionsArr.length) {
+  //           userAnswers = [...selectedOptionsArr, value].sort();
+  //         } else {
+  //           toastifyBox(
+  //             "info",
+  //             t("youCanOnlyChoose") + correctOptionsArr.length,
+  //           );
+  //           return;
+  //         }
+  //       } else {
+  //         userAnswers = selectedOptionsArr
+  //           .filter((v: string) => v !== value)
+  //           .sort();
+  //       }
+  //     }
+  //     const answerstate = !userAnswers.length
+  //       ? "skipped"
+  //       : userAnswers!.join() === correctOptionsArr.join()
+  //         ? "correct"
+  //         : "wrong";
+  //     const selectedOpt = JSON.stringify(userAnswers);
+  //     dispatch(setAnswerState({ questionIndex, answerstate }));
+  //     dispatch(setSelectedOpt({ questionIndex, selectedOpt }));
+  //   },
+  //   [correctOptionsArr, dispatch, questionIndex, selectedOptionsArr, t],
+  // );
   return editable ? (
     <div className={imagesArr ? "grid" : undefined}>
       {imagesArr ? (
@@ -148,31 +229,17 @@ export default function QuestionMCQ({
                   ? "border-green-800 border-2"
                   : "border-gray-300";
           return (
-            <li
+            <OptionItem
               key={opt.option}
-              className={`mt-2 border ${ansClass} rounded bg-transparent px-4 py-2 font-semibold ${checkDisabled ? "pointer-events-none opacity-70" : "cursor-pointer"}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                const target = e.target as HTMLLIElement;
-                target.querySelector('label')?.click();
-              }}
-            >
-              <input
-                className="cursor-pointer"
-                type={correctOptionsArr.length > 1 ? "checkbox" : "radio"}
-                checked={selectedOptionsArr?.includes(opt.option)}
-                name={`question-${questionIndex}`}
-                id={`option-${i + 1}`}
-                onChange={handleRadioChange}
-                value={opt.option}
-              />
-              <label
-                htmlFor={`option-${i + 1}`}
-                className="ms-2 cursor-pointer"
-              >
-                {opt.option}
-              </label>
-            </li>
+              opt={opt}
+              optIndex={i}
+              questionIndex={questionIndex}
+              ansClass={ansClass}
+              checkDisabled={checkDisabled}
+              onRadioChange={handleRadioChange}
+              correctOptionsArr={correctOptionsArr}
+              selectedOptionsArr={selectedOptionsArr}
+            />
           );
         })}
       </ul>

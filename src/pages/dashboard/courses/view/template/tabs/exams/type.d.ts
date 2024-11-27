@@ -1,3 +1,8 @@
+interface Option {
+  option: string;
+  answer: string;
+}
+
 interface QuestionForUpload {
   type: "mcq" | "dragdrop";
   chapter?: string;
@@ -5,10 +10,7 @@ interface QuestionForUpload {
   name: string;
   description: string;
   degree: number;
-  options: {
-    option: string;
-    answer: string;
-  }[];
+  options: Option[];
 }
 
 interface Question {
