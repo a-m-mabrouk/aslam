@@ -20,14 +20,14 @@ import ExamsSidebar from "./ExamsSidebar";
 import {
   ArrowsPointingInIcon,
   ArrowsPointingOutIcon,
-  // TrashIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import useGetLang from "../../../../../../../hooks/useGetLang";
-// import axiosDefault from "../../../../../../../utilities/axios";
-// import { API_EXAMS } from "../../../../../../../router/routes/apiRoutes";
-// import withReactContent from "sweetalert2-react-content";
-// import Swal from "sweetalert2";
-// import { Button } from "flowbite-react";
+import axiosDefault from "../../../../../../../utilities/axios";
+import { API_EXAMS } from "../../../../../../../router/routes/apiRoutes";
+import withReactContent from "sweetalert2-react-content";
+import Swal from "sweetalert2";
+import { Button } from "flowbite-react";
 
 export function FullScreenButton({
   onFullscreen,
@@ -76,8 +76,12 @@ declare global {
 const ExamComponent = () => {
   const fullscreenDivRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const { activeAssessment, isAssessmentRunning } = useAppSelector(({ exams }) => exams);
-  const { questions, name: assessmentName } = activeAssessment ? activeAssessment : { questions: [], name: null };
+  const { activeAssessment, isAssessmentRunning } = useAppSelector(
+    ({ exams }) => exams,
+  );
+  const { questions, name: assessmentName } = activeAssessment
+    ? activeAssessment
+    : { questions: [], name: null };
 
   const { lang } = useGetLang();
   const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
@@ -86,8 +90,8 @@ const ExamComponent = () => {
   const questionTimeRatio = 1.2778;
   const examTime = Math.round(questions?.length * questionTimeRatio * 60);
   const { t } = useTranslation("exams");
-  // const { t: tAlert } = useTranslation("alerts");
-  // const { t: tBtns } = useTranslation("buttons");
+  const { t: tAlert } = useTranslation("alerts");
+  const { t: tBtns } = useTranslation("buttons");
 
   const toggleFullscreen = () => {
     const element = fullscreenDivRef.current;
@@ -115,30 +119,30 @@ const ExamComponent = () => {
     setIsExamEnded(false);
     dispatch(setActiveAssessment(assessment));
   };
-  // const handleDeleteQuestion = async () => {
-  //   withReactContent(Swal).fire({
-  //     title: tAlert("deleteQuestions"),
-  //     preConfirm: async () => {
-  //       try {
-  //         activeAssessment?.questions.forEach(async ({id}) => {
-  //           const response = await axiosDefault.post(
-  //           `${API_EXAMS.questions}/${id}`, { _method: "delete"},
-  //         );
-  //         console.log(response);
-  //         })
-  //         dispatch(setActiveAssessment(null));
-  //       } catch (error) {
-  //         throw new Error("");
-  //       }
-  //     },
-  //     confirmButtonText: tBtns("confirm"),
-  //     icon: "warning",
-  //     denyButtonText: tBtns("cancel"),
-  //     showDenyButton: true,
-  //     showLoaderOnConfirm: true,
-  //   });
-    
-  // };
+  const handleDeleteQuestion = async () => {
+    withReactContent(Swal).fire({
+      title: tAlert("deleteQuestions"),
+      preConfirm: async () => {
+        try {
+          activeAssessment?.questions.forEach(async ({ id }) => {
+            const response = await axiosDefault.post(
+              `${API_EXAMS.questions}/${id}`,
+              { _method: "delete" },
+            );
+            console.log(response);
+          });
+          dispatch(setActiveAssessment(null));
+        } catch (error) {
+          throw new Error("");
+        }
+      },
+      confirmButtonText: tBtns("confirm"),
+      icon: "warning",
+      denyButtonText: tBtns("cancel"),
+      showDenyButton: true,
+      showLoaderOnConfirm: true,
+    });
+  };
   const onStart = () => {
     dispatch(setIsAssessmentRunning(true));
     dispatch(resetExam());
@@ -201,11 +205,11 @@ const ExamComponent = () => {
                   />
                 ) : (
                   <>
-                    {/* {isTeacher ? (
-                      <Button onClick={handleDeleteQuestion}>
+                    {isTeacher ? (
+                      <Button onClick={handleDeleteQuestion} className="hidden">
                         <TrashIcon className="size-5" />
                       </Button>
-                    ) : null} */}
+                    ) : null}
                     <ExamDetails
                       questions={questions}
                       examTime={examTime}

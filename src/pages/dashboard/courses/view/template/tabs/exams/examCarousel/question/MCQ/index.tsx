@@ -71,10 +71,7 @@ export function OptionItem({
     <li
       key={opt.option}
       className={`mt-2 border ${ansClass} rounded bg-transparent px-4 py-2 font-semibold ${checkDisabled ? "pointer-events-none opacity-70" : "cursor-pointer"}`}
-      onClick={(e) => {
-        optRef.current?.click();
-        e.stopPropagation();
-      }}
+      onClick={() => optRef.current?.click()}
     >
       <input
         className="cursor-pointer"
@@ -82,11 +79,20 @@ export function OptionItem({
         checked={selectedOptionsArr?.includes(opt.option)}
         name={`question-${questionIndex}`}
         id={`option-${optIndex + 1}`}
-        onChange={({target}) => onRadioChange(opt.option, target.checked)}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        onChange={({ target }) => onRadioChange(opt.option, target.checked)}
         value={opt.option}
         ref={optRef}
       />
-      <label htmlFor={`option-${optIndex + 1}`} className="ms-2 cursor-pointer">
+      <label
+        htmlFor={`option-${optIndex + 1}`}
+        className="ms-2 cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
         {opt.option}
       </label>
     </li>
@@ -120,8 +126,7 @@ export default function QuestionMCQ({
   );
 
   const handleRadioChange = useCallback(
-    (value: string, checked: boolean ) => {
-      // const { value, checked } = target;
+    (value: string, checked: boolean) => {
       let userAnswers: string[] = [];
       if (correctOptionsArr.length === 1) {
         userAnswers = [value];
@@ -153,40 +158,6 @@ export default function QuestionMCQ({
     },
     [correctOptionsArr, dispatch, questionIndex, selectedOptionsArr, t],
   );
-  // const handleRadioChange = useCallback(
-  //   ({ target }: { target: HTMLInputElement }) => {
-  //     const { value, checked } = target;
-  //     let userAnswers: string[] = [];
-  //     if (correctOptionsArr.length === 1) {
-  //       userAnswers = [value];
-  //     } else {
-  //       if (checked) {
-  //         if (selectedOptionsArr.length < correctOptionsArr.length) {
-  //           userAnswers = [...selectedOptionsArr, value].sort();
-  //         } else {
-  //           toastifyBox(
-  //             "info",
-  //             t("youCanOnlyChoose") + correctOptionsArr.length,
-  //           );
-  //           return;
-  //         }
-  //       } else {
-  //         userAnswers = selectedOptionsArr
-  //           .filter((v: string) => v !== value)
-  //           .sort();
-  //       }
-  //     }
-  //     const answerstate = !userAnswers.length
-  //       ? "skipped"
-  //       : userAnswers!.join() === correctOptionsArr.join()
-  //         ? "correct"
-  //         : "wrong";
-  //     const selectedOpt = JSON.stringify(userAnswers);
-  //     dispatch(setAnswerState({ questionIndex, answerstate }));
-  //     dispatch(setSelectedOpt({ questionIndex, selectedOpt }));
-  //   },
-  //   [correctOptionsArr, dispatch, questionIndex, selectedOptionsArr, t],
-  // );
   return editable ? (
     <div className={imagesArr ? "grid" : undefined}>
       {imagesArr ? (
