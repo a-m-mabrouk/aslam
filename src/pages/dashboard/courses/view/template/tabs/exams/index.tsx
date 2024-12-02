@@ -167,6 +167,13 @@ const ExamComponent = () => {
     dispatch(setReview(true));
     dispatch(setIsPaused(false));
     dispatch(setActiveAssessQuestionIndex(0));
+    const examAnswers = JSON.parse(localStorage.getItem("examAnswers")!);
+    examAnswers.forEach(({answerstate}: {answerstate: string}, i: number) => {
+      if (answerstate === "wrong") {
+        console.log(i);
+        
+      }
+    })
   };
 
   return (
