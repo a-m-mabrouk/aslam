@@ -124,13 +124,9 @@ const ExamComponent = () => {
       title: tAlert("deleteQuestions"),
       preConfirm: async () => {
         try {
-          activeAssessment?.questions.forEach(async ({ id }) => {
-            const response = await axiosDefault.post(
-              `${API_EXAMS.questions}/${id}`,
-              { _method: "delete" },
-            );
-            console.log(response);
-          });
+          await axiosDefault.delete(
+            `${API_EXAMS.deleteAllQuestions}/${activeAssessment?.id}`,
+          );
           dispatch(setActiveAssessment(null));
         } catch (error) {
           throw new Error("");
@@ -205,8 +201,8 @@ const ExamComponent = () => {
                   />
                 ) : (
                   <>
-                    {isTeacher ? (
-                      <Button onClick={handleDeleteQuestion} className="hidden">
+                    {isTeacher && activeAssessment?.questions?.length > 0 ? (
+                      <Button onClick={handleDeleteQuestion}>
                         <TrashIcon className="size-5" />
                       </Button>
                     ) : null}

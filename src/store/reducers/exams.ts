@@ -91,7 +91,7 @@ const examsSlice = createSlice({
       state,
       { payload }: PayloadAction<AssessmentType | null>,
     ) => {
-      if (state.isAssessmentRunning && state.activeAssessment?.id !== payload?.id) {
+      if (payload && state.isAssessmentRunning && state.activeAssessment?.id !== payload?.id) {
         toastifyBox("error", "Stop Exam first");
       } else {
         if (payload) {
