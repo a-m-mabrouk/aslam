@@ -146,7 +146,7 @@ export default function ExamInterface({
 }: {
   questions: Question[];
   examTime: number;
-  onEndExam: () => void;
+  onEndExam: (assessment_id: number) => void;
   onFullscreen: () => void;
 }) {
   const { lang } = useGetLang();
@@ -156,6 +156,7 @@ export default function ExamInterface({
     examAnswers,
     isPaused,
     examTimeRemaining: timeRemaining,
+    activeAssessment,
     activeAssessQuestionIndex,
   } = useAppSelector(({ exams }) => exams);
   const timeRemainingRef = useRef(timeRemaining);
@@ -220,7 +221,7 @@ export default function ExamInterface({
 
   const stopExam = () => {
     closeEndExamPopupOpen();
-    onEndExam();
+    activeAssessment && onEndExam(activeAssessment?.id);
   };
 
   useEffect(() => {

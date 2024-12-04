@@ -1,4 +1,5 @@
 interface ExamAnswer {
+    question_id: number;
     selectedOpt: string;
     showAnsClicked: boolean;
     isFlagged: boolean;
@@ -21,6 +22,7 @@ interface ExamAnswer {
   interface SetAnswerPayload {
     questionIndex: number;
     queAnsDetails: {
+      question_id: number;
       selectedOpt: string;
       showAnsClicked: boolean;
       isFlagged: boolean;

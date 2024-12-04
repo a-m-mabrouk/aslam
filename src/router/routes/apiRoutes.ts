@@ -24,6 +24,8 @@ export const API_EXAMS = {
   domains: `${API_DOMAIN}/Domain`,
   subdomain: `${API_DOMAIN}/Subdomain`,
   assessments: `${API_DOMAIN}/Assessments`,
+  mistakesExams: `${API_DOMAIN}/mistakesExams`,
   questions: `${API_DOMAIN}/Questions`,
+  answer: `${API_DOMAIN}/answer`,
   deleteAllQuestions: `${API_DOMAIN}/DeleteAllQuestions`,
 };

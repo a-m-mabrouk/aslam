@@ -12,10 +12,10 @@ export default function Resources() {
       <div className="flex justify-between gap-4">
         <TitleSection title={t("resources")} />
       </div>
-      {file?.map((file) => {
+      {file?.map((file, i) => {
         const name = file.path.split("/");
         return (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4" key={i}>
             {expire ? (
               <a
                 href={file.path}

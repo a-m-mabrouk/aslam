@@ -91,7 +91,11 @@ const examsSlice = createSlice({
       state,
       { payload }: PayloadAction<AssessmentType | null>,
     ) => {
-      if (payload && state.isAssessmentRunning && state.activeAssessment?.id !== payload?.id) {
+      if (
+        payload &&
+        state.isAssessmentRunning &&
+        state.activeAssessment?.id !== payload?.id
+      ) {
         toastifyBox("error", "Stop Exam first");
       } else {
         if (payload) {
@@ -126,7 +130,10 @@ const examsSlice = createSlice({
       { payload }: PayloadAction<number>,
     ) => {
       state.activeAssessQuestionIndex = payload;
-      localStorage.setItem("activeAssessQuestionIndex", JSON.stringify(payload));
+      localStorage.setItem(
+        "activeAssessQuestionIndex",
+        JSON.stringify(payload),
+      );
     },
   },
 });

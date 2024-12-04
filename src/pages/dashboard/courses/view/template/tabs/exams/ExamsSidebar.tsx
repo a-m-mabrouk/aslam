@@ -259,7 +259,8 @@ export default function ExamsSidebar({
   );
   const domains = useAppSelector(({ examsDomains }) => examsDomains.domains);
   const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
-
+  // console.log(domains);
+  
   const { t } = useTranslation("exams");
   const { t: tBtns } = useTranslation("buttons");
   const { t: tAlert } = useTranslation("alerts");

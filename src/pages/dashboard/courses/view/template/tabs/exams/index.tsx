@@ -28,6 +28,7 @@ import { API_EXAMS } from "../../../../../../../router/routes/apiRoutes";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
 import { Button } from "flowbite-react";
+import { useParams } from "react-router";
 
 export function FullScreenButton({
   onFullscreen,
@@ -82,9 +83,12 @@ const ExamComponent = () => {
   const { questions, name: assessmentName } = activeAssessment
     ? activeAssessment
     : { questions: [], name: null };
+  const { id } = useParams();
+  const course_id = Number(id);
 
   const { lang } = useGetLang();
-  const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
+  const { role, id: student_id } = useAppSelector(({ auth }) => auth);
+  const isTeacher = role === "teacher";
   const [isExamEnded, setIsExamEnded] = useState(false);
 
   const questionTimeRatio = 1.2778;
@@ -144,11 +148,12 @@ const ExamComponent = () => {
     dispatch(resetExam());
     dispatch(setIsPaused(false));
     dispatch(setExamTimeRemaining(examTime));
-    questions.forEach(({ question }, questionIndex) =>
+    questions.forEach(({ question, id }, questionIndex) =>
       dispatch(
         setAnswer({
           questionIndex,
           queAnsDetails: {
+            question_id: id,
             selectedOpt: "",
             showAnsClicked: false,
             isFlagged: false,
@@ -161,19 +166,91 @@ const ExamComponent = () => {
     );
   };
 
-  const handleEndExam = () => {
+  const handleEndExam = async (assessment_id: number) => {
     setIsExamEnded(true);
     dispatch(setIsAssessmentRunning(false));
     dispatch(setReview(true));
     dispatch(setIsPaused(false));
     dispatch(setActiveAssessQuestionIndex(0));
-    const examAnswers = JSON.parse(localStorage.getItem("examAnswers")!);
-    examAnswers.forEach(({answerstate}: {answerstate: string}, i: number) => {
-      if (answerstate === "wrong") {
-        console.log(i);
-        
+    // add mistakes for a separated exam
+    if (!isTeacher) {
+      let mistakesExamId: number | null = null;
+      const { data: mistakesExamsData } = await axiosDefault.get(
+        `${API_EXAMS.mistakesExams}/${student_id}`,
+      );
+      if (!mistakesExamsData) {
+        try {
+          const { data } = await axiosDefault.post(API_EXAMS.assessments, {
+            student_id,
+            course_id,
+          });
+          mistakesExamId = data.id;
+        } catch (error) {
+          return console.error(
+            "Couldn't create mistakes assessmanet for this course",
+          );
+        }
+      } else {
+        mistakesExamId = mistakesExamsData.data.id;
       }
-    })
+      const examAnswers = JSON.parse(localStorage.getItem("examAnswers")!);
+      const total_degree =
+        Math.round(
+          (examAnswers.reduce(
+            (acc: number, examAnswer: { answerstate: string }) =>
+              examAnswer.answerstate === "correct" ? acc + 1 : acc,
+            0,
+          ) /
+            examAnswers.length) *
+            10000,
+        ) / 100;
+      // const wrongQuestionsIds = examAnswers
+      //   .filter(
+      //     ({ answerstate }: { answerstate: string }) => answerstate === "wrong",
+      //   )
+      //   .map(({ question_id }: { question_id: number }) => question_id);
+      // const wrongQuestions = questions
+      //   .filter(({ id }) => wrongQuestionsIds.includes(id))
+      //   .map(({ question, id }) => ({ ...question, question_id: id }));
+
+      // if (wrongQuestions.length) {
+      //   const { data } = await axiosDefault.post(
+      //     API_EXAMS.questions,
+      //     {
+      //       assessment_id: mistakesExamId,
+      //       course_id,
+      //       questions: wrongQuestions,
+      //     },
+      //     {
+      //       headers: {
+      //         "Content-Type": "application/json",
+      //       },
+      //       transformRequest: [(data) => JSON.stringify(data)],
+      //     },
+      //   );
+      //   console.log(data);
+      // }
+      const { data } = await axiosDefault.post(
+        API_EXAMS.answer,
+        {
+          student_id,
+          assessment_id,
+          total_degree,
+          answers: examAnswers.map((ans: ExamAnswer) => ({
+            answer: ans.selectedOpt || 'not answered',
+            question_id: ans.question_id,
+            true: ans.answerstate === "correct" ? 1 : 0,
+          })),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          transformRequest: [(data) => JSON.stringify(data)],
+        },
+      );
+      console.log(data);
+    }
   };
 
   return (
