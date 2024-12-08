@@ -204,32 +204,32 @@ const ExamComponent = () => {
             examAnswers.length) *
             10000,
         ) / 100;
-      // const wrongQuestionsIds = examAnswers
-      //   .filter(
-      //     ({ answerstate }: { answerstate: string }) => answerstate === "wrong",
-      //   )
-      //   .map(({ question_id }: { question_id: number }) => question_id);
-      // const wrongQuestions = questions
-      //   .filter(({ id }) => wrongQuestionsIds.includes(id))
-      //   .map(({ question, id }) => ({ ...question, question_id: id }));
+      const wrongQuestionsIds = examAnswers
+        .filter(
+          ({ answerstate }: { answerstate: string }) => answerstate === "wrong",
+        )
+        .map(({ question_id }: { question_id: number }) => question_id);
+      const wrongQuestions = questions
+        .filter(({ id }) => wrongQuestionsIds.includes(id))
+        .map(({ question, id }) => ({ ...question, id }));
 
-      // if (wrongQuestions.length) {
-      //   const { data } = await axiosDefault.post(
-      //     API_EXAMS.questions,
-      //     {
-      //       assessment_id: mistakesExamId,
-      //       course_id,
-      //       questions: wrongQuestions,
-      //     },
-      //     {
-      //       headers: {
-      //         "Content-Type": "application/json",
-      //       },
-      //       transformRequest: [(data) => JSON.stringify(data)],
-      //     },
-      //   );
-      //   console.log(data);
-      // }
+      if (wrongQuestions.length) {
+        const { data } = await axiosDefault.post(
+          API_EXAMS.questions,
+          {
+            assessment_id: mistakesExamId,
+            course_id,
+            questions: wrongQuestions,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            transformRequest: [(data) => JSON.stringify(data)],
+          },
+        );
+        console.log(data);
+      }
       const { data } = await axiosDefault.post(
         API_EXAMS.answer,
         {

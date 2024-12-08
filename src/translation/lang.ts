@@ -141,6 +141,9 @@ export const resources = {
         phone_number: "Phone Number",
       },
     },
+    whatsapp: {
+      title: "Whatsapp",
+    },
     exams: {
       of: "Of",
       or: "Or",
@@ -315,6 +318,9 @@ export const resources = {
         email: "البريد الالكتروني",
         phone_number: "رقم الهاتف",
       },
+    },
+    whatsapp: {
+      title: "واتساب",
     },
     exams: {
       of: "من",

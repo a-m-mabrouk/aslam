@@ -15,6 +15,7 @@ const DashboardCourses = lazy(() => import("../pages/dashboard/courses"));
 const CourseView = lazy(() => import("../pages/dashboard/courses/view"));
 const DashboardStudents = lazy(() => import("../pages/dashboard/students"));
 const ViewStudent = lazy(() => import("../pages/dashboard/students/view"));
+const Whatsapp = lazy(() => import("../pages/dashboard/whatsapp"));
 const Student = lazy(() => import("../pages/student"));
 const StudentCourses = lazy(() => import("../pages/student/courses"));
 const StudentCourse = lazy(() => import("../pages/student/courses/view"));
@@ -118,6 +119,14 @@ const router = createBrowserRouter([
         element: (
           <SuspenseRoute>
             <ViewStudent />
+          </SuspenseRoute>
+        ),
+      },
+      {
+        path: "whatsapp",
+        element: (
+          <SuspenseRoute>
+            <Whatsapp />
           </SuspenseRoute>
         ),
       },
