@@ -20,6 +20,10 @@ export const API_STUDENTS = {
   studentCourse: `${API_DOMAIN}/StudentsCourses`,
   removeStudentCourse: `${API_DOMAIN}/StudentsCourses/removeStudentsFromCourse`,
 };
+export const API_WHATSAPP = {
+  getNumber: `${API_DOMAIN}/update/1`,
+  updateNumber: `${API_DOMAIN}/update/1`,
+};
 export const API_EXAMS = {
   domains: `${API_DOMAIN}/Domain`,
   subdomain: `${API_DOMAIN}/Subdomain`,

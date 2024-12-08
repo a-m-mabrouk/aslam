@@ -143,6 +143,7 @@ export const resources = {
     },
     whatsapp: {
       title: "Whatsapp",
+      editNumber: "Edit Number",
     },
     exams: {
       of: "Of",
@@ -321,6 +322,7 @@ export const resources = {
     },
     whatsapp: {
       title: "واتساب",
+      editNumber: "تعديل الرقم",
     },
     exams: {
       of: "من",
