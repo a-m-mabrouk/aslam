@@ -102,7 +102,9 @@ const Question = memo(
     );
 
     return (
-      <main className="grow p-4 md:min-h-[30rem]">
+      <main className="relative grow p-4 md:min-h-[30rem]">
+        <div className="absolute inset-0 bg-[url('/src/assets/images/Logo.png')] bg-[length:50%] bg-center bg-no-repeat opacity-30"></div>
+  <div className="relative z-10">
         {editable && isTeacher && !review ? (
           <form onSubmit={(event) => handleEditQuestion(event)}>
             <div className="flex justify-center gap-2">
@@ -138,6 +140,7 @@ const Question = memo(
             {questionMarkup}
           </>
         )}
+  </div>
       </main>
     );
   },
