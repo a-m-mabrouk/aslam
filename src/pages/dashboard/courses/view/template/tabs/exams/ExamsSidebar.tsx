@@ -29,6 +29,7 @@ import {
   setActiveAssessment,
   setIsAssessmentRunning,
 } from "../../../../../../../store/reducers/exams";
+import { clearAllExamItems } from "../../../../../../../utilities/clearExamStorage";
 
 export function AddDomainModal({
   modalType,
@@ -326,13 +327,7 @@ export default function ExamsSidebar({
           if (!assessmentInDomains && !assessmentInSubdomains) {
             dispatch(setActiveAssessment(null));
             dispatch(setIsAssessmentRunning(false));
-            [
-              "activeAssessment",
-              "activeAssessQuestionIndex",
-              "examAnswers",
-              "examTimeRemaining",
-              "isAssessmentRunning",
-            ].forEach((key) => localStorage.removeItem(key));
+            clearAllExamItems();
           }
         }
       })

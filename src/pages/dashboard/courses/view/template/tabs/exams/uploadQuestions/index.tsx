@@ -9,6 +9,7 @@ import { useParams } from "react-router";
 import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
 import { setActiveAssessment } from "../../../../../../../../store/reducers/exams";
 import { toastifyBox } from "../../../../../../../../helper/toastifyBox";
+import { fetchDomains } from "../../../../../../../../store/reducers/examsDomains";
 
 interface ExcelQuestion {
   type: "mcq" | "dragdrop";
@@ -185,6 +186,7 @@ export default function UploadQuestions() {
       );
       toastifyBox("success", data.message);
       dispatch(setActiveAssessment(data.data));
+      dispatch(fetchDomains(+id));
     } catch (error) {
       console.error("Error uploading file:", error);
     }

@@ -25,9 +25,11 @@ const backendOptions = {
 export default function QuestionDragDrop({
   question,
   questionIndex,
+  isDescShow,
 }: {
   question: Question;
   questionIndex: number;
+  isDescShow: boolean;
 }) {
   const dispatch = useAppDispatch();
   const { examAnswers, review } = useAppSelector(({ exams }) => exams);
@@ -38,8 +40,8 @@ export default function QuestionDragDrop({
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
 
   const checkDisabled = useMemo(
-    () => examAnswers[questionIndex]?.showAnsClicked || review,
-    [examAnswers, questionIndex, review]
+    () => (examAnswers[questionIndex]?.showAnsClicked && isDescShow) || review,
+    [examAnswers, isDescShow, questionIndex, review]
   );
 
   const handleDropItem = (areaId: number, item: DraggableAreaProps) => {

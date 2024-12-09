@@ -27,9 +27,11 @@ const Question = memo(
   ({
     question,
     questionIndex,
+    isDescShow = false,
   }: {
     question: Question;
     questionIndex: number;
+    isDescShow?: boolean;
   }) => {
     const [editable, setEditable] = useState<boolean>(false);
     const dispatch = useAppDispatch();
@@ -53,11 +55,12 @@ const Question = memo(
           question={question}
           questionIndex={questionIndex}
           editable={editable}
+          isDescShow={isDescShow}
         />
       );
     } else if (question?.question?.type === "dragdrop") {
       questionMarkup = (
-        <QuestionDragDrop question={question} questionIndex={questionIndex} />
+        <QuestionDragDrop question={question} questionIndex={questionIndex} isDescShow={isDescShow} />
       );
     }
 

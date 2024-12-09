@@ -50,7 +50,7 @@ export default function Whatsapp() {
   return (
     <div className="grid gap-4">
       <div className="flex flex-wrap justify-between gap-4">
-        <TitleSection title={t("whatsapp")} />
+        <TitleSection title={t("title")} />
       </div>
 
       <BgCard>

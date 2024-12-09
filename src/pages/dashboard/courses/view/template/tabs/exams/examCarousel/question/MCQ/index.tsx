@@ -104,11 +104,13 @@ export default function QuestionMCQ({
   questionIndex,
   imagesArr,
   editable,
+  isDescShow,
 }: {
   question: Question;
   questionIndex: number;
   imagesArr: string[] | null;
   editable: boolean;
+  isDescShow: boolean;
 }) {
   const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
@@ -189,7 +191,7 @@ export default function QuestionMCQ({
           const isSelected = selectedOpt?.includes(opt.option);
           const isCorrect = opt.answer === "true";
           const checkDisabled =
-            examAnswers[questionIndex]?.showAnsClicked || review;
+            (examAnswers[questionIndex]?.showAnsClicked && isDescShow) || review;
           const ansClass = !checkDisabled
             ? "border-gray-300"
             : isSelected && !isCorrect

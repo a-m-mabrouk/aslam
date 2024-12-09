@@ -234,17 +234,39 @@ export default function ExamInterface({
 
   const progress = ((examTime - timeRemaining) / examTime) * 100;
 
-  const goToNextQuestion = () => {
+  const goToNextQuestion = useCallback(() => {
     if (currentQuestionIndex < questions?.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     }
-  };
+  }, [currentQuestionIndex, questions?.length]);
 
-  const goToPreviousQuestion = () => {
+  const goToPreviousQuestion = useCallback(() => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex((prev) => prev - 1);
     }
-  };
+  }, [currentQuestionIndex]);
+
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'ArrowRight') {
+      if (lang === "en") {
+        goToNextQuestion();
+      } else {
+        goToPreviousQuestion();
+      }
+    } else if (event.key === 'ArrowLeft') {
+      if (lang === "en") {
+        goToPreviousQuestion();
+      } else {
+        goToNextQuestion();
+      }
+    }
+  }, [goToNextQuestion, goToPreviousQuestion, lang]);
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
   const showAns = () => {
     dispatch(setShowAnsClicked(currentQuestionIndex));
   };
@@ -386,6 +408,7 @@ export default function ExamInterface({
         <Question
           question={questions[currentQuestionIndex]}
           questionIndex={currentQuestionIndex}
+          isDescShow={isPopupOpen}
         />
 
         {/* Footer */}

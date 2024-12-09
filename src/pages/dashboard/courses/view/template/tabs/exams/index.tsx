@@ -29,6 +29,7 @@ import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
 import { Button } from "flowbite-react";
 import { useParams } from "react-router";
+import { fetchDomains } from "../../../../../../../store/reducers/examsDomains";
 
 export function FullScreenButton({
   onFullscreen,
@@ -131,7 +132,10 @@ const ExamComponent = () => {
           await axiosDefault.delete(
             `${API_EXAMS.deleteAllQuestions}/${activeAssessment?.id}`,
           );
-          dispatch(setActiveAssessment(null));
+          const activeAssess = JSON.parse(localStorage.getItem("activeAssessment")!);
+          activeAssess.questions = [];
+          dispatch(setActiveAssessment(activeAssess));
+          dispatch(fetchDomains(course_id));
         } catch (error) {
           throw new Error("");
         }
