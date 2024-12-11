@@ -6,7 +6,7 @@ export default function InfoItem({
   value: React.ReactNode;
 }) {
   return (
-    <div className="flex items-baseline gap-2">
+    <div className="flex flex-wrap items-baseline gap-2">
       <p className="capitalize text-gray-500">{title}</p>
       <p className="capitalize">{value}</p>
     </div>
