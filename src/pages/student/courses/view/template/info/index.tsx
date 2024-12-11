@@ -1,4 +1,4 @@
-import { Avatar } from "flowbite-react";
+// import { Avatar } from "flowbite-react";
 import { useContext } from "react";
 import { ViewCourseContext } from "../..";
 import useGetLang from "../../../../../../hooks/useGetLang";
@@ -14,10 +14,10 @@ export default function CourseInfo() {
   const { course } = useContext(ViewCourseContext);
   const {
     name,
-    photo,
-    number_of_student,
+    // photo,
+    // number_of_student,
     created_from,
-    updated_from,
+    // updated_from,
     teacher,
     expiration_date,
     expire: isExpired,
@@ -26,30 +26,17 @@ export default function CourseInfo() {
 
   return (
     <div className="flex items-start justify-between gap-4">
-      <Avatar
+      {/* <Avatar
         bordered
         alt={name?.[lang] || ""}
-        img={photo || ""}
+        // img={photo || ""}
         size="xl"
         className="flex-col md:flex-row"
-      >
-        <div className=" ms-4 grid gap-4">
-          <h5 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+      > */}
+        <div className="ms-4 grid w-full gap-4">
+          <h5 className="flex items-center gap-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
             {name?.[lang] || ""}
-          </h5>
-          <div className="flex flex-wrap gap-4">
-            <InfoItem
-              title={t("teacher")}
-              value={`${teacher?.first_name || ""} ${teacher?.last_name || ""}`}
-            />
-            <InfoItem
-              title={t("number_of_student")}
-              value={number_of_student}
-            />
-            <InfoItem title={t("created_from")} value={created_from} />
-            <InfoItem title={t("updated_from")} value={updated_from} />
-          </div>
-          <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4">
             {isExpired ? (
               <div className={`${flagClass} bg-green-500`}>
                 {tStudents("subscribed")}
@@ -65,8 +52,22 @@ export default function CourseInfo() {
               </div>
             )}
           </div>
+          </h5>
+          <div className="flex w-[90%] flex-wrap justify-around gap-2">
+            <InfoItem
+              title={t("teacher")}
+              value={`${teacher?.first_name || ""} ${teacher?.last_name || ""}`}
+            />
+            {/* <InfoItem
+              title={t("number_of_student")}
+              value={number_of_student}
+            /> */}
+            <InfoItem title={t("created_from")} value={created_from} />
+            {/* <InfoItem title={t("updated_from")} value={updated_from} /> */}
+          </div>
+          
         </div>
-      </Avatar>
+      {/* </Avatar> */}
     </div>
   );
 }

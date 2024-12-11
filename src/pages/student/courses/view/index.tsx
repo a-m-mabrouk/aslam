@@ -8,6 +8,7 @@ import Tabs from "./template/tabs";
 import BgCard from "../../../../components/cards/bg";
 import { toastifyBox } from "../../../../helper/toastifyBox";
 import { useTranslation } from "react-i18next";
+import WhatsappFAB from "../../../../components/whatsappFAB";
 
 export const ViewCourseContext = createContext<viewCourseContextType>({} as viewCourseContextType);
 
@@ -30,7 +31,10 @@ export default function ViewCourse() {
         <div className="container mx-auto mt-4 grid gap-4 p-4">
           <BgCard>
             <CourseInfo />
+          </BgCard>
+          <BgCard>
             <Tabs />
+            <WhatsappFAB />
           </BgCard>
         </div>
       </ViewCourseContext.Provider>

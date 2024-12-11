@@ -21,7 +21,15 @@ export default function Tabs() {
     <BgCard>
       <TabsCard>
         <TabsCard.TabItem title={t("description")} icon={DocumentTextIcon}>
-          <p className="">{course?.description[lang]}</p>
+          <pre
+            style={{
+              fontFamily: "unset",
+              fontWeight: "bold",
+              textWrap: "wrap",
+            }}
+          >
+            {course?.description[lang]}
+          </pre>
         </TabsCard.TabItem>
         <TabsCard.TabItem title={t("videos")} icon={FolderIcon}>
           <Videos />

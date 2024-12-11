@@ -12,7 +12,7 @@ export default function CourseInfo() {
   const { course } = useContext(ViewCourseContext);
   const {
     name,
-    description,
+    // description,
     photo,
     number_of_student,
     created_from,
@@ -47,14 +47,14 @@ export default function CourseInfo() {
               <InfoItem title={t("created_from")} value={created_from} />
               <InfoItem title={t("updated_from")} value={updated_from} />
             </div>
-            <InfoItem
+            {/* <InfoItem
               title={t("description")}
               value={
                 <span className=" rounded-md p-2">
                   {description?.[lang] || ""}
                 </span>
               }
-            />
+            /> */}
           </div>
         </Avatar>
         <EditCourse />

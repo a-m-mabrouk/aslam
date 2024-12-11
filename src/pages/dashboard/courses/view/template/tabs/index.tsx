@@ -9,7 +9,9 @@ import {
   FolderIcon,
 } from "@heroicons/react/24/outline";
 import Exams from "./exams";
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useState } from "react";
+import { ViewCourseContext } from "../..";
+import useGetLang from "../../../../../../hooks/useGetLang";
 
 export default function Tabs() {
   const localstorageTabIndex = Number(localStorage.getItem('tabIndex'));
@@ -19,10 +21,23 @@ export default function Tabs() {
     setActiveTabIndex(tabIndex);
     localStorage.setItem('tabIndex', JSON.stringify(tabIndex))
   }, [])
+  const { lang } = useGetLang();
+  const { course } = useContext(ViewCourseContext);
   return (
     <div>
       <BgCard>
         <TabsCard handleActiveTabchange={e=> setTabsLocalstorage(e)}>
+        <TabsCard.TabItem title={t("description")} icon={DocumentTextIcon}>
+          <pre
+            style={{
+              fontFamily: "unset",
+              fontWeight: "bold",
+              textWrap: "wrap",
+            }}
+          >
+            {course?.description[lang]}
+          </pre>
+        </TabsCard.TabItem>
           <TabsCard.TabItem title={t("videos")} icon={FolderIcon} active={activeTabIndex === 0}>
             <Videos />
           </TabsCard.TabItem>

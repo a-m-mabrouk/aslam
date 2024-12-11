@@ -38,19 +38,22 @@ export default function QuestionDragDrop({
   const [draggableItems, setDraggableItems] = useState<DraggableAreaProps[]>([]);
   const [droppableAreas, setDroppableAreas] = useState<DroppableAreaProps[]>([]);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
-
+  // console.log(question.question.description !== "");
+  
   const checkDisabled = useMemo(
-    () => (examAnswers[questionIndex]?.showAnsClicked && isDescShow) || review,
-    [examAnswers, isDescShow, questionIndex, review]
+    () => (question.question.description === ""? (examAnswers[questionIndex]?.showAnsClicked && isDescShow): examAnswers[questionIndex]?.showAnsClicked) || review,
+    [examAnswers, isDescShow, question.question.description, questionIndex, review]
   );
 
   const handleDropItem = (areaId: number, item: DraggableAreaProps) => {
-    if (droppableAreas[areaId].items.length) return; // Only one item allowed per droppable area
+    if (droppableAreas[areaId].items.length) return;
 
-    const updatedDroppableAreas = droppableAreas.map((area) =>
-      area.id === areaId
+    const updatedDroppableAreas = droppableAreas.map((area) => {
+      area.items[0]?.id === item.id && area.items.pop();
+      return  area.id === areaId
         ? { ...area, items: [item] }
         : area
+    }
     );
 
     const updatedDraggableItems = draggableItems.filter(

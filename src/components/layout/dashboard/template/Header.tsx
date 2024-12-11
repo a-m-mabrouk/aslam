@@ -17,6 +17,8 @@ export default function Header() {
   const { first_name, last_name, email, id } = useAppSelector(
     (state) => state.auth,
   );
+  console.log(first_name, last_name);
+  
   const dispatch = useAppDispatch();
   return (
     <Navbar fluid className="sticky z-10 min-h-[85px]" theme={theme}>
@@ -29,8 +31,9 @@ export default function Header() {
           label={
             <Avatar
               alt="User settings"
-              img="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+              // img="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
               rounded
+              placeholderInitials={first_name[0] + last_name[0]}
             />
           }
         >
