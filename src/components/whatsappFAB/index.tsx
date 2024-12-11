@@ -2,7 +2,7 @@ function WhatsappFAB() {
   return (
     <a
       className="fixed bottom-5 end-5 z-10"
-      href="http://wa.me/01024642124"
+      href="http://wa.me/+201024642124"
       target="_blank"
       rel="noopener noreferrer"
     >

@@ -34,7 +34,7 @@ export default function Student() {
           {t("desc")}
         </motion.p>
         <motion.a
-          href="https://wa.me/01024642124"
+          href="https://wa.me/+201024642124"
           target="_blank"
           variants={textVariant(1.5)}
           className="btn_social flex w-max items-center justify-center gap-2 overflow-hidden rounded-full bg-primary px-8 py-2 text-xl text-white"
