@@ -10,6 +10,7 @@ import { courseScheme } from "../../../../helper/validation/course";
 import { API_COURSES } from "../../../../router/routes/apiRoutes";
 import { toastifyBox } from "../../../../helper/toastifyBox";
 import axiosJson from "../../../../utilities/axiosJson";
+import { ToggleSwitch } from "flowbite-react";
 
 export default function CreateCourse({
   setData,
@@ -36,6 +37,7 @@ export default function CreateCourse({
       name_en: "",
       description_ar: "",
       description_en: "",
+      free: false,
     },
     validationSchema: courseScheme,
     onSubmit: async (values) => {
@@ -43,7 +45,12 @@ export default function CreateCourse({
       const formData = new FormData();
 
       for (const [key, value] of Object.entries(values)) {
-        formData.append(key, value as string);
+        if (key === "free") {
+          const isFreeVal = value? "1": "0";
+          formData.append(key, isFreeVal as string);
+        } else {
+          formData.append(key, value as string);
+        }
       }
 
       try {
@@ -108,6 +115,13 @@ export default function CreateCourse({
             values={values}
             errors={errors}
             touched={touched}
+          />
+
+          <ToggleSwitch
+            name="free"
+            onBlur={handleBlur}
+            checked={values.free} // Bind the checked state to Formik's value
+            onChange={(state) => setFieldValue("free", state)}
           />
 
           <PrimaryBtn type="submit" className="mx-auto" isProcessing={loading}>

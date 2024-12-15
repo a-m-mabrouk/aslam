@@ -78,7 +78,7 @@ declare global {
 const ExamComponent = () => {
   const fullscreenDivRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const { activeAssessment, isAssessmentRunning } = useAppSelector(
+  const { activeAssessment, isAssessmentRunning, examTimeRemaining, activeAssessQuestionIndex } = useAppSelector(
     ({ exams }) => exams,
   );
   const { questions, name: assessmentName } = activeAssessment
@@ -237,12 +237,20 @@ const ExamComponent = () => {
       const { data } = await axiosDefault.post(
         API_EXAMS.answer,
         {
+          activeAssessQuestionIndex,
+          examTimeRemaining,
           student_id,
           assessment_id,
           total_degree,
           answers: examAnswers.map((ans: ExamAnswer) => ({
-            answer: ans.selectedOpt || 'not answered',
+            answerState: ans.answerstate,
+            domain: ans.domain,
+            chapter: ans.chapter,
+            selectOpt: ans.selectedOpt,
+            isFlagged: ans.isFlagged,
+            showAnsClicked: ans.showAnsClicked,
             question_id: ans.question_id,
+            answer: ans.selectedOpt || 'not answered',
             true: ans.answerstate === "correct" ? 1 : 0,
           })),
         },
@@ -253,7 +261,9 @@ const ExamComponent = () => {
           transformRequest: [(data) => JSON.stringify(data)],
         },
       );
-      console.log(data);
+      if(data?.success) {
+        dispatch(fetchDomains(course_id));
+      }
     }
   };
 
