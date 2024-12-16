@@ -10,7 +10,7 @@ import { courseScheme } from "../../../../helper/validation/course";
 import { API_COURSES } from "../../../../router/routes/apiRoutes";
 import { toastifyBox } from "../../../../helper/toastifyBox";
 import axiosJson from "../../../../utilities/axiosJson";
-import { ToggleSwitch } from "flowbite-react";
+// import { ToggleSwitch } from "flowbite-react";
 
 export default function CreateCourse({
   setData,
@@ -117,12 +117,12 @@ export default function CreateCourse({
             touched={touched}
           />
 
-          <ToggleSwitch
+          {/* <ToggleSwitch
             name="free"
             onBlur={handleBlur}
             checked={values.free} // Bind the checked state to Formik's value
             onChange={(state) => setFieldValue("free", state)}
-          />
+          /> */}
 
           <PrimaryBtn type="submit" className="mx-auto" isProcessing={loading}>
             {t("addCourse")}
