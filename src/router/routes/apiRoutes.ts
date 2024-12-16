@@ -1,4 +1,4 @@
-export const API_DOMAIN = "https://e-learning.powersgate.com/api";
+export const API_DOMAIN = import.meta.env.VITE_API_DOMAIN;
 
 export const API_AUTH = {
   register: `${API_DOMAIN}/register`,
