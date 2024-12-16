@@ -31,7 +31,7 @@ export default function Header() {
             <Avatar
               alt="User settings"
               rounded
-              placeholderInitials={(first_name[0] + last_name[0]).toUpperCase()}
+              placeholderInitials={`${first_name[0]}${last_name[0]}`.toUpperCase()}
             />
           }
         >
