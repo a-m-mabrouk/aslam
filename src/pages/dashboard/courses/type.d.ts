@@ -21,6 +21,7 @@ interface CoursesListDatum {
   modules: Module[];
   file: CourseFile[];
   students: StudentCourse[];
+  free?: boolean;
 }
 
 interface StudentCourse {

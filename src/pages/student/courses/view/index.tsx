@@ -22,8 +22,11 @@ export default function ViewCourse() {
     if (data && !data?.expire) {
       toastifyBox("error", t("notSubscibedToCourse"));
       navigate('/student/courses');
+    } else if (!loading && !data) {
+      toastifyBox("error", t("courseIsNotExisted"));
+      navigate('/student/courses');
     }
-  }, [data, navigate, t]); // Add dependencies to the useEffect hook
+  }, [data, loading, navigate, t]);
 
   return (
     <PlaceHolderLoading loading={loading}>

@@ -49,9 +49,16 @@ const Question = memo(
       questionName && questionName[1] ? questionName[1].split("###") : null;
 
     useEffect(() => {
-      dispatch(setActiveAssessQuestionIndex(questionIndex));
+      if (assessment_id) {
+        dispatch(
+          setActiveAssessQuestionIndex({
+            assessment_id,
+            activeAssessQuestionIndex: questionIndex,
+          }),
+        );
+      }
       setEditable(false);
-    }, [dispatch, questionIndex]);
+    }, [assessment_id, dispatch, questionIndex]);
 
     let questionMarkup = <h2>You can only add MCQ & DragDrop question.</h2>;
     if (question?.question?.type === "mcq") {

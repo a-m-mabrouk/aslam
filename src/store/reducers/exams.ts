@@ -1,26 +1,38 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { toastifyBox } from "../../helper/toastifyBox";
 import { shuffle } from "../../utilities/shuffleArray";
+import { getItemById, updateItem } from "../../utilities/idb";
 
-function getParsedLocalStorage(item: string, defaultValue: unknown) {
-  return localStorage.getItem(item)
+// function getParsedLocalStorage(item: string, defaultValue: unknown) {
+//   return localStorage.getItem(item)
+//     ? JSON.parse(localStorage.getItem(item)!)
+//     : defaultValue;
+// }
+async function getParsedIndexedDB(item: string, defaultValue: unknown) {
+  const assessment_id = localStorage.getItem(item)
     ? JSON.parse(localStorage.getItem(item)!)
     : defaultValue;
+
+  if (assessment_id) {
+    const data = await getItemById(assessment_id);
+    console.log(data);
+    return data? data: null;
+  }
 }
 
 const initialState: ExamType = {
-  examAnswers: getParsedLocalStorage("examAnswers", []),
+  examAnswers: [],
   domains: [],
-  activeAssessment: getParsedLocalStorage("activeAssessment", null),
-  isAssessmentRunning: getParsedLocalStorage("isAssessmentRunning", false),
-  review: getParsedLocalStorage("review", false),
+  activeAssessment: null,
+  review: false,
   isPaused: true,
-  examTimeRemaining: getParsedLocalStorage("examTimeRemaining", 0),
-  activeAssessQuestionIndex: getParsedLocalStorage(
-    "activeAssessQuestionIndex",
-    0,
-  ),
+  examTimeRemaining: 0,
+  activeAssessQuestionIndex: 0,
 };
+(async () => {
+  const activeAssessment = await getParsedIndexedDB("activeAssessmentId", null);
+  // Update the state using your state management (e.g., Redux or React state)
+  initialState.activeAssessment = activeAssessment? activeAssessment: null;
+})();
 
 const examsSlice = createSlice({
   name: "exams",
@@ -33,56 +45,86 @@ const examsSlice = createSlice({
       localStorage.removeItem("review");
     },
     setAnswer: (state, { payload }: PayloadAction<SetAnswerPayload>) => {
-      const { questionIndex, queAnsDetails } = payload;
-      const localExamAnswer = getParsedLocalStorage("examAnswers", []);
-      localExamAnswer[questionIndex] = queAnsDetails;
-      localStorage.setItem("examAnswers", JSON.stringify(localExamAnswer));
-      state.examAnswers[questionIndex] = queAnsDetails;
+      const { assessment_id, examAnswers } = payload;
+      updateItem(assessment_id, { examAnswers });
+      state.examAnswers = examAnswers;
     },
     setAnswerState: (
       state,
       {
         payload,
       }: PayloadAction<{
+        assessment_id: number;
         questionIndex: number;
         answerstate: "wrong" | "correct" | "skipped";
       }>,
     ) => {
-      const { questionIndex, answerstate } = payload;
-      const localExamAnswer = getParsedLocalStorage("examAnswers", []);
-      localExamAnswer[questionIndex].answerstate = answerstate;
-      localStorage.setItem("examAnswers", JSON.stringify(localExamAnswer));
+      const { assessment_id, questionIndex, answerstate } = payload;
+      getItemById(assessment_id).then((assessment) => {
+        if (assessment) {
+          const examAnswers = [...assessment.examAnswers];
+          examAnswers[questionIndex].answerstate = answerstate;
+          updateItem(assessment_id, { examAnswers });
+        }
+      });
       state.examAnswers[questionIndex].answerstate = answerstate;
     },
     setSelectedOpt: (
       state,
       {
         payload,
-      }: PayloadAction<{ questionIndex: number; selectedOpt: string }>,
+      }: PayloadAction<{
+        assessment_id: number;
+        questionIndex: number;
+        selectedOpt: string;
+      }>,
     ) => {
-      const { questionIndex, selectedOpt } = payload;
-      const localExamAnswer = getParsedLocalStorage("examAnswers", []);
-      localExamAnswer[questionIndex].selectedOpt = selectedOpt;
-      localStorage.setItem("examAnswers", JSON.stringify(localExamAnswer));
+      const { assessment_id, questionIndex, selectedOpt } = payload;
+      getItemById(assessment_id).then((assessment) => {
+        if (assessment) {
+          const examAnswers = [...assessment.examAnswers];
+          examAnswers[questionIndex].selectedOpt = selectedOpt;
+          updateItem(assessment_id, { examAnswers });
+        }
+      });
       state.examAnswers[questionIndex].selectedOpt = selectedOpt;
     },
-    setShowAnsClicked: (state, { payload }: PayloadAction<number>) => {
-      const localExamAnswer = getParsedLocalStorage("examAnswers", []);
-      localExamAnswer[payload].showAnsClicked = true;
-      localStorage.setItem("examAnswers", JSON.stringify(localExamAnswer));
-      state.examAnswers[payload].showAnsClicked = true;
+    setShowAnsClicked: (
+      state,
+      { payload }: PayloadAction<{ assessment_id: number; ansIndex: number }>,
+    ) => {
+      const { assessment_id, ansIndex } = payload;
+      getItemById(assessment_id).then((assessment) => {
+        if (assessment) {
+          const examAnswers = [...assessment.examAnswers];
+          examAnswers[ansIndex].showAnsClicked = true;
+          updateItem(assessment_id, { examAnswers });
+        }
+      });
+      state.examAnswers[ansIndex].showAnsClicked = true;
     },
-    setReview: (state, { payload }: PayloadAction<boolean>) => {
-      state.review = payload;
-      localStorage.setItem("review", JSON.stringify(payload));
+    setReview: (
+      state,
+      { payload }: PayloadAction<{ assessment_id: number; review: boolean }>,
+    ) => {
+      const { assessment_id, review } = payload;
+      state.review = review;
+      updateItem(assessment_id, { review });
     },
-    setIsFlagged: (state, { payload }: PayloadAction<number>) => {
-      const localExamAnswer = getParsedLocalStorage("examAnswers", []);
-      localExamAnswer[payload].isFlagged =
-        !state.examAnswers[payload].isFlagged;
-      localStorage.setItem("examAnswers", JSON.stringify(localExamAnswer));
-      state.examAnswers[payload].isFlagged =
-        !state.examAnswers[payload].isFlagged;
+    setIsFlagged: (
+      state,
+      { payload }: PayloadAction<{ assessment_id: number; ansIndex: number }>,
+    ) => {
+      const { assessment_id, ansIndex } = payload;
+      getItemById(assessment_id).then((assessment) => {
+        if (assessment) {
+          const examAnswers = [...assessment.examAnswers];
+          examAnswers[ansIndex].isFlagged = !examAnswers[ansIndex].isFlagged;
+          updateItem(assessment_id, { examAnswers });
+        }
+      });
+      state.examAnswers[ansIndex].isFlagged =
+        !state.examAnswers[ansIndex].isFlagged;
     },
     setDomains: (state, { payload }: PayloadAction<DomainType[]>) => {
       state.domains = payload;
@@ -91,49 +133,52 @@ const examsSlice = createSlice({
       state,
       { payload }: PayloadAction<AssessmentType | null>,
     ) => {
-      if (
-        payload &&
-        state.isAssessmentRunning &&
-        state.activeAssessment?.id !== payload?.id
-      ) {
-        toastifyBox("error", "Stop Exam first");
-      } else {
-        if (payload) {
-          const questions = payload.questions.map((que) => ({
-            ...que,
-            question: {
-              ...que.question,
-              options: shuffle(que.question.options),
-            },
-          }));
-          state.activeAssessment = !payload ? null : { ...payload, questions };
-        } else {
-          state.activeAssessment = payload;
-        }
+      console.log(payload);
 
-        localStorage.setItem("activeAssessment", JSON.stringify(payload));
+      if (payload) {
+        const questions = payload.questions.map((que) => ({
+          ...que,
+          question: {
+            ...que.question,
+            options: shuffle(que.question.options),
+          },
+        }));
+        state.activeAssessment = !payload ? null : { ...payload, questions };
+        updateItem(payload.id, { ...payload, questions });
+        localStorage.setItem("activeAssessmentId", JSON.stringify(payload?.id));
+      } else {
+        state.activeAssessment = payload;
+        // localStorage.setItem(
+        //   "activeAssessmentId",
+        //   JSON.stringify(null),
+        // );
       }
-    },
-    setIsAssessmentRunning: (state, { payload }: PayloadAction<boolean>) => {
-      state.isAssessmentRunning = payload;
-      localStorage.setItem("isAssessmentRunning", JSON.stringify(payload));
     },
     setIsPaused: (state, { payload }: PayloadAction<boolean>) => {
       state.isPaused = payload;
     },
-    setExamTimeRemaining: (state, { payload }: PayloadAction<number>) => {
-      state.examTimeRemaining = payload;
-      localStorage.setItem("examTimeRemaining", JSON.stringify(payload));
+    setExamTimeRemaining: (
+      state,
+      {
+        payload,
+      }: PayloadAction<{ assessment_id: number; examTimeRemaining: number }>,
+    ) => {
+      const { assessment_id, examTimeRemaining } = payload;
+      state.examTimeRemaining = examTimeRemaining;
+      updateItem(assessment_id, { examTimeRemaining });
     },
     setActiveAssessQuestionIndex: (
       state,
-      { payload }: PayloadAction<number>,
+      {
+        payload,
+      }: PayloadAction<{
+        assessment_id: number;
+        activeAssessQuestionIndex: number;
+      }>,
     ) => {
-      state.activeAssessQuestionIndex = payload;
-      localStorage.setItem(
-        "activeAssessQuestionIndex",
-        JSON.stringify(payload),
-      );
+      const { assessment_id, activeAssessQuestionIndex } = payload;
+      state.activeAssessQuestionIndex = activeAssessQuestionIndex;
+      updateItem(assessment_id, { activeAssessQuestionIndex });
     },
   },
 });
@@ -147,7 +192,6 @@ export const {
   setAnswerState,
   setDomains,
   setActiveAssessment,
-  setIsAssessmentRunning,
   setReview,
   setIsPaused,
   setExamTimeRemaining,

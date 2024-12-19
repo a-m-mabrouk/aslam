@@ -6,7 +6,6 @@ import {
   setActiveAssessQuestionIndex,
   setAnswer,
   setExamTimeRemaining,
-  setIsAssessmentRunning,
   setIsPaused,
   setReview,
 } from "../../../../../../../store/reducers/exams";
@@ -78,9 +77,11 @@ declare global {
 const ExamComponent = () => {
   const fullscreenDivRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const { activeAssessment, isAssessmentRunning, examTimeRemaining, activeAssessQuestionIndex } = useAppSelector(
-    ({ exams }) => exams,
-  );
+  const {
+    activeAssessment,
+    examTimeRemaining,
+    activeAssessQuestionIndex,
+  } = useAppSelector(({ exams }) => exams);
   const { questions, name: assessmentName } = activeAssessment
     ? activeAssessment
     : { questions: [], name: null };
@@ -91,6 +92,7 @@ const ExamComponent = () => {
   const { role, id: student_id } = useAppSelector(({ auth }) => auth);
   const isTeacher = role === "teacher";
   const [isExamEnded, setIsExamEnded] = useState(false);
+  const [isAssessmentRunning, setIsAssessmentRunning] = useState(false);
 
   const questionTimeRatio = 1.2778;
   const examTime = Math.round(questions?.length * questionTimeRatio * 60);
@@ -132,7 +134,9 @@ const ExamComponent = () => {
           await axiosDefault.delete(
             `${API_EXAMS.deleteAllQuestions}/${activeAssessment?.id}`,
           );
-          const activeAssess = JSON.parse(localStorage.getItem("activeAssessment")!);
+          const activeAssess = JSON.parse(
+            localStorage.getItem("activeAssessment")!,
+          );
           activeAssess.questions = [];
           dispatch(setActiveAssessment(activeAssess));
           dispatch(fetchDomains(course_id));
@@ -148,15 +152,20 @@ const ExamComponent = () => {
     });
   };
   const onStart = () => {
-    dispatch(setIsAssessmentRunning(true));
     dispatch(resetExam());
     dispatch(setIsPaused(false));
-    dispatch(setExamTimeRemaining(examTime));
-    questions.forEach(({ question, id }, questionIndex) =>
+    setIsAssessmentRunning(true);
+    if (activeAssessment?.id) {
+      dispatch(
+        setExamTimeRemaining({
+          assessment_id: activeAssessment?.id,
+          examTimeRemaining: examTime,
+        }),
+      );
       dispatch(
         setAnswer({
-          questionIndex,
-          queAnsDetails: {
+          assessment_id: activeAssessment?.id,
+          examAnswers: questions.map(({ question, id }) => ({
             question_id: id,
             selectedOpt: "",
             showAnsClicked: false,
@@ -164,18 +173,24 @@ const ExamComponent = () => {
             chapter: question?.chapter || "",
             domain: question?.domain || "",
             answerstate: "skipped",
-          },
+          })),
         }),
-      ),
-    );
+      );
+    }
   };
 
   const handleEndExam = async (assessment_id: number) => {
     setIsExamEnded(true);
-    dispatch(setIsAssessmentRunning(false));
-    dispatch(setReview(true));
+    setIsAssessmentRunning(false);
+    dispatch(setReview({ assessment_id, review: true }));
     dispatch(setIsPaused(false));
-    dispatch(setActiveAssessQuestionIndex(0));
+    dispatch(
+      setActiveAssessQuestionIndex({
+        assessment_id,
+        activeAssessQuestionIndex: 0,
+      }),
+    );
+
     // add mistakes for a separated exam
     if (!isTeacher) {
       let mistakesExamId: number | null = null;
@@ -250,7 +265,7 @@ const ExamComponent = () => {
             isFlagged: ans.isFlagged,
             showAnsClicked: ans.showAnsClicked,
             question_id: ans.question_id,
-            answer: ans.selectedOpt || 'not answered',
+            answer: ans.selectedOpt || "not answered",
             true: ans.answerstate === "correct" ? 1 : 0,
           })),
         },
@@ -261,7 +276,7 @@ const ExamComponent = () => {
           transformRequest: [(data) => JSON.stringify(data)],
         },
       );
-      if(data?.success) {
+      if (data?.success) {
         dispatch(fetchDomains(course_id));
       }
     }
@@ -283,7 +298,7 @@ const ExamComponent = () => {
               t("noAssessments")
             ) : (
               <>
-                {!questions.length ? (
+                {!questions?.length ? (
                   <>
                     <h4 className="mx-auto">{t("noQuestions")}</h4>
                     {isTeacher ? <UploadQuestions /> : ""}

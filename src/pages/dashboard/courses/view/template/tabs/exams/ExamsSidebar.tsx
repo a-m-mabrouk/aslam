@@ -25,11 +25,8 @@ import {
 import { toastifyBox } from "../../../../../../../helper/toastifyBox";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
-import {
-  setActiveAssessment,
-  setIsAssessmentRunning,
-} from "../../../../../../../store/reducers/exams";
-import { clearAllExamItems } from "../../../../../../../utilities/clearExamStorage";
+import { setActiveAssessment } from "../../../../../../../store/reducers/exams";
+// import { clearAllExamItems } from "../../../../../../../utilities/clearExamStorage";
 
 export function AddDomainModal({
   modalType,
@@ -261,7 +258,7 @@ export default function ExamsSidebar({
   const domains = useAppSelector(({ examsDomains }) => examsDomains.domains);
   const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
   // console.log(domains);
-  
+
   const { t } = useTranslation("exams");
   const { t: tBtns } = useTranslation("buttons");
   const { t: tAlert } = useTranslation("alerts");
@@ -308,30 +305,31 @@ export default function ExamsSidebar({
   };
 
   useEffect(() => {
-    dispatch(fetchDomains(+course_id!))
-      .unwrap()
-      .then((data) => {
-        // reset exam and clear localStorage if exam was removed by teacher
-        const domains = data.data;
-        const localActiveAssessment = localStorage.getItem("activeAssessment");
-        if (localActiveAssessment) {
-          const id = JSON.parse(localActiveAssessment).id;
-          const assessmentInDomains = domains.some((domain: DomainType) =>
-            domain.assessments.some((assessment) => assessment.id === id),
-          );
-          const assessmentInSubdomains = domains.some((domain: DomainType) =>
-            domain.subdomains?.some((subdomain) =>
-              subdomain.assessments.some((assessment) => assessment.id === id),
-            ),
-          );
-          if (!assessmentInDomains && !assessmentInSubdomains) {
-            dispatch(setActiveAssessment(null));
-            dispatch(setIsAssessmentRunning(false));
-            clearAllExamItems();
-          }
+    let isFirst = true;
+    dispatch(fetchDomains(Number(course_id!)))
+    .unwrap()
+    .then((data) => {
+      // reset exam and clear localStorage if exam was removed by teacher
+      const domains = data.data;
+      const localActiveAssessment = localStorage.getItem("activeAssessment");
+      if (localActiveAssessment) {
+        const id = JSON.parse(localActiveAssessment).id;
+        const assessmentInDomains = domains.some((domain: DomainType) =>
+          domain.assessments.some((assessment) => assessment.id === id),
+        );
+        const assessmentInSubdomains = domains.some((domain: DomainType) =>
+          domain.subdomains?.some((subdomain) =>
+            subdomain.assessments.some((assessment) => assessment.id === id),
+          ),
+        );
+        if (!assessmentInDomains && !assessmentInSubdomains) {
+          dispatch(setActiveAssessment(null));
+          // clearAllExamItems();
         }
-      })
-      .catch((err) => toastifyBox("error", err.message || "Failed!"));
+      }
+    })
+    .catch((err) => toastifyBox("error", err.message || "Failed!"));
+    // dispatch(setActiveAssessment(null));
   }, [course_id, dispatch]);
 
   return (

@@ -114,7 +114,7 @@ export default function QuestionMCQ({
 }) {
   const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
-  const { examAnswers, review } = useAppSelector(({ exams }) => exams);
+  const { examAnswers, review, activeAssessment } = useAppSelector(({ exams }) => exams);
   const selectedOptionsArr = JSON.parse(
     examAnswers[questionIndex]?.selectedOpt || "[]",
   );
@@ -155,10 +155,13 @@ export default function QuestionMCQ({
           ? "correct"
           : "wrong";
       const selectedOpt = JSON.stringify(userAnswers);
-      dispatch(setAnswerState({ questionIndex, answerstate }));
-      dispatch(setSelectedOpt({ questionIndex, selectedOpt }));
+      if (activeAssessment?.id) {
+        dispatch(setAnswerState({ assessment_id: activeAssessment?.id, questionIndex, answerstate }));
+        dispatch(setSelectedOpt({ assessment_id: activeAssessment?.id, questionIndex, selectedOpt }));
+        
+      }
     },
-    [correctOptionsArr, dispatch, questionIndex, selectedOptionsArr, t],
+    [activeAssessment?.id, correctOptionsArr, dispatch, questionIndex, selectedOptionsArr, t],
   );
   return editable ? (
     <div className={imagesArr ? "grid" : undefined}>

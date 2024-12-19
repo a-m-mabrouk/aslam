@@ -27,7 +27,7 @@ export default function Tabs() {
     <div>
       <BgCard>
         <TabsCard handleActiveTabchange={e=> setTabsLocalstorage(e)}>
-        <TabsCard.TabItem title={t("description")} icon={DocumentTextIcon}>
+        <TabsCard.TabItem title={t("description")} icon={DocumentTextIcon} active={activeTabIndex === 0}>
           <pre
             style={{
               fontFamily: "unset",
@@ -38,13 +38,13 @@ export default function Tabs() {
             {course?.description[lang]}
           </pre>
         </TabsCard.TabItem>
-          <TabsCard.TabItem title={t("videos")} icon={FolderIcon} active={activeTabIndex === 0}>
+          <TabsCard.TabItem title={t("videos")} icon={FolderIcon} active={activeTabIndex === 1}>
             <Videos />
           </TabsCard.TabItem>
-          <TabsCard.TabItem title={t("resources")} icon={DocumentIcon} active={activeTabIndex === 1}>
+          <TabsCard.TabItem title={t("resources")} icon={DocumentIcon} active={activeTabIndex === 2}>
             <Resources />
           </TabsCard.TabItem>
-          <TabsCard.TabItem title={t("exams")} icon={DocumentTextIcon} active={activeTabIndex === 2}>
+          <TabsCard.TabItem title={t("exams")} icon={DocumentTextIcon} active={activeTabIndex === 3}>
             <Exams />
           </TabsCard.TabItem>
         </TabsCard>

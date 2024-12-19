@@ -9,18 +9,24 @@ import {
   FolderIcon,
 } from "@heroicons/react/24/outline";
 import { ViewCourseContext } from "../..";
-import { useContext } from "react";
+import { useCallback, useContext, useState } from "react";
 import useGetLang from "../../../../../../hooks/useGetLang";
 import ExamComponent from "../../../../../dashboard/courses/view/template/tabs/exams";
 
 export default function Tabs() {
+  const localstorageTabIndex = Number(localStorage.getItem('tabIndex'));
+  const [activeTabIndex, setActiveTabIndex] = useState<number>(localstorageTabIndex || 0)
   const { t } = useTranslation("viewCourse");
+  const setTabsLocalstorage = useCallback((tabIndex: number) => {
+    setActiveTabIndex(tabIndex);
+    localStorage.setItem('tabIndex', JSON.stringify(tabIndex))
+  }, [])
   const { lang } = useGetLang();
   const { course } = useContext(ViewCourseContext);
   return (
     <BgCard>
-      <TabsCard>
-        <TabsCard.TabItem title={t("description")} icon={DocumentTextIcon}>
+      <TabsCard handleActiveTabchange={e=> setTabsLocalstorage(e)}>
+        <TabsCard.TabItem title={t("description")} icon={DocumentTextIcon} active={activeTabIndex === 0}>
           <pre
             style={{
               fontFamily: "unset",
@@ -31,13 +37,13 @@ export default function Tabs() {
             {course?.description[lang]}
           </pre>
         </TabsCard.TabItem>
-        <TabsCard.TabItem title={t("videos")} icon={FolderIcon}>
+        <TabsCard.TabItem title={t("videos")} icon={FolderIcon} active={activeTabIndex === 1}>
           <Videos />
         </TabsCard.TabItem>
-        <TabsCard.TabItem title={t("resources")} icon={DocumentIcon}>
+        <TabsCard.TabItem title={t("resources")} icon={DocumentIcon} active={activeTabIndex === 2}>
           <Resources />
         </TabsCard.TabItem>
-        <TabsCard.TabItem title={t("exams")} icon={DocumentIcon}>
+        <TabsCard.TabItem title={t("exams")} icon={DocumentIcon} active={activeTabIndex === 3}>
           <ExamComponent />
         </TabsCard.TabItem>
       </TabsCard>

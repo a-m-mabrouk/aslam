@@ -1863,6 +1863,11 @@ i18next@^23.16.5:
   dependencies:
     "@babel/runtime" "^7.23.2"
 
+idb@^8.0.1:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/idb/-/idb-8.0.1.tgz#15e8be673413d6caf4beefacf086c8902d785e1e"
+  integrity sha512-EkBCzUZSdhJV8PxMSbeEV//xguVKZu9hZZulM+2gHXI0t2hGVU3eYE6/XnH77DS6FM2FY8wl17aDcu9vXpvLWQ==
+
 ignore@^5.2.0, ignore@^5.3.1:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.3.2.tgz#3cd40e729f3643fd87cb04e50bf0eb722bc596f5"

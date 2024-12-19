@@ -192,10 +192,13 @@ export default function ExamInterface({
   }, []);
   const startTimer = useCallback(() => {
     timerIntervalRef.current = setInterval(() => {
-      dispatch(setExamTimeRemaining(timeRemaining > 0 ? timeRemaining - 1 : 0));
+      if (activeAssessment?.id) {
+        dispatch(setExamTimeRemaining({assessment_id: activeAssessment?.id, examTimeRemaining: timeRemaining > 0 ? timeRemaining - 1 : 0}));
+        
+      }
       timeRemaining === 0 && startTimeoutAnimation();
     }, 1000);
-  }, [dispatch, startTimeoutAnimation, timeRemaining]);
+  }, [activeAssessment?.id, dispatch, startTimeoutAnimation, timeRemaining]);
 
   useEffect(() => {
     timeRemainingRef.current = timeRemaining;
@@ -268,7 +271,9 @@ export default function ExamInterface({
     };
   }, [handleKeyDown]);
   const showAns = () => {
-    dispatch(setShowAnsClicked(currentQuestionIndex));
+    if (activeAssessment?.id) {
+      dispatch(setShowAnsClicked({assessment_id: activeAssessment.id, ansIndex: currentQuestionIndex}));
+    }
   };
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -359,7 +364,7 @@ export default function ExamInterface({
             <div className="col-start-1 col-end-3 flex">
               <span
                 className="flex cursor-pointer gap-1 text-gray-700"
-                onClick={() => dispatch(setIsFlagged(currentQuestionIndex))}
+                onClick={() => {activeAssessment?.id && dispatch(setIsFlagged({assessment_id: activeAssessment?.id, ansIndex: currentQuestionIndex}))}}
               >
                 {examAnswers[currentQuestionIndex]?.isFlagged ? (
                   <>

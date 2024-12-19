@@ -32,6 +32,7 @@ export function StudentCourseCard({
   id,
   expire: isExpired,
   expiration_date,
+  free,
 }: CoursesListDatum) {
   const { t } = useTranslation("students");
   const { t: tInputs } = useTranslation("inputs");
@@ -40,8 +41,9 @@ export function StudentCourseCard({
   return (
     <div className="relative">
       <LinkWrapper isExpired={isExpired} id={id}>
+      <>{console.log(free)}</>
         <Card
-          className={`relative h-full max-w-sm ${!isExpired ? "cursor-not-allowed" : undefined}`}
+          className={`relative h-full max-w-sm ${!isExpired || !free ? "cursor-not-allowed" : undefined}`}
           imgAlt="course"
           imgSrc={photo}
         >

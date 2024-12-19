@@ -3,8 +3,14 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
 import { MultiBackend, TouchTransition } from "react-dnd-multi-backend";
-import { useAppDispatch, useAppSelector } from "../../../../../../../../../../store";
-import { setAnswerState, setSelectedOpt } from "../../../../../../../../../../store/reducers/exams";
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "../../../../../../../../../../store";
+import {
+  setAnswerState,
+  setSelectedOpt,
+} from "../../../../../../../../../../store/reducers/exams";
 import DraggableItem from "./DraggableItem";
 import DroppableArea from "./DroppableArea";
 import { shuffle } from "../../../../../../../../../../utilities/shuffleArray";
@@ -32,17 +38,32 @@ export default function QuestionDragDrop({
   isDescShow: boolean;
 }) {
   const dispatch = useAppDispatch();
-  const { examAnswers, review } = useAppSelector(({ exams }) => exams);
+  const { examAnswers, review, activeAssessment } = useAppSelector(
+    ({ exams }) => exams,
+  );
   const thisQueAnswers = examAnswers[questionIndex]?.selectedOpt;
 
-  const [draggableItems, setDraggableItems] = useState<DraggableAreaProps[]>([]);
-  const [droppableAreas, setDroppableAreas] = useState<DroppableAreaProps[]>([]);
+  const [draggableItems, setDraggableItems] = useState<DraggableAreaProps[]>(
+    [],
+  );
+  const [droppableAreas, setDroppableAreas] = useState<DroppableAreaProps[]>(
+    [],
+  );
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
   // console.log(question.question.description !== "");
-  
+
   const checkDisabled = useMemo(
-    () => (question.question.description === ""? (examAnswers[questionIndex]?.showAnsClicked && isDescShow): examAnswers[questionIndex]?.showAnsClicked) || review,
-    [examAnswers, isDescShow, question.question.description, questionIndex, review]
+    () =>
+      (question.question.description === ""
+        ? examAnswers[questionIndex]?.showAnsClicked && isDescShow
+        : examAnswers[questionIndex]?.showAnsClicked) || review,
+    [
+      examAnswers,
+      isDescShow,
+      question.question.description,
+      questionIndex,
+      review,
+    ],
   );
 
   const handleDropItem = (areaId: number, item: DraggableAreaProps) => {
@@ -50,37 +71,45 @@ export default function QuestionDragDrop({
 
     const updatedDroppableAreas = droppableAreas.map((area) => {
       area.items[0]?.id === item.id && area.items.pop();
-      return  area.id === areaId
-        ? { ...area, items: [item] }
-        : area
-    }
-    );
+      return area.id === areaId ? { ...area, items: [item] } : area;
+    });
 
     const updatedDraggableItems = draggableItems.filter(
-      (draggableItem) => draggableItem.id !== item.id
+      (draggableItem) => draggableItem.id !== item.id,
     );
 
     setDroppableAreas(updatedDroppableAreas);
     setDraggableItems(updatedDraggableItems);
 
-    const answerstate = updatedDroppableAreas.every((area) => area.items.length === 0)
+    const answerstate = updatedDroppableAreas.every(
+      (area) => area.items.length === 0,
+    )
       ? "skipped"
       : updatedDroppableAreas.every(
-          ({ items, id }) => items.length === 1 && items[0].id === id
-        )
-      ? "correct"
-      : "wrong";
+            ({ items, id }) => items.length === 1 && items[0].id === id,
+          )
+        ? "correct"
+        : "wrong";
 
-    dispatch(setAnswerState({ questionIndex, answerstate }));
-    dispatch(
-      setSelectedOpt({
-        questionIndex,
-        selectedOpt: JSON.stringify({
-          draggableItems: updatedDraggableItems,
-          droppableAreas: updatedDroppableAreas,
+    if (activeAssessment?.id) {
+      dispatch(
+        setAnswerState({
+          assessment_id: activeAssessment?.id,
+          questionIndex,
+          answerstate,
         }),
-      })
-    );
+      );
+      dispatch(
+        setSelectedOpt({
+          assessment_id: activeAssessment?.id,
+          questionIndex,
+          selectedOpt: JSON.stringify({
+            draggableItems: updatedDraggableItems,
+            droppableAreas: updatedDroppableAreas,
+          }),
+        }),
+      );
+    }
   };
 
   const handleDropBack = (item: DraggableAreaProps) => {
@@ -95,15 +124,18 @@ export default function QuestionDragDrop({
       setDraggableItems(updatedDraggableItems);
       setDroppableAreas(updatedDroppableAreas);
 
-      dispatch(
-        setSelectedOpt({
-          questionIndex,
-          selectedOpt: JSON.stringify({
-            draggableItems: updatedDraggableItems,
-            droppableAreas: updatedDroppableAreas,
+      if (activeAssessment?.id) {
+        dispatch(
+          setSelectedOpt({
+            assessment_id: activeAssessment?.id,
+            questionIndex,
+            selectedOpt: JSON.stringify({
+              draggableItems: updatedDraggableItems,
+              droppableAreas: updatedDroppableAreas,
+            }),
           }),
-        })
-      );
+        );
+      }
     }
   };
 
@@ -116,8 +148,8 @@ export default function QuestionDragDrop({
           question?.question?.options.map(({ option: label }, id) => ({
             id,
             label,
-          }))
-      )
+          })),
+      ),
     );
 
     setDroppableAreas(
@@ -126,35 +158,47 @@ export default function QuestionDragDrop({
           id,
           label,
           items: [],
-        }))
+        })),
     );
     setIsAnswered(false); // Reset isAnswered for each question
   }, [thisQueAnswers, question?.question?.options]);
 
   useEffect(() => {
     if (checkDisabled && !isAnswered) {
-      const updatedDroppableAreas = question?.question?.options.map(({ answer }, id) => ({
-        id,
-        label: answer,
-        items: [{ id, label: question?.question?.options[id].option }],
-      }));
+      const updatedDroppableAreas = question?.question?.options.map(
+        ({ answer }, id) => ({
+          id,
+          label: answer,
+          items: [{ id, label: question?.question?.options[id].option }],
+        }),
+      );
 
       setDraggableItems([]); // Clear draggable items
       setDroppableAreas(updatedDroppableAreas); // Set correct answers
       setIsAnswered(true);
 
       // Dispatch updated state to save answers
-      dispatch(
-        setSelectedOpt({
-          questionIndex,
-          selectedOpt: JSON.stringify({
-            draggableItems: [],
-            droppableAreas: updatedDroppableAreas,
+      if (activeAssessment?.id) {
+        dispatch(
+          setSelectedOpt({
+            assessment_id: activeAssessment?.id,
+            questionIndex,
+            selectedOpt: JSON.stringify({
+              draggableItems: [],
+              droppableAreas: updatedDroppableAreas,
+            }),
           }),
-        })
-      );
+        );
+      }
     }
-  }, [checkDisabled, question?.question?.options, dispatch, questionIndex, isAnswered]);
+  }, [
+    checkDisabled,
+    question?.question?.options,
+    dispatch,
+    questionIndex,
+    isAnswered,
+    activeAssessment?.id,
+  ]);
 
   return (
     <DndProvider backend={MultiBackend} options={backendOptions}>

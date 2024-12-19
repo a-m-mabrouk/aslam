@@ -4,6 +4,5 @@ export const clearAllExamItems = () => {
         "activeAssessQuestionIndex",
         "examAnswers",
         "examTimeRemaining",
-        "isAssessmentRunning",
       ].forEach((key) => localStorage.removeItem(key));
 }
