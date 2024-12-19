@@ -1,6 +1,8 @@
-import { Suspense, useState } from "react";
+import React, { Suspense, useState } from "react";
 import PopupModal from "..";
-import ReactPlayer from "react-player/lazy";
+// import ReactPlayer from "react-player/lazy";
+const ReactPlayer = React.lazy(() => import("react-player"));
+
 import Loading from "../../loading";
 
 export default function PlayerModal({
