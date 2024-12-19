@@ -26,7 +26,6 @@ import { toastifyBox } from "../../../../../../../helper/toastifyBox";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
 import { setActiveAssessment } from "../../../../../../../store/reducers/exams";
-// import { clearAllExamItems } from "../../../../../../../utilities/clearExamStorage";
 
 export function AddDomainModal({
   modalType,
@@ -305,15 +304,14 @@ export default function ExamsSidebar({
   };
 
   useEffect(() => {
-    let isFirst = true;
     dispatch(fetchDomains(Number(course_id!)))
     .unwrap()
     .then((data) => {
       // reset exam and clear localStorage if exam was removed by teacher
       const domains = data.data;
-      const localActiveAssessment = localStorage.getItem("activeAssessment");
-      if (localActiveAssessment) {
-        const id = JSON.parse(localActiveAssessment).id;
+      const localActiveAssessmentId = localStorage.getItem("activeAssessmentId");
+      if (localActiveAssessmentId) {
+        const id = JSON.parse(localActiveAssessmentId);
         const assessmentInDomains = domains.some((domain: DomainType) =>
           domain.assessments.some((assessment) => assessment.id === id),
         );
@@ -324,7 +322,7 @@ export default function ExamsSidebar({
         );
         if (!assessmentInDomains && !assessmentInSubdomains) {
           dispatch(setActiveAssessment(null));
-          // clearAllExamItems();
+          localStorage.removeItem("activeAssessmentId")
         }
       }
     })

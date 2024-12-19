@@ -5,7 +5,7 @@ import Register from "./template/register";
 import Info from "./template/info";
 
 export default function Auth() {
-  const [view, setView] = useState(true);
+  const [view, setView] = useState(false);
   return (
     <AuthLayout>
       <div className="relative mx-auto grid min-h-[80vh] w-full max-w-[1000px] grid-cols-1 gap-4 bg-white p-4 md:grid-cols-2">

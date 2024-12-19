@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { fadeIn } from "../../../utilities/motion";
 import { toastifyBox } from "../../../helper/toastifyBox";
+import LoginHelp from "./loginHelp";
 
 export default function Login({
   view,
@@ -113,6 +114,7 @@ export default function Login({
           {t("do_not_have_account")}
         </motion.p>
       </motion.form>
+      <LoginHelp />
     </div>
   );
 }

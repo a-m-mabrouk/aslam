@@ -11,6 +11,7 @@ import { useAppDispatch } from "../../../store";
 import { login } from "../../../store/reducers/auth";
 import { fadeIn } from "../../../utilities/motion";
 import { toastifyBox } from "../../../helper/toastifyBox";
+import LoginHelp from "./loginHelp";
 
 export default function Register({
   view,
@@ -166,6 +167,7 @@ export default function Register({
           {t("have_account")}
         </motion.p>
       </motion.form>
+      <LoginHelp />
     </div>
   );
 }

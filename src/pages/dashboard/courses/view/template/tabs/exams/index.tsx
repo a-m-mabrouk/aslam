@@ -29,6 +29,7 @@ import Swal from "sweetalert2";
 import { Button } from "flowbite-react";
 import { useParams } from "react-router";
 import { fetchDomains } from "../../../../../../../store/reducers/examsDomains";
+import { getItemById, updateItem } from "../../../../../../../utilities/idb";
 
 export function FullScreenButton({
   onFullscreen,
@@ -134,10 +135,8 @@ const ExamComponent = () => {
           await axiosDefault.delete(
             `${API_EXAMS.deleteAllQuestions}/${activeAssessment?.id}`,
           );
-          const activeAssess = JSON.parse(
-            localStorage.getItem("activeAssessment")!,
-          );
-          activeAssess.questions = [];
+          await updateItem(activeAssessment!.id!, {questions: []});
+          const activeAssess = {...activeAssessment, questions: []} as AssessmentType;
           dispatch(setActiveAssessment(activeAssess));
           dispatch(fetchDomains(course_id));
         } catch (error) {
@@ -212,73 +211,76 @@ const ExamComponent = () => {
       } else {
         mistakesExamId = mistakesExamsData.data.id;
       }
-      const examAnswers = JSON.parse(localStorage.getItem("examAnswers")!);
-      const total_degree =
-        Math.round(
-          (examAnswers.reduce(
-            (acc: number, examAnswer: { answerstate: string }) =>
-              examAnswer.answerstate === "correct" ? acc + 1 : acc,
-            0,
-          ) /
-            examAnswers.length) *
-            10000,
-        ) / 100;
-      const wrongQuestionsIds = examAnswers
-        .filter(
-          ({ answerstate }: { answerstate: string }) => answerstate === "wrong",
-        )
-        .map(({ question_id }: { question_id: number }) => question_id);
-      const wrongQuestions = questions
-        .filter(({ id }) => wrongQuestionsIds.includes(id))
-        .map(({ question, id }) => ({ ...question, id }));
-
-      if (wrongQuestions.length) {
-        const { data } = await axiosDefault.post(
-          API_EXAMS.questions,
-          {
-            assessment_id: mistakesExamId,
-            course_id,
-            questions: wrongQuestions,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
+      await getItemById(activeAssessment!.id!).then(async (assess) => {
+        const examAnswers = assess?.examAnswers
+        if (examAnswers) {
+          const total_degree =
+            Math.round(
+              (examAnswers.reduce(
+                (acc: number, examAnswer: { answerstate: string }) =>
+                  examAnswer.answerstate === "correct" ? acc + 1 : acc,
+                0,
+              ) /
+                examAnswers.length) *
+                10000,
+            ) / 100;
+          const wrongQuestionsIds = examAnswers?.filter(
+              ({ answerstate }: { answerstate: string }) => answerstate === "wrong",
+            )
+            .map(({ question_id }: { question_id: number }) => question_id);
+          const wrongQuestions = questions
+            .filter(({ id }) => wrongQuestionsIds?.includes(id))
+            .map(({ question, id }) => ({ ...question, id }));
+    
+          if (wrongQuestions.length) {
+            const { data } = await axiosDefault.post(
+              API_EXAMS.questions,
+              {
+                assessment_id: mistakesExamId,
+                course_id,
+                questions: wrongQuestions,
+              },
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                transformRequest: [(data) => JSON.stringify(data)],
+              },
+            );
+            console.log(data);
+          }
+          const { data } = await axiosDefault.post(
+            API_EXAMS.answer,
+            {
+              activeAssessQuestionIndex,
+              examTimeRemaining,
+              student_id,
+              assessment_id,
+              total_degree,
+              answers: examAnswers.map((ans: ExamAnswer) => ({
+                answerState: ans.answerstate,
+                domain: ans.domain,
+                chapter: ans.chapter,
+                selectOpt: ans.selectedOpt,
+                isFlagged: ans.isFlagged,
+                showAnsClicked: ans.showAnsClicked,
+                question_id: ans.question_id,
+                answer: ans.selectedOpt || "not answered",
+                true: ans.answerstate === "correct" ? 1 : 0,
+              })),
             },
-            transformRequest: [(data) => JSON.stringify(data)],
-          },
-        );
-        console.log(data);
-      }
-      const { data } = await axiosDefault.post(
-        API_EXAMS.answer,
-        {
-          activeAssessQuestionIndex,
-          examTimeRemaining,
-          student_id,
-          assessment_id,
-          total_degree,
-          answers: examAnswers.map((ans: ExamAnswer) => ({
-            answerState: ans.answerstate,
-            domain: ans.domain,
-            chapter: ans.chapter,
-            selectOpt: ans.selectedOpt,
-            isFlagged: ans.isFlagged,
-            showAnsClicked: ans.showAnsClicked,
-            question_id: ans.question_id,
-            answer: ans.selectedOpt || "not answered",
-            true: ans.answerstate === "correct" ? 1 : 0,
-          })),
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          transformRequest: [(data) => JSON.stringify(data)],
-        },
-      );
-      if (data?.success) {
-        dispatch(fetchDomains(course_id));
-      }
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+              transformRequest: [(data) => JSON.stringify(data)],
+            },
+          );
+          if (data?.success) {
+            dispatch(fetchDomains(course_id));
+          }
+        }
+      })
     }
   };
 

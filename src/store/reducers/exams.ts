@@ -7,17 +7,6 @@ import { getItemById, updateItem } from "../../utilities/idb";
 //     ? JSON.parse(localStorage.getItem(item)!)
 //     : defaultValue;
 // }
-async function getParsedIndexedDB(item: string, defaultValue: unknown) {
-  const assessment_id = localStorage.getItem(item)
-    ? JSON.parse(localStorage.getItem(item)!)
-    : defaultValue;
-
-  if (assessment_id) {
-    const data = await getItemById(assessment_id);
-    console.log(data);
-    return data? data: null;
-  }
-}
 
 const initialState: ExamType = {
   examAnswers: [],
@@ -28,11 +17,6 @@ const initialState: ExamType = {
   examTimeRemaining: 0,
   activeAssessQuestionIndex: 0,
 };
-(async () => {
-  const activeAssessment = await getParsedIndexedDB("activeAssessmentId", null);
-  // Update the state using your state management (e.g., Redux or React state)
-  initialState.activeAssessment = activeAssessment? activeAssessment: null;
-})();
 
 const examsSlice = createSlice({
   name: "exams",
@@ -41,8 +25,8 @@ const examsSlice = createSlice({
     resetExam: (state) => {
       state.examAnswers = [];
       state.review = false;
-      localStorage.removeItem("examAnswers");
-      localStorage.removeItem("review");
+      // localStorage.removeItem("examAnswers");
+      // localStorage.removeItem("review");
     },
     setAnswer: (state, { payload }: PayloadAction<SetAnswerPayload>) => {
       const { assessment_id, examAnswers } = payload;
@@ -148,10 +132,7 @@ const examsSlice = createSlice({
         localStorage.setItem("activeAssessmentId", JSON.stringify(payload?.id));
       } else {
         state.activeAssessment = payload;
-        // localStorage.setItem(
-        //   "activeAssessmentId",
-        //   JSON.stringify(null),
-        // );
+        localStorage.removeItem("activeAssessmentId");
       }
     },
     setIsPaused: (state, { payload }: PayloadAction<boolean>) => {
