@@ -20,7 +20,7 @@ interface ExamType {
 }
 
 interface SetAnswerPayload {
-  assessment_id: number;
+  // assessment_id: number;
   examAnswers: {
     // questionIndex: number;
     // queAnsDetails: {

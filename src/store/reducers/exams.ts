@@ -1,8 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { shuffle } from "../../utilities/shuffleArray";
-import { getItemById, updateItem } from "../../utilities/idb";
-
-console.log('first loaded');
+import { getItemById, IDBAssessmentType, updateItem } from "../../utilities/idb";
 
 const initialState: ExamType = {
   examAnswers: [],
@@ -26,8 +23,8 @@ const examsSlice = createSlice({
       // localStorage.removeItem("review");
     },
     setAnswer: (state, { payload }: PayloadAction<SetAnswerPayload>) => {
-      const { assessment_id, examAnswers } = payload;
-      updateItem(assessment_id, { examAnswers });
+      const { examAnswers } = payload;
+      // updateItem(assessment_id, { examAnswers });
       state.examAnswers = examAnswers;
     },
     setAnswerState: (
@@ -112,19 +109,32 @@ const examsSlice = createSlice({
     },
     setActiveAssessment: (
       state,
-      { payload }: PayloadAction<AssessmentType | null>,
+      { payload }: PayloadAction<{assessment: AssessmentType | IDBAssessmentType} | null>,
     ) => {
       if (payload) {
-        const questions = payload.questions.map((que) => ({
-          ...que,
-          question: {
-            ...que.question,
-            options: shuffle(que.question.options),
-          },
-        }));
-        localStorage.setItem("activeAssessmentId", JSON.stringify(payload?.id));
-        state.activeAssessment = { ...payload, questions };
-        updateItem(payload.id, { ...payload, questions });
+        const {assessment} = payload;
+        if ('examAnswers' in assessment) {
+          const { examAnswers, examTimeRemaining, currentQuestionIndex, didAssessmentStart, review, ...rest } = assessment;
+          state.currentQuestionIndex = currentQuestionIndex;
+          state.examAnswers = examAnswers;
+          state.examTimeRemaining = examTimeRemaining;          
+          state.didAssessmentStart = didAssessmentStart;
+          state.review = review;
+          state.isPaused = true;
+          state.activeAssessment = rest;
+        } else {
+          // const questions = assessment.questions.map((que) => ({
+          //   ...que,
+          //   question: {
+          //     ...que.question,
+          //     options: shuffle(que.question.options),
+          //   },
+          // }));
+          state.activeAssessment = assessment;
+          // state.activeAssessment = { ...assessment, questions };
+          // updateItem(assessment.id, { ...assessment, questions });
+        }
+        localStorage.setItem("activeAssessmentId", JSON.stringify(assessment?.id));
       } else {
         state.activeAssessment = payload;
         localStorage.removeItem("activeAssessmentId");
@@ -137,36 +147,36 @@ const examsSlice = createSlice({
       state,
       {
         payload,
-      }: PayloadAction<{ assessment_id: number; examTimeRemaining: number }>,
+      }: PayloadAction<{
+        // assessment_id: number;
+        examTimeRemaining: number
+      }>,
     ) => {
-      const { assessment_id, examTimeRemaining } = payload;
+      const { examTimeRemaining } = payload;
       state.examTimeRemaining = examTimeRemaining;
-      updateItem(assessment_id, { examTimeRemaining });
+      // updateItem(assessment_id, { examTimeRemaining });
     },
     setCurrentQuestionIndex: (
       state,
       {
         payload,
       }: PayloadAction<{
-        assessment_id: number;
+        // assessment_id: number;
         currentQuestionIndex: number;
       }>,
     ) => {
-      const { assessment_id, currentQuestionIndex } = payload;
+      const { currentQuestionIndex } = payload;
       state.currentQuestionIndex = currentQuestionIndex;
-      updateItem(assessment_id, { currentQuestionIndex });
+      // updateItem(assessment_id, { currentQuestionIndex });
     },
     setStartAssessment: (
       state,
       {
         payload,
-      }: PayloadAction<{ assessment_id: number; didAssessmentStart: boolean }>,
+      }: PayloadAction<{didAssessmentStart: boolean }>,
     ) => {
-      const {assessment_id, didAssessmentStart} = payload;
+      const {didAssessmentStart} = payload;
       state.didAssessmentStart = didAssessmentStart;
-      console.log(assessment_id, didAssessmentStart);
-      
-      updateItem(assessment_id, {didAssessmentStart: true})
     }
   },
 });

@@ -31,6 +31,7 @@ import { Button } from "flowbite-react";
 import { useParams } from "react-router";
 import { fetchDomains } from "../../../../../../../store/reducers/examsDomains";
 import { getItemById, updateItem } from "../../../../../../../utilities/idb";
+import { shuffle } from "../../../../../../../utilities/shuffleArray";
 
 export function FullScreenButton({
   onFullscreen,
@@ -125,26 +126,19 @@ const ExamComponent = () => {
       }
     }
   };
-  const handleSelectAssessment = (assessment: AssessmentType) => {
+  const handleSelectAssessment = async (assessment: AssessmentType) => {
+    const prevId = localStorage.getItem('activeAssessmentId');
+    if (prevId) {
+      updateItem(Number(JSON.parse(prevId)), {examTimeRemaining});
+    }
+    
     setIsExamEnded(false);
-    dispatch(setActiveAssessment(assessment));
-
-    getItemById(assessment.id).then((assess) => {
-      if (assess) {
-        const {
-          id: assessment_id,
-          examTimeRemaining,
-          examAnswers,
-          currentQuestionIndex,
-          review,
-          didAssessmentStart
-        } = assess;
-        dispatch(setExamTimeRemaining({ assessment_id, examTimeRemaining }));
-        dispatch(setAnswer({ assessment_id, examAnswers }));
-        dispatch(setCurrentQuestionIndex({ assessment_id, currentQuestionIndex }));
-        dispatch(setStartAssessment({assessment_id, didAssessmentStart}));
-        dispatch(setReview({ assessment_id, review }));
-        dispatch(setIsPaused(true));
+    getItemById(assessment.id).then((data) => {
+      if (data) {
+        dispatch(setActiveAssessment({ assessment: data }));
+      } else {
+        dispatch(setActiveAssessment({ assessment }));
+        updateItem(assessment.id, {...assessment})
       }
     });
   };
@@ -166,11 +160,12 @@ const ExamComponent = () => {
           } as AssessmentType;
           dispatch(
             setAnswer({
-              assessment_id: activeAssessment!.id!,
+              // assessment_id: activeAssessment!.id!,
               examAnswers: [],
             }),
           );
-          dispatch(setActiveAssessment(activeAssess));
+          updateItem(activeAssessment!.id!, {questions: []});
+          dispatch(setActiveAssessment({ assessment: activeAssess }));
           dispatch(fetchDomains(course_id));
         } catch (error) {
           throw new Error("");
@@ -188,28 +183,57 @@ const ExamComponent = () => {
     dispatch(resetExam());
     dispatch(setIsPaused(false));
     setIsAssessmentRunning(true);
-    if (assessment_id) {
-      dispatch(setStartAssessment({ assessment_id, didAssessmentStart: true }));
-      dispatch(
-        setExamTimeRemaining({
-          assessment_id,
-          examTimeRemaining: examTime,
-        }),
-      );
-      dispatch(
-        setAnswer({
-          assessment_id,
-          examAnswers: questions.map(({ question, id }) => ({
-            question_id: id,
-            selectedOpt: "",
-            showAnsClicked: false,
-            isFlagged: false,
-            chapter: question?.chapter || "",
-            domain: question?.domain || "",
-            answerstate: "skipped",
-          })),
-        }),
-      );
+    if (assessment_id) {   
+      const ques = questions.map((que) => ({
+        ...que,
+        question: {
+          ...que.question,
+          options: shuffle(que.question.options),
+        },
+      }));
+      const examAnswers: ExamAnswer[] = ques.map(({ question, id }) => ({
+        question_id: id,
+        selectedOpt: "",
+        showAnsClicked: false,
+        isFlagged: false,
+        chapter: question?.chapter || "",
+        domain: question?.domain || "",
+        answerstate: "skipped",
+      }));
+
+      getItemById(assessment_id).then((data) => {
+        if (!data) {
+          dispatch(
+            setActiveAssessment({assessment: {...activeAssessment, questions: ques}})
+          );
+          dispatch(
+            setAnswer({
+              // assessment_id,
+              examAnswers,
+            }),
+          );
+          updateItem(assessment_id, {
+            examAnswers,
+            didAssessmentStart: true,
+            examTimeRemaining: examTime,
+            questions: ques,
+          });
+        } else {
+          updateItem(assessment_id, {
+            didAssessmentStart: true,
+            examTimeRemaining: examTime,
+          });
+        }
+        dispatch(
+          setExamTimeRemaining({
+            // assessment_id,
+            examTimeRemaining: examTime,
+          }),
+        );
+        dispatch(
+          setStartAssessment({ didAssessmentStart: true }),
+        );
+      });
     }
   };
 
@@ -220,7 +244,7 @@ const ExamComponent = () => {
     dispatch(setIsPaused(false));
     dispatch(
       setCurrentQuestionIndex({
-        assessment_id,
+        // assessment_id,
         currentQuestionIndex: 0,
       }),
     );

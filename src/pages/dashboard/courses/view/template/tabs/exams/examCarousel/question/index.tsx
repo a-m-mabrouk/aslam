@@ -52,7 +52,7 @@ const Question = memo(
       if (assessment_id) {
         dispatch(
           setCurrentQuestionIndex({
-            assessment_id,
+            // assessment_id,
             currentQuestionIndex: questionIndex,
           }),
         );
@@ -122,7 +122,7 @@ const Question = memo(
           );
           toastifyBox("success", data.message);
           setEditable(false);
-          dispatch(setActiveAssessment(data.data));
+          dispatch(setActiveAssessment({assessment: data.data}));
         } catch (error) {
           toastifyBox("error", "couldn't update question!");
         }

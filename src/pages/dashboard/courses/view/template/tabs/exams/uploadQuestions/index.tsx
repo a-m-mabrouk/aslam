@@ -185,7 +185,7 @@ export default function UploadQuestions() {
         },
       );
       toastifyBox("success", data.message);
-      dispatch(setActiveAssessment(data.data));
+      dispatch(setActiveAssessment({assessment: data.data}));
       dispatch(fetchDomains(+id));
     } catch (error) {
       console.error("Error uploading file:", error);
