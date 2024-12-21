@@ -50,7 +50,6 @@ export default function QuestionDragDrop({
     [],
   );
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
-  // console.log(question.question.description !== "");
 
   const checkDisabled = useMemo(
     () =>

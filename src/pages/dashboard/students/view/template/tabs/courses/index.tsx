@@ -9,8 +9,6 @@ import DeleteCourse from "./delete";
 
 export default function Chapters() {
   const { student } = useContext(ViewStudentContext);
-  console.log(student);
-  
   const { courses } = student || {};
   const { t } = useTranslation("students");
   const { lang } = useGetLang();
@@ -27,7 +25,6 @@ export default function Chapters() {
           key={course.id}
           className="flex justify-between gap-4 rounded-md bg-primary/10 p-4"
           >
-            <>{console.log(course)}</>
             <div className="flex grow gap-4 ">
               <InfoItem title={t("course")} value={course.name[lang]} />
               <InfoItem

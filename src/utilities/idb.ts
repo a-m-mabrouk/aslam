@@ -2,10 +2,11 @@ import { openDB, IDBPDatabase } from "idb";
 
 
 export type IDBAssessmentType = AssessmentType & {
-  activeAssessQuestionIndex: number;
+  currentQuestionIndex: number;
   examTimeRemaining: number;
   review: boolean;
   examAnswers: ExamAnswer[];
+  didAssessmentStart: boolean;
 };
 
 interface MyDatabaseSchema {
@@ -23,10 +24,11 @@ const initIDBAssessment: IDBAssessmentType = {
     en: "",
   },
   questions: [],
-  activeAssessQuestionIndex: 0,
+  currentQuestionIndex: 0,
   examTimeRemaining: 0,
   review: false,
   examAnswers: [],
+  didAssessmentStart: false,
 };
 
 let db: IDBPDatabase<MyDatabaseSchema> | undefined;
@@ -62,13 +64,19 @@ export async function updateItem(id: number, keyValuepairs: object) {
   const db = await initializeDB();
   if (id) {
     let iDBAssessment = await db.get("exams", id);
+    console.log(iDBAssessment);
+    
     if (!iDBAssessment) {
+      console.log('not init');
+      
       iDBAssessment = { ...initIDBAssessment, id };
     }
     const keys = Object.keys(keyValuepairs);
     keys.forEach((key) => {
       const myKey = key as keyof object;
       iDBAssessment[key] = keyValuepairs[myKey];
+      console.log(myKey, keyValuepairs[myKey]);
+      
     });
     await db.put("exams", iDBAssessment);
   }

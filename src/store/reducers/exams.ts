@@ -2,11 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { shuffle } from "../../utilities/shuffleArray";
 import { getItemById, updateItem } from "../../utilities/idb";
 
-// function getParsedLocalStorage(item: string, defaultValue: unknown) {
-//   return localStorage.getItem(item)
-//     ? JSON.parse(localStorage.getItem(item)!)
-//     : defaultValue;
-// }
+console.log('first loaded');
 
 const initialState: ExamType = {
   examAnswers: [],
@@ -15,7 +11,8 @@ const initialState: ExamType = {
   review: false,
   isPaused: true,
   examTimeRemaining: 0,
-  activeAssessQuestionIndex: 0,
+  currentQuestionIndex: 0,
+  didAssessmentStart: false,
 };
 
 const examsSlice = createSlice({
@@ -46,7 +43,7 @@ const examsSlice = createSlice({
       const { assessment_id, questionIndex, answerstate } = payload;
       getItemById(assessment_id).then((assessment) => {
         if (assessment) {
-          const examAnswers = [...assessment.examAnswers];
+          const examAnswers = [...assessment.examAnswers];          
           examAnswers[questionIndex].answerstate = answerstate;
           updateItem(assessment_id, { examAnswers });
         }
@@ -117,8 +114,6 @@ const examsSlice = createSlice({
       state,
       { payload }: PayloadAction<AssessmentType | null>,
     ) => {
-      console.log(payload);
-
       if (payload) {
         const questions = payload.questions.map((que) => ({
           ...que,
@@ -127,9 +122,9 @@ const examsSlice = createSlice({
             options: shuffle(que.question.options),
           },
         }));
-        state.activeAssessment = !payload ? null : { ...payload, questions };
-        updateItem(payload.id, { ...payload, questions });
         localStorage.setItem("activeAssessmentId", JSON.stringify(payload?.id));
+        state.activeAssessment = { ...payload, questions };
+        updateItem(payload.id, { ...payload, questions });
       } else {
         state.activeAssessment = payload;
         localStorage.removeItem("activeAssessmentId");
@@ -148,19 +143,31 @@ const examsSlice = createSlice({
       state.examTimeRemaining = examTimeRemaining;
       updateItem(assessment_id, { examTimeRemaining });
     },
-    setActiveAssessQuestionIndex: (
+    setCurrentQuestionIndex: (
       state,
       {
         payload,
       }: PayloadAction<{
         assessment_id: number;
-        activeAssessQuestionIndex: number;
+        currentQuestionIndex: number;
       }>,
     ) => {
-      const { assessment_id, activeAssessQuestionIndex } = payload;
-      state.activeAssessQuestionIndex = activeAssessQuestionIndex;
-      updateItem(assessment_id, { activeAssessQuestionIndex });
+      const { assessment_id, currentQuestionIndex } = payload;
+      state.currentQuestionIndex = currentQuestionIndex;
+      updateItem(assessment_id, { currentQuestionIndex });
     },
+    setStartAssessment: (
+      state,
+      {
+        payload,
+      }: PayloadAction<{ assessment_id: number; didAssessmentStart: boolean }>,
+    ) => {
+      const {assessment_id, didAssessmentStart} = payload;
+      state.didAssessmentStart = didAssessmentStart;
+      console.log(assessment_id, didAssessmentStart);
+      
+      updateItem(assessment_id, {didAssessmentStart: true})
+    }
   },
 });
 
@@ -176,7 +183,8 @@ export const {
   setReview,
   setIsPaused,
   setExamTimeRemaining,
-  setActiveAssessQuestionIndex,
+  setCurrentQuestionIndex,
+  setStartAssessment
 } = examsSlice.actions;
 
 export default examsSlice.reducer;

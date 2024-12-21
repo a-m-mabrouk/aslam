@@ -15,7 +15,8 @@ interface ExamType {
   review: boolean;
   isPaused: boolean;
   examTimeRemaining: number;
-  activeAssessQuestionIndex: number;
+  currentQuestionIndex: number;
+  didAssessmentStart: boolean;
 }
 
 interface SetAnswerPayload {

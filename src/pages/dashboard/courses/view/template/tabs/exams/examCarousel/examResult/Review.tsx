@@ -1,16 +1,18 @@
-import { useState } from "react";
-import { useAppSelector } from "../../../../../../../../../store";
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "../../../../../../../../../store";
 import { useTranslation } from "react-i18next";
 import Question from "../question";
 import { Button } from "flowbite-react";
+import { setCurrentQuestionIndex } from "../../../../../../../../../store/reducers/exams";
 
 export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
   const { t } = useTranslation("exams");
-  const { examAnswers, activeAssessment } = useAppSelector(
-    ({ exams }) => exams,
-  );
-  const { questions } = activeAssessment!;
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const dispatch = useAppDispatch();
+  const { examAnswers, activeAssessment, currentQuestionIndex } =
+    useAppSelector(({ exams }) => exams);
+  const { questions, id: assessment_id } = activeAssessment!;
 
   type ReviewQuestions = Question & { reviewIndex: number };
   const reviewQuestions: ReviewQuestions[] = [];
@@ -25,13 +27,23 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
 
   const goToNextQuestion = () => {
     if (currentQuestionIndex < reviewQuestions?.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1);
+      dispatch(
+        setCurrentQuestionIndex({
+          assessment_id,
+          currentQuestionIndex: currentQuestionIndex + 1,
+        }),
+      );
     }
   };
 
   const goToPreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1);
+      dispatch(
+        setCurrentQuestionIndex({
+          assessment_id,
+          currentQuestionIndex: currentQuestionIndex - 1,
+        }),
+      );
     }
   };
 

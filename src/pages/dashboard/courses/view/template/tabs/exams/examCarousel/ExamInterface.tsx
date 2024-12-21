@@ -38,6 +38,7 @@ import {
 import Question from "./question";
 import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
 import {
+  setCurrentQuestionIndex,
   setExamTimeRemaining,
   setIsFlagged,
   setIsPaused,
@@ -157,19 +158,22 @@ export default function ExamInterface({
     isPaused,
     examTimeRemaining: timeRemaining,
     activeAssessment,
-    activeAssessQuestionIndex,
+    currentQuestionIndex,
   } = useAppSelector(({ exams }) => exams);
   const timeRemainingRef = useRef(timeRemaining);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(
-    activeAssessQuestionIndex,
-  );
   const [borderColor, setBorderColor] = useState<string>("border-gray-300");
   const [timerColor, setTimerColor] = useState<string>("");
   const timerIntervalRef = useRef<number | null>(null);
   const overIntervalRef = useRef<number | null>(null);
 
   const handleChooseQue = (queIndex: number) => {
-    setCurrentQuestionIndex(queIndex);
+    dispatch(
+      setCurrentQuestionIndex({
+        assessment_id: activeAssessment!.id!,
+        currentQuestionIndex: queIndex,
+      }),
+    );
+
     closeFlagQuestionsPopupOpen();
     const fakeEvent = { stopPropagation: () => {} } as SyntheticEvent;
     closeAllQuestionsPopupOpen(fakeEvent);
@@ -193,8 +197,12 @@ export default function ExamInterface({
   const startTimer = useCallback(() => {
     timerIntervalRef.current = setInterval(() => {
       if (activeAssessment?.id) {
-        dispatch(setExamTimeRemaining({assessment_id: activeAssessment?.id, examTimeRemaining: timeRemaining > 0 ? timeRemaining - 1 : 0}));
-        
+        dispatch(
+          setExamTimeRemaining({
+            assessment_id: activeAssessment?.id,
+            examTimeRemaining: timeRemaining > 0 ? timeRemaining - 1 : 0,
+          }),
+        );
       }
       timeRemaining === 0 && startTimeoutAnimation();
     }, 1000);
@@ -210,7 +218,7 @@ export default function ExamInterface({
       dispatch(setIsPaused(true));
     }
   }, [dispatch, startTimeoutAnimation]);
-  
+
   const pauseTimer = () => {
     dispatch(setIsPaused(true));
     clearTimerInterval();
@@ -239,40 +247,58 @@ export default function ExamInterface({
 
   const goToNextQuestion = useCallback(() => {
     if (currentQuestionIndex < questions?.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1);
+      dispatch(
+        setCurrentQuestionIndex({
+          assessment_id: activeAssessment!.id!,
+          currentQuestionIndex: currentQuestionIndex + 1,
+        }),
+      );
     }
-  }, [currentQuestionIndex, questions?.length]);
+  }, [activeAssessment, currentQuestionIndex, dispatch, questions?.length]);
 
   const goToPreviousQuestion = useCallback(() => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1);
+      dispatch(
+        setCurrentQuestionIndex({
+          assessment_id: activeAssessment!.id!,
+          currentQuestionIndex: currentQuestionIndex - 1,
+        }),
+      );
     }
-  }, [currentQuestionIndex]);
+  }, [activeAssessment, currentQuestionIndex, dispatch]);
 
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key === 'ArrowRight') {
-      if (lang === "en") {
-        goToNextQuestion();
-      } else {
-        goToPreviousQuestion();
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "ArrowRight") {
+        if (lang === "en") {
+          goToNextQuestion();
+        } else {
+          goToPreviousQuestion();
+        }
+      } else if (event.key === "ArrowLeft") {
+        if (lang === "en") {
+          goToPreviousQuestion();
+        } else {
+          goToNextQuestion();
+        }
       }
-    } else if (event.key === 'ArrowLeft') {
-      if (lang === "en") {
-        goToPreviousQuestion();
-      } else {
-        goToNextQuestion();
-      }
-    }
-  }, [goToNextQuestion, goToPreviousQuestion, lang]);
+    },
+    [goToNextQuestion, goToPreviousQuestion, lang],
+  );
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [handleKeyDown]);
   const showAns = () => {
     if (activeAssessment?.id) {
-      dispatch(setShowAnsClicked({assessment_id: activeAssessment.id, ansIndex: currentQuestionIndex}));
+      dispatch(
+        setShowAnsClicked({
+          assessment_id: activeAssessment.id,
+          ansIndex: currentQuestionIndex,
+        }),
+      );
     }
   };
   const formatTime = (seconds: number) => {
@@ -329,7 +355,9 @@ export default function ExamInterface({
           <span>{formatTime(timeRemaining)}</span>
         </div>
       </div>
-      <div className={`grid h-full grid-rows-[auto_1fr_auto] ${isPaused ? "invisible" : ""}`}>
+      <div
+        className={`grid h-full grid-rows-[auto_1fr_auto] ${isPaused ? "invisible" : ""}`}
+      >
         {/* Header */}
         <header className="grid gap-2 bg-gray-200 p-4">
           <div className="flex justify-between">
@@ -364,7 +392,15 @@ export default function ExamInterface({
             <div className="col-start-1 col-end-3 flex">
               <span
                 className="flex cursor-pointer gap-1 text-gray-700"
-                onClick={() => {activeAssessment?.id && dispatch(setIsFlagged({assessment_id: activeAssessment?.id, ansIndex: currentQuestionIndex}))}}
+                onClick={() => {
+                  activeAssessment?.id &&
+                    dispatch(
+                      setIsFlagged({
+                        assessment_id: activeAssessment?.id,
+                        ansIndex: currentQuestionIndex,
+                      }),
+                    );
+                }}
               >
                 {examAnswers[currentQuestionIndex]?.isFlagged ? (
                   <>

@@ -9,7 +9,7 @@ import QuestionMCQ from "./MCQ";
 import QuestionDragDrop from "./dragDrop";
 import {
   setActiveAssessment,
-  setActiveAssessQuestionIndex,
+  setCurrentQuestionIndex,
 } from "../../../../../../../../../store/reducers/exams";
 import {
   useAppDispatch,
@@ -51,9 +51,9 @@ const Question = memo(
     useEffect(() => {
       if (assessment_id) {
         dispatch(
-          setActiveAssessQuestionIndex({
+          setCurrentQuestionIndex({
             assessment_id,
-            activeAssessQuestionIndex: questionIndex,
+            currentQuestionIndex: questionIndex,
           }),
         );
       }

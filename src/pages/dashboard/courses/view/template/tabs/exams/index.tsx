@@ -3,11 +3,12 @@ import { useAppDispatch, useAppSelector } from "../../../../../../../store";
 import {
   resetExam,
   setActiveAssessment,
-  setActiveAssessQuestionIndex,
+  setCurrentQuestionIndex,
   setAnswer,
   setExamTimeRemaining,
   setIsPaused,
   setReview,
+  setStartAssessment,
 } from "../../../../../../../store/reducers/exams";
 import ExamInterface from "./examCarousel/ExamInterface";
 import ExamDetails from "./examCarousel/ExamDetails";
@@ -81,7 +82,8 @@ const ExamComponent = () => {
   const {
     activeAssessment,
     examTimeRemaining,
-    activeAssessQuestionIndex,
+    currentQuestionIndex,
+    didAssessmentStart,
   } = useAppSelector(({ exams }) => exams);
   const { questions, name: assessmentName } = activeAssessment
     ? activeAssessment
@@ -126,6 +128,25 @@ const ExamComponent = () => {
   const handleSelectAssessment = (assessment: AssessmentType) => {
     setIsExamEnded(false);
     dispatch(setActiveAssessment(assessment));
+
+    getItemById(assessment.id).then((assess) => {
+      if (assess) {
+        const {
+          id: assessment_id,
+          examTimeRemaining,
+          examAnswers,
+          currentQuestionIndex,
+          review,
+          didAssessmentStart
+        } = assess;
+        dispatch(setExamTimeRemaining({ assessment_id, examTimeRemaining }));
+        dispatch(setAnswer({ assessment_id, examAnswers }));
+        dispatch(setCurrentQuestionIndex({ assessment_id, currentQuestionIndex }));
+        dispatch(setStartAssessment({assessment_id, didAssessmentStart}));
+        dispatch(setReview({ assessment_id, review }));
+        dispatch(setIsPaused(true));
+      }
+    });
   };
   const handleDeleteQuestion = async () => {
     withReactContent(Swal).fire({
@@ -135,8 +156,20 @@ const ExamComponent = () => {
           await axiosDefault.delete(
             `${API_EXAMS.deleteAllQuestions}/${activeAssessment?.id}`,
           );
-          await updateItem(activeAssessment!.id!, {questions: []});
-          const activeAssess = {...activeAssessment, questions: []} as AssessmentType;
+          await updateItem(activeAssessment!.id!, {
+            questions: [],
+            examAnswers: [],
+          });
+          const activeAssess = {
+            ...activeAssessment,
+            questions: [],
+          } as AssessmentType;
+          dispatch(
+            setAnswer({
+              assessment_id: activeAssessment!.id!,
+              examAnswers: [],
+            }),
+          );
           dispatch(setActiveAssessment(activeAssess));
           dispatch(fetchDomains(course_id));
         } catch (error) {
@@ -151,19 +184,21 @@ const ExamComponent = () => {
     });
   };
   const onStart = () => {
+    const assessment_id = activeAssessment?.id;
     dispatch(resetExam());
     dispatch(setIsPaused(false));
     setIsAssessmentRunning(true);
-    if (activeAssessment?.id) {
+    if (assessment_id) {
+      dispatch(setStartAssessment({ assessment_id, didAssessmentStart: true }));
       dispatch(
         setExamTimeRemaining({
-          assessment_id: activeAssessment?.id,
+          assessment_id,
           examTimeRemaining: examTime,
         }),
       );
       dispatch(
         setAnswer({
-          assessment_id: activeAssessment?.id,
+          assessment_id,
           examAnswers: questions.map(({ question, id }) => ({
             question_id: id,
             selectedOpt: "",
@@ -184,9 +219,9 @@ const ExamComponent = () => {
     dispatch(setReview({ assessment_id, review: true }));
     dispatch(setIsPaused(false));
     dispatch(
-      setActiveAssessQuestionIndex({
+      setCurrentQuestionIndex({
         assessment_id,
-        activeAssessQuestionIndex: 0,
+        currentQuestionIndex: 0,
       }),
     );
 
@@ -212,7 +247,7 @@ const ExamComponent = () => {
         mistakesExamId = mistakesExamsData.data.id;
       }
       await getItemById(activeAssessment!.id!).then(async (assess) => {
-        const examAnswers = assess?.examAnswers
+        const examAnswers = assess?.examAnswers;
         if (examAnswers) {
           const total_degree =
             Math.round(
@@ -224,16 +259,18 @@ const ExamComponent = () => {
                 examAnswers.length) *
                 10000,
             ) / 100;
-          const wrongQuestionsIds = examAnswers?.filter(
-              ({ answerstate }: { answerstate: string }) => answerstate === "wrong",
+          const wrongQuestionsIds = examAnswers
+            ?.filter(
+              ({ answerstate }: { answerstate: string }) =>
+                answerstate === "wrong",
             )
             .map(({ question_id }: { question_id: number }) => question_id);
           const wrongQuestions = questions
             .filter(({ id }) => wrongQuestionsIds?.includes(id))
             .map(({ question, id }) => ({ ...question, id }));
-    
+
           if (wrongQuestions.length) {
-            const { data } = await axiosDefault.post(
+            await axiosDefault.post(
               API_EXAMS.questions,
               {
                 assessment_id: mistakesExamId,
@@ -247,12 +284,11 @@ const ExamComponent = () => {
                 transformRequest: [(data) => JSON.stringify(data)],
               },
             );
-            console.log(data);
           }
           const { data } = await axiosDefault.post(
             API_EXAMS.answer,
             {
-              activeAssessQuestionIndex,
+              currentQuestionIndex,
               examTimeRemaining,
               student_id,
               assessment_id,
@@ -280,7 +316,7 @@ const ExamComponent = () => {
             dispatch(fetchDomains(course_id));
           }
         }
-      })
+      });
     }
   };
 
@@ -307,7 +343,7 @@ const ExamComponent = () => {
                   </>
                 ) : isExamEnded ? (
                   <ExamResult />
-                ) : isAssessmentRunning ? (
+                ) : isAssessmentRunning && didAssessmentStart ? (
                   <ExamInterface
                     questions={questions}
                     examTime={examTime}
