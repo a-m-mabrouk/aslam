@@ -21,6 +21,7 @@ export default function CourseInfo() {
     teacher,
     expiration_date,
     expire: isExpired,
+    free
   } = course || {};
   const { lang } = useGetLang();
 
@@ -30,7 +31,11 @@ export default function CourseInfo() {
         <div className="flex items-center gap-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
           <h5>{name?.[lang] || ""}</h5>
           <div className="flex flex-wrap gap-4">
-            {isExpired ? (
+            {free? (
+              <div className={`${flagClass} bg-green-500`}>
+              {tStudents("free")}
+            </div>
+            ) :isExpired ? (
               <div className={`${flagClass} bg-green-500`}>
                 {tStudents("subscribed")}
               </div>
