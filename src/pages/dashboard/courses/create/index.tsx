@@ -54,8 +54,6 @@ export default function CreateCourse({
       }
 
       try {
-        console.log(formData.get('free'));
-        
         const { data } = await axiosJson.post(API_COURSES.courses, formData);
         setData((prev) => (prev ? [data.data, ...prev] : prev));
         toggleModal();

@@ -8,7 +8,7 @@ import { store } from "./store/index.ts";
 import { deleteDB } from "idb";
 
 localStorage.removeItem('activeAssessmentId');
-await deleteDB('AslamExams');
+deleteDB('AslamExams');
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

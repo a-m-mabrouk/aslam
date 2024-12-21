@@ -132,6 +132,7 @@ export const resources = {
       unlimited: "Unlimited",
       noCourses: "No courses",
       course: "Course name",
+      free: "Free",
       subscribed: "Subscribed",
       notSubscribed: "Not Subscribed",
       table: {
@@ -311,6 +312,7 @@ export const resources = {
       unlimited: "غير محدود",
       noCourses: "لا يوجد دورات",
       course: " اسم الدورة ",
+      free: "مجاني",
       subscribed: "مشترك",
       notSubscribed: "غير مشترك",
 

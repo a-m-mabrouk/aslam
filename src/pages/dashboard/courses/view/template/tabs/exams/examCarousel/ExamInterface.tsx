@@ -169,7 +169,7 @@ export default function ExamInterface({
   const handleChooseQue = (queIndex: number) => {
     dispatch(
       setCurrentQuestionIndex({
-        assessment_id: activeAssessment!.id!,
+        // assessment_id: activeAssessment!.id!,
         currentQuestionIndex: queIndex,
       }),
     );
@@ -199,7 +199,7 @@ export default function ExamInterface({
       if (activeAssessment?.id) {
         dispatch(
           setExamTimeRemaining({
-            assessment_id: activeAssessment?.id,
+            // assessment_id: activeAssessment?.id,
             examTimeRemaining: timeRemaining > 0 ? timeRemaining - 1 : 0,
           }),
         );
@@ -249,23 +249,23 @@ export default function ExamInterface({
     if (currentQuestionIndex < questions?.length - 1) {
       dispatch(
         setCurrentQuestionIndex({
-          assessment_id: activeAssessment!.id!,
+          // assessment_id: activeAssessment!.id!,
           currentQuestionIndex: currentQuestionIndex + 1,
         }),
       );
     }
-  }, [activeAssessment, currentQuestionIndex, dispatch, questions?.length]);
+  }, [currentQuestionIndex, dispatch, questions?.length]);
 
   const goToPreviousQuestion = useCallback(() => {
     if (currentQuestionIndex > 0) {
       dispatch(
         setCurrentQuestionIndex({
-          assessment_id: activeAssessment!.id!,
+          // assessment_id: activeAssessment!.id!,
           currentQuestionIndex: currentQuestionIndex - 1,
         }),
       );
     }
-  }, [activeAssessment, currentQuestionIndex, dispatch]);
+  }, [currentQuestionIndex, dispatch]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {

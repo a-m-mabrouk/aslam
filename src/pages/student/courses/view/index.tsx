@@ -19,7 +19,7 @@ export default function ViewCourse() {
   const { data, loading, setData } = useFetch<CoursesListDatum>(`${API_COURSES.courses}/${id}`);
 
   useEffect(() => {
-    if (data && !data?.expire) {
+    if (data && !data?.expire && !data?.free) {
       toastifyBox("error", t("notSubscibedToCourse"));
       navigate('/student/courses');
     } else if (!loading && !data) {

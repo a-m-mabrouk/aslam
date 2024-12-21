@@ -40,15 +40,18 @@ export function StudentCourseCard({
 
   return (
     <div className="relative">
-      <LinkWrapper isExpired={isExpired} id={id}>
-      <>{console.log(free)}</>
+      <LinkWrapper isExpired={isExpired || free!} id={id}>
         <Card
-          className={`relative h-full max-w-sm ${!isExpired || !free ? "cursor-not-allowed" : undefined}`}
+          className={`relative h-full max-w-sm ${free ? undefined: isExpired? undefined: "cursor-not-allowed"}`}
           imgAlt="course"
           imgSrc={photo}
         >
           <div className="absolute right-2 top-2 grid gap-2">
-            {isExpired ? (
+            {free? (
+              <div className={`${flagClass} bg-green-500`}>
+                {t("free")}
+              </div>
+            ) :isExpired ? (
               <div className={`${flagClass} bg-green-500`}>
                 {t("subscribed")}
               </div>

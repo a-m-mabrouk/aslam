@@ -12,7 +12,7 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
   const dispatch = useAppDispatch();
   const { examAnswers, activeAssessment, currentQuestionIndex } =
     useAppSelector(({ exams }) => exams);
-  const { questions, id: assessment_id } = activeAssessment!;
+  const { questions } = activeAssessment!;
 
   type ReviewQuestions = Question & { reviewIndex: number };
   const reviewQuestions: ReviewQuestions[] = [];
@@ -29,7 +29,7 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
     if (currentQuestionIndex < reviewQuestions?.length - 1) {
       dispatch(
         setCurrentQuestionIndex({
-          assessment_id,
+          // assessment_id,
           currentQuestionIndex: currentQuestionIndex + 1,
         }),
       );
@@ -40,7 +40,7 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
     if (currentQuestionIndex > 0) {
       dispatch(
         setCurrentQuestionIndex({
-          assessment_id,
+          // assessment_id,
           currentQuestionIndex: currentQuestionIndex - 1,
         }),
       );
