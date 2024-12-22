@@ -14,6 +14,10 @@ import {
 import DraggableItem from "./DraggableItem";
 import DroppableArea from "./DroppableArea";
 import { shuffle } from "../../../../../../../../../../utilities/shuffleArray";
+import {
+  getItemById,
+  updateItem,
+} from "../../../../../../../../../../utilities/idb";
 
 const backendOptions = {
   backends: [
@@ -93,14 +97,12 @@ export default function QuestionDragDrop({
     if (activeAssessment?.id) {
       dispatch(
         setAnswerState({
-          assessment_id: activeAssessment?.id,
           questionIndex,
           answerstate,
         }),
       );
       dispatch(
         setSelectedOpt({
-          assessment_id: activeAssessment?.id,
           questionIndex,
           selectedOpt: JSON.stringify({
             draggableItems: updatedDraggableItems,
@@ -108,6 +110,17 @@ export default function QuestionDragDrop({
           }),
         }),
       );
+      getItemById(activeAssessment?.id).then((assessment) => {
+        if (assessment) {
+          const examAnswers = [...assessment.examAnswers];
+          examAnswers[questionIndex].answerstate = answerstate;
+          examAnswers[questionIndex].selectedOpt = JSON.stringify({
+            draggableItems: updatedDraggableItems,
+            droppableAreas: updatedDroppableAreas,
+          });
+          updateItem(activeAssessment?.id, { examAnswers });
+        }
+      });
     }
   };
 
@@ -126,7 +139,6 @@ export default function QuestionDragDrop({
       if (activeAssessment?.id) {
         dispatch(
           setSelectedOpt({
-            assessment_id: activeAssessment?.id,
             questionIndex,
             selectedOpt: JSON.stringify({
               draggableItems: updatedDraggableItems,
@@ -134,6 +146,16 @@ export default function QuestionDragDrop({
             }),
           }),
         );
+        getItemById(activeAssessment?.id).then((assessment) => {
+          if (assessment) {
+            const examAnswers = [...assessment.examAnswers];
+            examAnswers[questionIndex].selectedOpt = JSON.stringify({
+              draggableItems: updatedDraggableItems,
+              droppableAreas: updatedDroppableAreas,
+            });
+            updateItem(activeAssessment?.id, { examAnswers });
+          }
+        });
       }
     }
   };
@@ -180,7 +202,6 @@ export default function QuestionDragDrop({
       if (activeAssessment?.id) {
         dispatch(
           setSelectedOpt({
-            assessment_id: activeAssessment?.id,
             questionIndex,
             selectedOpt: JSON.stringify({
               draggableItems: [],
@@ -188,6 +209,17 @@ export default function QuestionDragDrop({
             }),
           }),
         );
+        getItemById(activeAssessment?.id).then((assessment) => {
+          if (assessment) {
+            const examAnswers = [...assessment.examAnswers];
+            // examAnswers[questionIndex].answerstate = answerstate;
+            examAnswers[questionIndex].selectedOpt = JSON.stringify({
+              draggableItems: [],
+              droppableAreas: updatedDroppableAreas,
+            });
+            updateItem(activeAssessment?.id, { examAnswers });
+          }
+        });
       }
     }
   }, [

@@ -120,7 +120,7 @@ export const resources = {
       deleteDomain: "Are you sure you want to delete this domain?",
       deleteSubdomain: "Are you sure you want to delete this subdomain?",
       deleteAssessment: "Are you sure you want to delete this assessment?",
-      deleteQuestions: "Are you sure you want to delete all questions of this assessment?",
+      deleteQuestionsAlert: "Are you sure you want to delete all questions of this assessment?",
     },
     students: {
       title: "Students",
@@ -180,6 +180,7 @@ export const resources = {
       skipped: "Skipped",
       correct: "Correct",
       wrong: "Wrong",
+      deleteQuestions: "Delete Questions",
     },
   },
   ar: {
@@ -273,6 +274,7 @@ export const resources = {
       noChapters: "لا يوجد مواضيع",
       noVideos: "لا يوجد فيديوهات",
       noExams: "لا يوجد امتحانات",
+      
     },
     inputs: {
       fileLesson: "تحميل درس",
@@ -300,7 +302,7 @@ export const resources = {
       deleteDomain: "هل أنت متأكد أنك تريد حذف هذا النطاق؟",
       deleteSubdomain: "هل أنت متأكد أنك تريد حذف هذا النطاق الفرعي؟",
       deleteAssessment: "هل أنت متأكد أنك تريد حذف هذا الامتحان؟",
-      deleteQuestions: "هل أنت متأكد أنك تريد حذف كل أسئلة هذا الامتحان؟",
+      deleteQuestionsAlert: "هل أنت متأكد أنك تريد حذف كل أسئلة هذا الامتحان؟",
     },
     students: {
       title: "الطلاب",
@@ -361,6 +363,7 @@ export const resources = {
       skipped: "تخطي",
       correct: "صحيح",
       wrong: "خطأ",
+      deleteQuestions: "حذف الأسئلة",
     },
   },
 };

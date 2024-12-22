@@ -194,3 +194,12 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-deny) {
     transform: translateY(0);
   }
 }
+
+.react-pdf__Page__textContent.textLayer,
+.react-pdf__Page__annotations.annotationLayer {
+  width: 100% !important;
+}
+.react-pdf__Page__canvas {
+  width: 100% !important;
+  height: fit-content !important;
+}

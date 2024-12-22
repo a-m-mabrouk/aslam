@@ -1,18 +1,19 @@
-import {
-  useAppDispatch,
-  useAppSelector,
-} from "../../../../../../../../../store";
+import { useAppSelector } from "../../../../../../../../../store";
 import { useTranslation } from "react-i18next";
 import Question from "../question";
 import { Button } from "flowbite-react";
-import { setCurrentQuestionIndex } from "../../../../../../../../../store/reducers/exams";
+// import { setCurrentQuestionIndex } from "../../../../../../../../../store/reducers/exams";
+import { useState } from "react";
 
 export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
   const { t } = useTranslation("exams");
-  const dispatch = useAppDispatch();
-  const { examAnswers, activeAssessment, currentQuestionIndex } =
+  // const dispatch = useAppDispatch();
+  const { examAnswers, activeAssessment, currentQuestionIndex: currQueIndex } =
     useAppSelector(({ exams }) => exams);
   const { questions } = activeAssessment!;
+  console.log(currQueIndex);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+  
 
   type ReviewQuestions = Question & { reviewIndex: number };
   const reviewQuestions: ReviewQuestions[] = [];
@@ -24,26 +25,29 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
       reviewQuestions.push({ ...questions[i], reviewIndex: i });
     }
   });
+  console.log(examAnswers);
+  console.log(reviewQuestions);
+  
 
   const goToNextQuestion = () => {
     if (currentQuestionIndex < reviewQuestions?.length - 1) {
-      dispatch(
-        setCurrentQuestionIndex({
-          // assessment_id,
-          currentQuestionIndex: currentQuestionIndex + 1,
-        }),
-      );
+      // dispatch(
+      //   setCurrentQuestionIndex({
+      //     currentQuestionIndex: currentQuestionIndex + 1,
+      //   }),
+      // );
+      setCurrentQuestionIndex(prev => prev + 1);
     }
   };
 
   const goToPreviousQuestion = () => {
     if (currentQuestionIndex > 0) {
-      dispatch(
-        setCurrentQuestionIndex({
-          // assessment_id,
-          currentQuestionIndex: currentQuestionIndex - 1,
-        }),
-      );
+      // dispatch(
+      //   setCurrentQuestionIndex({
+      //     currentQuestionIndex: currentQuestionIndex - 1,
+      //   }),
+      // );
+      setCurrentQuestionIndex(prev => prev - 1);
     }
   };
 
@@ -62,6 +66,7 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
 
       {/* Question Content */}
       <section>
+        <>{console.log(currentQuestionIndex)}</>
         <Question
           question={reviewQuestions[currentQuestionIndex]}
           questionIndex={reviewQuestions[currentQuestionIndex]?.reviewIndex}

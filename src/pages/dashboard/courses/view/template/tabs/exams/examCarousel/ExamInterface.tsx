@@ -50,6 +50,7 @@ import { FullScreenButton } from "..";
 import useGetLang from "../../../../../../../../hooks/useGetLang";
 import CanvasDraw from "react-canvas-draw";
 import DraggablePopup from "../../../../../../../../components/draggablePopover";
+import { updateItem } from "../../../../../../../../utilities/idb";
 
 type FlaggedQuestionType = Question & { queIndex: number };
 
@@ -203,6 +204,7 @@ export default function ExamInterface({
             examTimeRemaining: timeRemaining > 0 ? timeRemaining - 1 : 0,
           }),
         );
+        updateItem(activeAssessment?.id, {examTimeRemaining: timeRemaining})
       }
       timeRemaining === 0 && startTimeoutAnimation();
     }, 1000);

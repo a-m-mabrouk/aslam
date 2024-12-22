@@ -19,53 +19,31 @@ const examsSlice = createSlice({
     resetExam: (state) => {
       state.examAnswers = [];
       state.review = false;
-      // localStorage.removeItem("examAnswers");
-      // localStorage.removeItem("review");
     },
     setAnswer: (state, { payload }: PayloadAction<SetAnswerPayload>) => {
-      const { examAnswers } = payload;
-      // updateItem(assessment_id, { examAnswers });
-      state.examAnswers = examAnswers;
+      state.examAnswers = payload.examAnswers;
     },
     setAnswerState: (
       state,
       {
         payload,
       }: PayloadAction<{
-        assessment_id: number;
         questionIndex: number;
         answerstate: "wrong" | "correct" | "skipped";
       }>,
     ) => {
-      const { assessment_id, questionIndex, answerstate } = payload;
-      getItemById(assessment_id).then((assessment) => {
-        if (assessment) {
-          const examAnswers = [...assessment.examAnswers];          
-          examAnswers[questionIndex].answerstate = answerstate;
-          updateItem(assessment_id, { examAnswers });
-        }
-      });
-      state.examAnswers[questionIndex].answerstate = answerstate;
+      state.examAnswers[payload.questionIndex].answerstate = payload.answerstate;
     },
     setSelectedOpt: (
       state,
       {
         payload,
       }: PayloadAction<{
-        assessment_id: number;
         questionIndex: number;
         selectedOpt: string;
       }>,
     ) => {
-      const { assessment_id, questionIndex, selectedOpt } = payload;
-      getItemById(assessment_id).then((assessment) => {
-        if (assessment) {
-          const examAnswers = [...assessment.examAnswers];
-          examAnswers[questionIndex].selectedOpt = selectedOpt;
-          updateItem(assessment_id, { examAnswers });
-        }
-      });
-      state.examAnswers[questionIndex].selectedOpt = selectedOpt;
+      state.examAnswers[payload.questionIndex].selectedOpt = payload.selectedOpt;
     },
     setShowAnsClicked: (
       state,
@@ -83,11 +61,9 @@ const examsSlice = createSlice({
     },
     setReview: (
       state,
-      { payload }: PayloadAction<{ assessment_id: number; review: boolean }>,
+      { payload }: PayloadAction<{ review: boolean }>,
     ) => {
-      const { assessment_id, review } = payload;
-      state.review = review;
-      updateItem(assessment_id, { review });
+      state.review = payload.review;
     },
     setIsFlagged: (
       state,
@@ -123,16 +99,7 @@ const examsSlice = createSlice({
           state.isPaused = true;
           state.activeAssessment = rest;
         } else {
-          // const questions = assessment.questions.map((que) => ({
-          //   ...que,
-          //   question: {
-          //     ...que.question,
-          //     options: shuffle(que.question.options),
-          //   },
-          // }));
           state.activeAssessment = assessment;
-          // state.activeAssessment = { ...assessment, questions };
-          // updateItem(assessment.id, { ...assessment, questions });
         }
         localStorage.setItem("activeAssessmentId", JSON.stringify(assessment?.id));
       } else {
@@ -148,26 +115,20 @@ const examsSlice = createSlice({
       {
         payload,
       }: PayloadAction<{
-        // assessment_id: number;
         examTimeRemaining: number
       }>,
     ) => {
-      const { examTimeRemaining } = payload;
-      state.examTimeRemaining = examTimeRemaining;
-      // updateItem(assessment_id, { examTimeRemaining });
+      state.examTimeRemaining = payload.examTimeRemaining;
     },
     setCurrentQuestionIndex: (
       state,
       {
         payload,
       }: PayloadAction<{
-        // assessment_id: number;
         currentQuestionIndex: number;
       }>,
     ) => {
-      const { currentQuestionIndex } = payload;
-      state.currentQuestionIndex = currentQuestionIndex;
-      // updateItem(assessment_id, { currentQuestionIndex });
+      state.currentQuestionIndex = payload.currentQuestionIndex;
     },
     setStartAssessment: (
       state,
@@ -175,8 +136,7 @@ const examsSlice = createSlice({
         payload,
       }: PayloadAction<{didAssessmentStart: boolean }>,
     ) => {
-      const {didAssessmentStart} = payload;
-      state.didAssessmentStart = didAssessmentStart;
+      state.didAssessmentStart = payload.didAssessmentStart;
     }
   },
 });

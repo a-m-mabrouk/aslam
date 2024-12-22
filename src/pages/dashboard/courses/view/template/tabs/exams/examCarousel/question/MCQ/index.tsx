@@ -9,6 +9,7 @@ import {
 } from "../../../../../../../../../../store/reducers/exams";
 import { useTranslation } from "react-i18next";
 import { toastifyBox } from "../../../../../../../../../../helper/toastifyBox";
+import { getItemById, updateItem } from "../../../../../../../../../../utilities/idb";
 
 export function OptionEditable({
   opt,
@@ -156,9 +157,16 @@ export default function QuestionMCQ({
           : "wrong";
       const selectedOpt = JSON.stringify(userAnswers);
       if (activeAssessment?.id) {
-        dispatch(setAnswerState({ assessment_id: activeAssessment?.id, questionIndex, answerstate }));
-        dispatch(setSelectedOpt({ assessment_id: activeAssessment?.id, questionIndex, selectedOpt }));
-        
+        dispatch(setAnswerState({ questionIndex, answerstate }));
+        dispatch(setSelectedOpt({ questionIndex, selectedOpt }));
+        getItemById(activeAssessment?.id).then((assessment) => {
+          if (assessment) {
+            const examAnswers = [...assessment.examAnswers];          
+            examAnswers[questionIndex].answerstate = answerstate;
+            examAnswers[questionIndex].selectedOpt = selectedOpt;            
+            updateItem(activeAssessment?.id, { examAnswers });
+          }
+        });
       }
     },
     [activeAssessment?.id, correctOptionsArr, dispatch, questionIndex, selectedOptionsArr, t],

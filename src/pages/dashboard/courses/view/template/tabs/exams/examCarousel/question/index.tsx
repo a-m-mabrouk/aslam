@@ -61,6 +61,8 @@ const Question = memo(
     }, [assessment_id, dispatch, questionIndex]);
 
     let questionMarkup = <h2>You can only add MCQ & DragDrop question.</h2>;
+    console.log(question);
+    
     if (question?.question?.type === "mcq") {
       questionMarkup = (
         <QuestionMCQ
