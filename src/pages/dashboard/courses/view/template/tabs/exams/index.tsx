@@ -132,6 +132,11 @@ const ExamComponent = () => {
       updateItem(Number(JSON.parse(prevId)), { examTimeRemaining });
     }
     getItemById(assessment.id).then((data) => {
+      // console.log(assessment);
+      // console.log("///////////////////\\\\\\\\\\\\\\\\\\\\\\");
+      
+      // console.log(data);
+      
       if (data) {
         dispatch(setActiveAssessment({ assessment: data }));
         dispatch(
@@ -141,11 +146,13 @@ const ExamComponent = () => {
       } else {
         dispatch(setActiveAssessment({ assessment }));
         dispatch(setStartAssessment({ didAssessmentStart: false }));
-        const { questions, ...rest } = assessment;
-        if (questions) {
-          // This only for hiding the warning line for unused questions!
-        }
-        updateItem(assessment.id, rest);
+        // const { questions, ...rest } = assessment;
+        // if (questions) {
+        //   // This only for hiding the warning line for unused questions!
+        // }
+        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        updateItem(assessment.id, assessment as Record<string, any>);
       }
     });
   };

@@ -221,13 +221,12 @@ const examsDomains = createSlice({
     builder
       .addCase(fetchDomains.pending, (state) => {
         state.loading = true;
+        state.domains = [];
         state.error = null;
       })
       .addCase(
         fetchDomains.fulfilled,
         (state, action: PayloadAction<FetchDomainPayload>) => {
-          console.log(action.payload.data);
-          
           state.domains = action.payload.data;
           state.loading = false;
         },

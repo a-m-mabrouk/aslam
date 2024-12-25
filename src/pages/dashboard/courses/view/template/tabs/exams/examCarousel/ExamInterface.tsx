@@ -377,7 +377,7 @@ export default function ExamInterface({
               <Popover content={<Whiteboard />} placement="top">
                 <Button>
                   <PencilSquareIcon className="size-5" />
-                  {t("board")}
+                  <span className="hidden lg:inline">{t("board")}</span>
                 </Button>
               </Popover>
             </div>
@@ -385,7 +385,7 @@ export default function ExamInterface({
               <Popover content={<Calculator />} placement="top">
                 <Button>
                   <CalculatorIcon className="size-5" />
-                  {t("calculator")}
+                  <span className="hidden lg:inline">{t("calculator")}</span>
                 </Button>
               </Popover>
             </div>
@@ -407,12 +407,13 @@ export default function ExamInterface({
                 {examAnswers[currentQuestionIndex]?.isFlagged ? (
                   <>
                     <FlagIconSolid className="size-5 fill-red-700" />
-                    <span className="text-red-700">{t("unFlagQue")}</span>
+                    <span className="hidden text-red-700 lg:inline">{t("unFlagQue")}</span>
                   </>
                 ) : (
                   <>
                     <FlagIconOutline className="size-5 text-gray-700" />
-                    <span>{t("flagQue")}</span>
+                    {/* <span>{t("flagQue")}</span> */}
+                    <span className="hidden lg:inline">{t("flagQue")}</span>
                   </>
                 )}
               </span>
@@ -488,6 +489,7 @@ export default function ExamInterface({
               onClick={openAllQuestionsPopupOpen}
             >
               <ListBulletIcon className="size-5" />
+              <span className="hidden lg:inline">{t("viewAllQuestions")}</span>
             </Button>
           </Tooltip>
 
@@ -510,6 +512,7 @@ export default function ExamInterface({
                   className={`${currentQuestionIndex === 0 ? "invisible" : ""} size-5`}
                 />
               )}
+              <span className="hidden lg:inline">{t("prev")}</span>
             </Button>
           </Tooltip>
 
@@ -576,6 +579,7 @@ export default function ExamInterface({
               onClick={openFlagQuestionsPopupOpen}
             >
               <FlagIconOutline className="size-5" />
+              <span className="hidden lg:inline">{t("flaggedQuestions")}</span>
             </Button>
           </Tooltip>
 
@@ -592,6 +596,7 @@ export default function ExamInterface({
           ) : (
             <Tooltip content={t("next")}>
               <Button onClick={goToNextQuestion} color="green">
+                <span className="hidden lg:inline">{t("next")}</span>
                 {lang === "ar" ? (
                   <ChevronLeftIcon className="size-5" />
                 ) : (
