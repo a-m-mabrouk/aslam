@@ -2,18 +2,17 @@ import { useAppSelector } from "../../../../../../../../../store";
 import { useTranslation } from "react-i18next";
 import Question from "../question";
 import { Button } from "flowbite-react";
-// import { setCurrentQuestionIndex } from "../../../../../../../../../store/reducers/exams";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { updateItem } from "../../../../../../../../../utilities/idb";
+import useGetLang from "../../../../../../../../../hooks/useGetLang";
 
 export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
   const { t } = useTranslation("exams");
   // const dispatch = useAppDispatch();
-  const { examAnswers, activeAssessment, currentQuestionIndex: currQueIndex } =
-    useAppSelector(({ exams }) => exams);
+  const { examAnswers, activeAssessment } = useAppSelector(({ exams }) => exams);
   const { questions } = activeAssessment!;
-  console.log(currQueIndex);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
-  
+  const {lang} = useGetLang();
 
   type ReviewQuestions = Question & { reviewIndex: number };
   const reviewQuestions: ReviewQuestions[] = [];
@@ -25,31 +24,44 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
       reviewQuestions.push({ ...questions[i], reviewIndex: i });
     }
   });
-  console.log(examAnswers);
-  console.log(reviewQuestions);
-  
 
-  const goToNextQuestion = () => {
+  const goToNextQuestion = useCallback(() => {
     if (currentQuestionIndex < reviewQuestions?.length - 1) {
-      // dispatch(
-      //   setCurrentQuestionIndex({
-      //     currentQuestionIndex: currentQuestionIndex + 1,
-      //   }),
-      // );
       setCurrentQuestionIndex(prev => prev + 1);
+      activeAssessment && updateItem(activeAssessment?.id, { currentQuestionIndex: currentQuestionIndex + 1 });
     }
-  };
+  }, [activeAssessment, currentQuestionIndex, reviewQuestions?.length]);
 
-  const goToPreviousQuestion = () => {
+  const goToPreviousQuestion = useCallback(() => {
     if (currentQuestionIndex > 0) {
-      // dispatch(
-      //   setCurrentQuestionIndex({
-      //     currentQuestionIndex: currentQuestionIndex - 1,
-      //   }),
-      // );
       setCurrentQuestionIndex(prev => prev - 1);
+      activeAssessment && updateItem(activeAssessment?.id, { currentQuestionIndex: currentQuestionIndex - 1 });
     }
-  };
+  }, [activeAssessment, currentQuestionIndex]);
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === "ArrowRight") {
+        if (lang === "en") {
+          goToNextQuestion();
+        } else {
+          goToPreviousQuestion();
+        }
+      } else if (event.key === "ArrowLeft") {
+        if (lang === "en") {
+          goToPreviousQuestion();
+        } else {
+          goToNextQuestion();
+        }
+      }
+    },
+    [goToNextQuestion, goToPreviousQuestion, lang],
+  );
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleKeyDown]);
 
   return (
     <div
@@ -66,7 +78,6 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
 
       {/* Question Content */}
       <section>
-        <>{console.log(currentQuestionIndex)}</>
         <Question
           question={reviewQuestions[currentQuestionIndex]}
           questionIndex={reviewQuestions[currentQuestionIndex]?.reviewIndex}

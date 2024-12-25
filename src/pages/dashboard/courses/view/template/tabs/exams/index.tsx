@@ -21,6 +21,7 @@ import {
   ArrowsPointingInIcon,
   ArrowsPointingOutIcon,
   TrashIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import useGetLang from "../../../../../../../hooks/useGetLang";
 import axiosDefault from "../../../../../../../utilities/axios";
@@ -127,34 +128,36 @@ const ExamComponent = () => {
     }
   };
   const handleSelectAssessment = async (assessment: AssessmentType) => {
-    const prevId = localStorage.getItem("activeAssessmentId");
-    if (prevId) {
-      updateItem(Number(JSON.parse(prevId)), { examTimeRemaining });
-    }
-    getItemById(assessment.id).then((data) => {
-      // console.log(assessment);
-      // console.log("///////////////////\\\\\\\\\\\\\\\\\\\\\\");
-      
-      // console.log(data);
-      
-      if (data) {
-        dispatch(setActiveAssessment({ assessment: data }));
-        dispatch(
-          setStartAssessment({ didAssessmentStart: data.didAssessmentStart }),
-        );
-        dispatch(setReview({ review: data.review }));
-      } else {
-        dispatch(setActiveAssessment({ assessment }));
-        dispatch(setStartAssessment({ didAssessmentStart: false }));
-        // const { questions, ...rest } = assessment;
-        // if (questions) {
-        //   // This only for hiding the warning line for unused questions!
-        // }
+    const innerSelect = () => {
+      getItemById(assessment.id).then((data) => {
         
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        updateItem(assessment.id, assessment as Record<string, any>);
-      }
-    });
+        if (data) {
+          dispatch(setActiveAssessment({ assessment: data }));
+          dispatch(
+            setStartAssessment({ didAssessmentStart: data.didAssessmentStart }),
+          );
+          dispatch(setReview({ review: data.review }));
+        } else {
+          dispatch(setActiveAssessment({ assessment }));
+          dispatch(setStartAssessment({ didAssessmentStart: false }));
+          dispatch(setReview({review: false}));
+          // const { questions, ...rest } = assessment;
+          if (questions) {
+            // This only for hiding the warning line for unused questions!
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          updateItem(assessment.id, {...assessment as Record<string, any>, review: false});
+          // updateItem(assessment.id, { ...rest });
+        }
+      });
+    };
+    const prevId = localStorage.getItem("activeAssessmentId");
+    if (prevId)
+      updateItem(Number(JSON.parse(prevId)), { examTimeRemaining }).then(() =>
+        innerSelect(),
+      );
+    else innerSelect();
   };
   const handleDeleteQuestion = async () => {
     withReactContent(Swal).fire({
@@ -191,6 +194,16 @@ const ExamComponent = () => {
       showDenyButton: true,
       showLoaderOnConfirm: true,
     });
+  };
+  const handleResetExam = () => {
+    dispatch(resetExam());
+    activeAssessment &&
+      updateItem(activeAssessment?.id, {
+        examAnswers: [],
+        review: false,
+        didAssessmentStart: false,
+        examTimeRemaining: examTime,
+      });
   };
   const onStart = () => {
     const assessment_id = activeAssessment?.id;
@@ -230,13 +243,11 @@ const ExamComponent = () => {
           );
           dispatch(
             setAnswer({
-              // assessment_id,
               examAnswers,
             }),
           );
           dispatch(
             setExamTimeRemaining({
-              // assessment_id,
               examTimeRemaining: examTime,
             }),
           );
@@ -252,11 +263,10 @@ const ExamComponent = () => {
     dispatch(setIsPaused(false));
     dispatch(
       setCurrentQuestionIndex({
-        // assessment_id,
         currentQuestionIndex: 0,
       }),
     );
-    updateItem(assessment_id, { review: true });
+    updateItem(assessment_id, { review: true, currentQuestionIndex: 0 });
 
     // add mistakes for a separated exam
     if (!isTeacher) {
@@ -302,9 +312,8 @@ const ExamComponent = () => {
             .filter(({ id }) => wrongQuestionsIds?.includes(id))
             .map(({ question, id }) => ({ ...question, id }));
 
-            console.log(wrongQuestions);
+          // console.log(wrongQuestions);
           if (wrongQuestions.length) {
-            
             await axiosDefault.post(
               API_EXAMS.questions,
               {
@@ -320,7 +329,7 @@ const ExamComponent = () => {
               },
             );
           }
-          
+
           const { data } = await axiosDefault.post(
             API_EXAMS.answer,
             {
@@ -334,8 +343,8 @@ const ExamComponent = () => {
                 domain: ans.domain,
                 chapter: ans.chapter,
                 selectOpt: ans.selectedOpt || "sad",
-                isFlagged: ans.isFlagged? 1: 0,
-                showAnsClicked: ans.showAnsClicked? 1: 0,
+                isFlagged: ans.isFlagged ? 1 : 0,
+                showAnsClicked: ans.showAnsClicked ? 1 : 0,
                 question_id: ans.question_id,
                 // answer: ans.selectedOpt || "not answered",
                 // true: ans.answerstate === "correct" ? 1 : 0,
@@ -378,7 +387,17 @@ const ExamComponent = () => {
                     {isTeacher ? <UploadQuestions /> : ""}
                   </>
                 ) : review ? (
-                  <ExamResult />
+                  <>
+                    <Button
+                      onClick={handleResetExam}
+                      color="green"
+                      className="mx-auto mb-2"
+                    >
+                      <ArrowPathIcon className="size-5" />
+                      &nbsp;{t("resetExam")}
+                    </Button>
+                    <ExamResult />
+                  </>
                 ) : isAssessmentRunning && didAssessmentStart ? (
                   <ExamInterface
                     questions={questions}

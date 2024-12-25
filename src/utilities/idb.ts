@@ -74,6 +74,8 @@ export async function updateItem(id: number, keyValuepairs: Record<string, unkno
       iDBAssessment = { ...initIDBAssessment, id };
     }
     iDBAssessment = { ...iDBAssessment, ...keyValuepairs };
+    // console.log(keyValuepairs);
+    
     await db.put("exams", iDBAssessment);
   } catch (error) {
     console.error("Error updating item:", error);

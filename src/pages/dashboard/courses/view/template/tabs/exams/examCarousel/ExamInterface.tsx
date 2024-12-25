@@ -170,10 +170,11 @@ export default function ExamInterface({
   const handleChooseQue = (queIndex: number) => {
     dispatch(
       setCurrentQuestionIndex({
-        // assessment_id: activeAssessment!.id!,
         currentQuestionIndex: queIndex,
       }),
     );
+    
+    activeAssessment && updateItem(activeAssessment?.id, { currentQuestionIndex: 0 });
 
     closeFlagQuestionsPopupOpen();
     const fakeEvent = { stopPropagation: () => {} } as SyntheticEvent;
@@ -251,23 +252,23 @@ export default function ExamInterface({
     if (currentQuestionIndex < questions?.length - 1) {
       dispatch(
         setCurrentQuestionIndex({
-          // assessment_id: activeAssessment!.id!,
           currentQuestionIndex: currentQuestionIndex + 1,
         }),
       );
     }
-  }, [currentQuestionIndex, dispatch, questions?.length]);
+    activeAssessment && updateItem(activeAssessment?.id, { currentQuestionIndex: currentQuestionIndex + 1 });
+  }, [activeAssessment, currentQuestionIndex, dispatch, questions?.length]);
 
   const goToPreviousQuestion = useCallback(() => {
     if (currentQuestionIndex > 0) {
       dispatch(
         setCurrentQuestionIndex({
-          // assessment_id: activeAssessment!.id!,
           currentQuestionIndex: currentQuestionIndex - 1,
         }),
       );
+      activeAssessment && updateItem(activeAssessment?.id, { currentQuestionIndex: currentQuestionIndex - 1 });
     }
-  }, [currentQuestionIndex, dispatch]);
+  }, [activeAssessment, currentQuestionIndex, dispatch]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {

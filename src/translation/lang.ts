@@ -181,6 +181,7 @@ export const resources = {
       correct: "Correct",
       wrong: "Wrong",
       deleteQuestions: "Delete Questions",
+      resetExam: "Reset exam",
     },
   },
   ar: {
@@ -364,6 +365,7 @@ export const resources = {
       correct: "صحيح",
       wrong: "خطأ",
       deleteQuestions: "حذف الأسئلة",
+      resetExam: "إعادة الامتحان",
     },
   },
 };
