@@ -97,7 +97,6 @@ const ExamComponent = () => {
   const { lang } = useGetLang();
   const { role, id: student_id } = useAppSelector(({ auth }) => auth);
   const isTeacher = role === "teacher";
-  const [isAssessmentRunning, setIsAssessmentRunning] = useState(false);
 
   const questionTimeRatio = 1.2778;
   const examTime = Math.round(questions?.length * questionTimeRatio * 60);
@@ -205,11 +204,20 @@ const ExamComponent = () => {
         examTimeRemaining: examTime,
       });
   };
-  const onStart = () => {
+  const onStart = async () => {
     const assessment_id = activeAssessment?.id;
     dispatch(resetExam());
     dispatch(setIsPaused(false));
-    setIsAssessmentRunning(true);
+    try {
+      await axiosDefault.post(API_EXAMS.assessments, {
+        student_id,
+        course_id,
+      });
+    } catch (error) {
+      return console.error(
+        "Couldn't create mistakes assessmanet for this course",
+      );
+    }
     if (assessment_id) {
       const ques = questions.map((que) => ({
         ...que,
@@ -258,7 +266,6 @@ const ExamComponent = () => {
   };
 
   const handleEndExam = async (assessment_id: number) => {
-    setIsAssessmentRunning(false);
     dispatch(setReview({ review: true }));
     dispatch(setIsPaused(false));
     dispatch(
@@ -274,19 +281,7 @@ const ExamComponent = () => {
       const { data: mistakesExamsData } = await axiosDefault.get(
         `${API_EXAMS.mistakesExams}/${student_id}`,
       );
-      if (!mistakesExamsData.data) {
-        try {
-          const { data } = await axiosDefault.post(API_EXAMS.assessments, {
-            student_id,
-            course_id,
-          });
-          mistakesExamId = data.id;
-        } catch (error) {
-          return console.error(
-            "Couldn't create mistakes assessmanet for this course",
-          );
-        }
-      } else {
+      if (mistakesExamsData.data) {
         mistakesExamId = mistakesExamsData.data.id;
       }
       await getItemById(activeAssessment!.id!).then(async (assess) => {
@@ -312,7 +307,11 @@ const ExamComponent = () => {
             .filter(({ id }) => wrongQuestionsIds?.includes(id))
             .map(({ question, id }) => ({ ...question, id }));
 
-          // console.log(wrongQuestions);
+          console.log({
+            assessment_id: mistakesExamId,
+            course_id,
+            questions: wrongQuestions,
+          });
           if (wrongQuestions.length) {
             await axiosDefault.post(
               API_EXAMS.questions,
@@ -398,7 +397,7 @@ const ExamComponent = () => {
                     </Button>
                     <ExamResult />
                   </>
-                ) : isAssessmentRunning && didAssessmentStart ? (
+                ) : didAssessmentStart ? (
                   <ExamInterface
                     questions={questions}
                     examTime={examTime}
