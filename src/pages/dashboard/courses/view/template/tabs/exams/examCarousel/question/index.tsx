@@ -38,7 +38,7 @@ const Question = memo(
   }) => {
     const [editable, setEditable] = useState<boolean>(false);
     const dispatch = useAppDispatch();
-    const review = useAppSelector(({ exams }) => exams.review);
+    const showReview = useAppSelector(({ exams }) => exams.showReview);
     const assessment_id = useAppSelector(
       ({ exams }) => exams.activeAssessment?.id,
     );
@@ -134,7 +134,7 @@ const Question = memo(
       <main className="relative grow p-4 md:min-h-[30rem]">
         <div className="absolute inset-0 bg-[url('/src/assets/images/Logo.png')] bg-[length:50%] bg-center bg-no-repeat opacity-30"></div>
         <div className="relative z-10">
-          {editable && isTeacher && !review ? (
+          {editable && isTeacher && !showReview ? (
             <form onSubmit={(event) => handleEditQuestion(event)}>
               <div className="flex justify-center gap-2">
                 <Button
@@ -178,7 +178,7 @@ const Question = memo(
             </form>
           ) : (
             <>
-              {isTeacher && !review && question?.question?.type === "mcq" ? (
+              {isTeacher && !showReview && question?.question?.type === "mcq" ? (
                 <Button
                   className="!m-0 justify-self-center !p-0"
                   onClick={() => setEditable(true)}

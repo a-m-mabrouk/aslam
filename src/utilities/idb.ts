@@ -4,7 +4,7 @@ import { openDB, IDBPDatabase } from "idb";
 export type IDBAssessmentType = AssessmentType & {
   currentQuestionIndex: number;
   examTimeRemaining: number;
-  review: boolean;
+  showReview: boolean;
   examAnswers: ExamAnswer[];
   didAssessmentStart: boolean;
 };
@@ -26,7 +26,7 @@ const initIDBAssessment: IDBAssessmentType = {
   questions: [],
   currentQuestionIndex: 0,
   examTimeRemaining: 0,
-  review: false,
+  showReview: false,
   examAnswers: [],
   didAssessmentStart: false,
 };

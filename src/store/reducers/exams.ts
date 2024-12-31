@@ -5,11 +5,12 @@ const initialState: ExamType = {
   examAnswers: [],
   domains: [],
   activeAssessment: null,
-  review: false,
+  showReview: false,
   isPaused: true,
   examTimeRemaining: 0,
   currentQuestionIndex: 0,
   didAssessmentStart: false,
+  answeredAtLeastOnce: false,
 };
 
 const examsSlice = createSlice({
@@ -18,7 +19,7 @@ const examsSlice = createSlice({
   reducers: {
     resetExam: (state) => {
       state.examAnswers = [];
-      state.review = false;
+      state.showReview = false;
     },
     setAnswer: (state, { payload }: PayloadAction<SetAnswerPayload>) => {
       state.examAnswers = payload.examAnswers;
@@ -61,9 +62,9 @@ const examsSlice = createSlice({
     },
     setReview: (
       state,
-      { payload }: PayloadAction<{ review: boolean }>,
+      { payload }: PayloadAction<{ showReview: boolean }>,
     ) => {
-      state.review = payload.review;
+      state.showReview = payload.showReview;
     },
     setIsFlagged: (
       state,
@@ -89,13 +90,15 @@ const examsSlice = createSlice({
     ) => {
       if (payload) {
         const {assessment} = payload;
+        console.log(assessment);
+        
         if ('examAnswers' in assessment) {
-          const { examAnswers, examTimeRemaining, currentQuestionIndex, didAssessmentStart, review, ...rest } = assessment;
+          const { examAnswers, examTimeRemaining, currentQuestionIndex, didAssessmentStart, showReview,  ...rest } = assessment;
           state.currentQuestionIndex = currentQuestionIndex;
           state.examAnswers = examAnswers;
           state.examTimeRemaining = examTimeRemaining;          
           state.didAssessmentStart = didAssessmentStart;
-          state.review = review;
+          state.showReview = showReview;
           state.isPaused = true;
           state.activeAssessment = rest;
         } else {

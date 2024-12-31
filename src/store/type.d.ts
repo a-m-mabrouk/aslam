@@ -12,11 +12,12 @@ interface ExamType {
   examAnswers: ExamAnswer[];
   domains: DomainType[];
   activeAssessment: AssessmentType | null;
-  review: boolean;
+  showReview: boolean;
   isPaused: boolean;
   examTimeRemaining: number;
   currentQuestionIndex: number;
   didAssessmentStart: boolean;
+  answeredAtLeastOnce: boolean;
 }
 
 interface SetAnswerPayload {

@@ -326,7 +326,6 @@ export default function ExamsSidebar({
       }
     })
     .catch((err) => toastifyBox("error", err.message || "Failed!"));
-    // dispatch(setActiveAssessment(null));
   }, [course_id, dispatch]);
 
   return (
@@ -437,7 +436,7 @@ export default function ExamsSidebar({
                               className={`text-indigo-900 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
                               onClick={() => {
                                 activeAssessmentId !== assessment.id &&
-                                  onSelectAssessment(assessment);
+                                  onSelectAssessment(assessment);                                  
                               }}
                             >
                               {lang === "en"

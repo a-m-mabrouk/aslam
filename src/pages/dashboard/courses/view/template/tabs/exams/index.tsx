@@ -86,7 +86,7 @@ const ExamComponent = () => {
     examTimeRemaining,
     currentQuestionIndex,
     didAssessmentStart,
-    review,
+    showReview,
   } = useAppSelector(({ exams }) => exams);
   const { questions, name: assessmentName } = activeAssessment
     ? activeAssessment
@@ -135,18 +135,18 @@ const ExamComponent = () => {
           dispatch(
             setStartAssessment({ didAssessmentStart: data.didAssessmentStart }),
           );
-          dispatch(setReview({ review: data.review }));
+          dispatch(setReview({ showReview: data.showReview }));
         } else {
           dispatch(setActiveAssessment({ assessment }));
           dispatch(setStartAssessment({ didAssessmentStart: false }));
-          dispatch(setReview({review: false}));
+          dispatch(setReview({showReview: false}));
           // const { questions, ...rest } = assessment;
           if (questions) {
             // This only for hiding the warning line for unused questions!
           }
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          updateItem(assessment.id, {...assessment as Record<string, any>, review: false});
+          updateItem(assessment.id, {...assessment as Record<string, any>, showReview: false});
           // updateItem(assessment.id, { ...rest });
         }
       });
@@ -199,7 +199,7 @@ const ExamComponent = () => {
     activeAssessment &&
       updateItem(activeAssessment?.id, {
         examAnswers: [],
-        review: false,
+        showReview: false,
         didAssessmentStart: false,
         examTimeRemaining: examTime,
       });
@@ -266,14 +266,14 @@ const ExamComponent = () => {
   };
 
   const handleEndExam = async (assessment_id: number) => {
-    dispatch(setReview({ review: true }));
+    dispatch(setReview({ showReview: true }));
     dispatch(setIsPaused(false));
     dispatch(
       setCurrentQuestionIndex({
         currentQuestionIndex: 0,
       }),
     );
-    updateItem(assessment_id, { review: true, currentQuestionIndex: 0 });
+    updateItem(assessment_id, { showReview: true, currentQuestionIndex: 0 });
 
     // add mistakes for a separated exam
     if (!isTeacher) {
@@ -337,6 +337,9 @@ const ExamComponent = () => {
               student_id,
               assessment_id,
               total_degree,
+              didAssessmentStart: 1,
+              showReview: 1,
+              answeredAtLeastOnce: 1,
               answers: examAnswers.map((ans: ExamAnswer) => ({
                 answerState: ans.answerstate,
                 domain: ans.domain,
@@ -385,7 +388,7 @@ const ExamComponent = () => {
                     <h4 className="mx-auto">{t("noQuestions")}</h4>
                     {isTeacher ? <UploadQuestions /> : ""}
                   </>
-                ) : review ? (
+                ) : showReview ? (
                   <>
                     <Button
                       onClick={handleResetExam}

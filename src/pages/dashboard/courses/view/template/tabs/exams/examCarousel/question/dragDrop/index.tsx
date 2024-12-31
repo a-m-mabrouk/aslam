@@ -42,7 +42,7 @@ export default function QuestionDragDrop({
   isDescShow: boolean;
 }) {
   const dispatch = useAppDispatch();
-  const { examAnswers, review, activeAssessment } = useAppSelector(
+  const { examAnswers, showReview, activeAssessment } = useAppSelector(
     ({ exams }) => exams,
   );
   const thisQueAnswers = examAnswers[questionIndex]?.selectedOpt;
@@ -59,13 +59,13 @@ export default function QuestionDragDrop({
     () =>
       (question.question.description === ""
         ? examAnswers[questionIndex]?.showAnsClicked && isDescShow
-        : examAnswers[questionIndex]?.showAnsClicked) || review,
+        : examAnswers[questionIndex]?.showAnsClicked) || showReview,
     [
       examAnswers,
       isDescShow,
       question.question.description,
       questionIndex,
-      review,
+      showReview,
     ],
   );
 
