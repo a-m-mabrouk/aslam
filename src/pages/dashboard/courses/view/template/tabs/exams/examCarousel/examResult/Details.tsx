@@ -12,7 +12,7 @@ export default function Details() {
       }
 
       acc[examAnswer.chapter].questionsCount += 1;
-      if (examAnswer.answerstate === "correct") {
+      if (examAnswer.answerState === "correct") {
         acc[examAnswer.chapter].correctAnswersCount += 1;
       }
 
@@ -73,7 +73,7 @@ export default function Details() {
                 <Table.Cell>{examAnswer.domain}</Table.Cell>
                 <Table.Cell>{examAnswer.chapter}</Table.Cell>
                 <Table.Cell>
-                  {examAnswer.answerstate === "correct" ? (
+                  {examAnswer.answerState === "correct" ? (
                     <CheckIcon className="mx-auto size-5 text-green-500" />
                   ) : (
                     <XMarkIcon className="mx-auto size-5 text-red-600" />

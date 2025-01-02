@@ -2,11 +2,13 @@ import { openDB, IDBPDatabase } from "idb";
 
 
 export type IDBAssessmentType = AssessmentType & {
-  currentQuestionIndex: number;
+  activeAssessQuestionIndex: number;
   examTimeRemaining: number;
   showReview: boolean;
   examAnswers: ExamAnswer[];
   didAssessmentStart: boolean;
+  answeredAtLeastOnce: boolean;
+  total_degree: number;
 };
 
 interface MyDatabaseSchema {
@@ -24,11 +26,13 @@ const initIDBAssessment: IDBAssessmentType = {
     en: "",
   },
   questions: [],
-  currentQuestionIndex: 0,
+  activeAssessQuestionIndex: 0,
   examTimeRemaining: 0,
   showReview: false,
   examAnswers: [],
   didAssessmentStart: false,
+  answeredAtLeastOnce: false,
+  total_degree: 0,
 };
 
 let db: IDBPDatabase<MyDatabaseSchema> | undefined;

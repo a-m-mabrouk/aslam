@@ -397,6 +397,7 @@ export default function ExamsSidebar({
                           <h3 className="flex gap-2 p-2" key={assessment.id}>
                             {isTeacher ? (
                               <>
+                              
                                 <TrashIcon
                                   title={
                                     activeAssessmentId === assessment.id

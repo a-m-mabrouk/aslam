@@ -16,6 +16,7 @@ interface QuestionForUpload {
 interface Question {
   id: number;
   question: QuestionForUpload;
+  answers: ExamAnswer[];
 }
 
 interface DraggableAreaProps {
@@ -65,6 +66,16 @@ interface AssessmentType {
     en: string;
   };
   questions: Question[];
+  student?: {pivot: {
+    activeAssessQuestionIndex: string;
+    answeredAtLeastOnce: 0 | 1;
+    assessment_id: number;
+    didAssessmentStart: 0 | 1;
+    examTimeRemaining: string;
+    showReview: 0 | 1;
+    total_degree: number;
+    user_id: number;
+  }}[];
 }
 interface AddNewModalProps {
   modalType: "assessment" | "subdomain" | "domain";

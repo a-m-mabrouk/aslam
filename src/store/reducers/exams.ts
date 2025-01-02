@@ -1,16 +1,23 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { getItemById, IDBAssessmentType, updateItem } from "../../utilities/idb";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import {
+  getItemById,
+  IDBAssessmentType,
+  updateItem,
+} from "../../utilities/idb";
 
 const initialState: ExamType = {
   examAnswers: [],
   domains: [],
   activeAssessment: null,
-  showReview: false,
   isPaused: true,
-  examTimeRemaining: 0,
-  currentQuestionIndex: 0,
-  didAssessmentStart: false,
-  answeredAtLeastOnce: false,
+  assessmentDetails: {
+    activeAssessQuestionIndex: 0,
+    examTimeRemaining: 0,
+    total_degree: 0,
+    showReview: false,
+    didAssessmentStart: false,
+    answeredAtLeastOnce: false,
+  },
 };
 
 const examsSlice = createSlice({
@@ -19,7 +26,14 @@ const examsSlice = createSlice({
   reducers: {
     resetExam: (state) => {
       state.examAnswers = [];
-      state.showReview = false;
+      state.assessmentDetails = {
+        activeAssessQuestionIndex: 0,
+        examTimeRemaining: 0,
+        total_degree: 0,
+        showReview: false,
+        didAssessmentStart: false,
+        answeredAtLeastOnce: false,
+      };
     },
     setAnswer: (state, { payload }: PayloadAction<SetAnswerPayload>) => {
       state.examAnswers = payload.examAnswers;
@@ -30,10 +44,17 @@ const examsSlice = createSlice({
         payload,
       }: PayloadAction<{
         questionIndex: number;
-        answerstate: "wrong" | "correct" | "skipped";
+        answerState: "wrong" | "correct" | "skipped";
       }>,
     ) => {
-      state.examAnswers[payload.questionIndex].answerstate = payload.answerstate;
+      console.log(payload);
+      
+      // state.examAnswers[payload.questionIndex].answerState =
+      //   payload.answerState;
+      if (state.activeAssessment) {
+        state.activeAssessment.questions[payload.questionIndex].answers[0].answerState =
+        payload.answerState;
+      }
     },
     setSelectedOpt: (
       state,
@@ -41,10 +62,11 @@ const examsSlice = createSlice({
         payload,
       }: PayloadAction<{
         questionIndex: number;
-        selectedOpt: string;
+        selectOpt: string;
       }>,
     ) => {
-      state.examAnswers[payload.questionIndex].selectedOpt = payload.selectedOpt;
+      state.examAnswers[payload.questionIndex].selectOpt =
+        payload.selectOpt;
     },
     setShowAnsClicked: (
       state,
@@ -59,12 +81,6 @@ const examsSlice = createSlice({
         }
       });
       state.examAnswers[ansIndex].showAnsClicked = true;
-    },
-    setReview: (
-      state,
-      { payload }: PayloadAction<{ showReview: boolean }>,
-    ) => {
-      state.showReview = payload.showReview;
     },
     setIsFlagged: (
       state,
@@ -86,25 +102,45 @@ const examsSlice = createSlice({
     },
     setActiveAssessment: (
       state,
-      { payload }: PayloadAction<{assessment: AssessmentType | IDBAssessmentType} | null>,
+      {
+        payload,
+      }: PayloadAction<{
+        assessment: AssessmentType | IDBAssessmentType;
+      } | null>,
     ) => {
       if (payload) {
-        const {assessment} = payload;
+        const { assessment } = payload;
         console.log(assessment);
-        
-        if ('examAnswers' in assessment) {
-          const { examAnswers, examTimeRemaining, currentQuestionIndex, didAssessmentStart, showReview,  ...rest } = assessment;
-          state.currentQuestionIndex = currentQuestionIndex;
+
+        if ("examAnswers" in assessment) {
+          const {
+            examAnswers,
+            examTimeRemaining,
+            didAssessmentStart,
+            showReview,
+            answeredAtLeastOnce,
+            activeAssessQuestionIndex,
+            total_degree,
+            ...rest
+          } = assessment;
           state.examAnswers = examAnswers;
-          state.examTimeRemaining = examTimeRemaining;          
-          state.didAssessmentStart = didAssessmentStart;
-          state.showReview = showReview;
           state.isPaused = true;
+          state.assessmentDetails = {
+            activeAssessQuestionIndex,
+            didAssessmentStart,
+            showReview,
+            answeredAtLeastOnce,
+            examTimeRemaining,
+            total_degree,
+          };
           state.activeAssessment = rest;
         } else {
           state.activeAssessment = assessment;
         }
-        localStorage.setItem("activeAssessmentId", JSON.stringify(assessment?.id));
+        localStorage.setItem(
+          "activeAssessmentId",
+          JSON.stringify(assessment?.id),
+        );
       } else {
         state.activeAssessment = payload;
         localStorage.removeItem("activeAssessmentId");
@@ -113,34 +149,47 @@ const examsSlice = createSlice({
     setIsPaused: (state, { payload }: PayloadAction<boolean>) => {
       state.isPaused = payload;
     },
-    setExamTimeRemaining: (
+    setAssessmentDetails: (
       state,
       {
         payload,
       }: PayloadAction<{
-        examTimeRemaining: number
+        activeAssessQuestionIndex?: number;
+        examTimeRemaining?: number;
+        total_degree?: number;
+        didAssessmentStart?: boolean;
+        showReview?: boolean;
+        answeredAtLeastOnce?: boolean;
       }>,
     ) => {
-      state.examTimeRemaining = payload.examTimeRemaining;
+      const {
+        activeAssessQuestionIndex,
+        examTimeRemaining,
+        total_degree,
+        didAssessmentStart,
+        answeredAtLeastOnce,
+        showReview,
+      } = payload;
+      if (activeAssessQuestionIndex) {
+        state.assessmentDetails.activeAssessQuestionIndex =
+          activeAssessQuestionIndex;
+      }
+      if (examTimeRemaining) {
+        state.assessmentDetails.examTimeRemaining = examTimeRemaining;
+      }
+      if (total_degree) {
+        state.assessmentDetails.total_degree = total_degree;
+      }
+      if (didAssessmentStart) {
+        state.assessmentDetails.didAssessmentStart = didAssessmentStart;
+      }
+      if (answeredAtLeastOnce) {
+        state.assessmentDetails.answeredAtLeastOnce = answeredAtLeastOnce;
+      }
+      if (showReview) {
+        state.assessmentDetails.showReview = showReview;
+      }
     },
-    setCurrentQuestionIndex: (
-      state,
-      {
-        payload,
-      }: PayloadAction<{
-        currentQuestionIndex: number;
-      }>,
-    ) => {
-      state.currentQuestionIndex = payload.currentQuestionIndex;
-    },
-    setStartAssessment: (
-      state,
-      {
-        payload,
-      }: PayloadAction<{didAssessmentStart: boolean }>,
-    ) => {
-      state.didAssessmentStart = payload.didAssessmentStart;
-    }
   },
 });
 
@@ -153,11 +202,8 @@ export const {
   setAnswerState,
   setDomains,
   setActiveAssessment,
-  setReview,
   setIsPaused,
-  setExamTimeRemaining,
-  setCurrentQuestionIndex,
-  setStartAssessment
+  setAssessmentDetails,
 } = examsSlice.actions;
 
 export default examsSlice.reducer;

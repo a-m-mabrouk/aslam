@@ -3,12 +3,8 @@ import { useAppDispatch, useAppSelector } from "../../../../../../../store";
 import {
   resetExam,
   setActiveAssessment,
-  setCurrentQuestionIndex,
-  setAnswer,
-  setExamTimeRemaining,
   setIsPaused,
-  setReview,
-  setStartAssessment,
+  setAssessmentDetails,
 } from "../../../../../../../store/reducers/exams";
 import ExamInterface from "./examCarousel/ExamInterface";
 import ExamDetails from "./examCarousel/ExamDetails";
@@ -33,6 +29,10 @@ import { useParams } from "react-router";
 import { fetchDomains } from "../../../../../../../store/reducers/examsDomains";
 import { getItemById, updateItem } from "../../../../../../../utilities/idb";
 import { shuffle } from "../../../../../../../utilities/shuffleArray";
+import {
+  falseTrueToZeroOne,
+  zeroOneToFalseTrue,
+} from "../../../../../../../utilities/zeroOneToFalseTrue";
 
 export function FullScreenButton({
   onFullscreen,
@@ -81,13 +81,9 @@ declare global {
 const ExamComponent = () => {
   const fullscreenDivRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
-  const {
-    activeAssessment,
-    examTimeRemaining,
-    currentQuestionIndex,
-    didAssessmentStart,
-    showReview,
-  } = useAppSelector(({ exams }) => exams);
+  const { activeAssessment, assessmentDetails } = useAppSelector(
+    ({ exams }) => exams,
+  );
   const { questions, name: assessmentName } = activeAssessment
     ? activeAssessment
     : { questions: [], name: null };
@@ -129,33 +125,71 @@ const ExamComponent = () => {
   const handleSelectAssessment = async (assessment: AssessmentType) => {
     const innerSelect = () => {
       getItemById(assessment.id).then((data) => {
-        
         if (data) {
           dispatch(setActiveAssessment({ assessment: data }));
           dispatch(
-            setStartAssessment({ didAssessmentStart: data.didAssessmentStart }),
+            setAssessmentDetails({
+              didAssessmentStart: data.didAssessmentStart,
+              answeredAtLeastOnce: data.answeredAtLeastOnce,
+              showReview: data.showReview,
+              total_degree: data.total_degree,
+            }),
           );
-          dispatch(setReview({ showReview: data.showReview }));
         } else {
-          dispatch(setActiveAssessment({ assessment }));
-          dispatch(setStartAssessment({ didAssessmentStart: false }));
-          dispatch(setReview({showReview: false}));
-          // const { questions, ...rest } = assessment;
-          if (questions) {
-            // This only for hiding the warning line for unused questions!
+          let activeAssessQuestionIndex = 0,
+            examTimeRemaining = 0,
+            didAssessmentStart = false,
+            answeredAtLeastOnce = false,
+            showReview = false,
+            total_degree = 0;
+          if (assessment.student?.length && assessment.student[0].pivot) {
+            const pivot = assessment.student[0].pivot;
+            activeAssessQuestionIndex = Number(pivot.activeAssessQuestionIndex);
+            examTimeRemaining = Number(pivot.examTimeRemaining);
+            didAssessmentStart = zeroOneToFalseTrue(pivot.didAssessmentStart);
+            answeredAtLeastOnce = zeroOneToFalseTrue(pivot.answeredAtLeastOnce);
+            showReview = zeroOneToFalseTrue(pivot.showReview);
+            total_degree = pivot.total_degree;
           }
+          console.log({
+            activeAssessQuestionIndex,
+            examTimeRemaining,
+            didAssessmentStart,
+            answeredAtLeastOnce,
+            showReview,
+            total_degree,
+          });
+          
+          dispatch(setActiveAssessment({ assessment }));
+          dispatch(
+            setAssessmentDetails({
+              activeAssessQuestionIndex,
+              examTimeRemaining,
+              didAssessmentStart,
+              answeredAtLeastOnce,
+              showReview,
+              total_degree,
+            }),
+          );
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          updateItem(assessment.id, {...assessment as Record<string, any>, showReview: false});
-          // updateItem(assessment.id, { ...rest });
+          updateItem(assessment.id, {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ...(assessment as Record<string, any>),
+            activeAssessQuestionIndex,
+            examTimeRemaining,
+            didAssessmentStart,
+            answeredAtLeastOnce,
+            showReview,
+            total_degree,
+          });
         }
       });
     };
     const prevId = localStorage.getItem("activeAssessmentId");
     if (prevId)
-      updateItem(Number(JSON.parse(prevId)), { examTimeRemaining }).then(() =>
-        innerSelect(),
-      );
+      updateItem(Number(JSON.parse(prevId)), {
+        examTimeRemaining: assessmentDetails.examTimeRemaining,
+      }).then(() => innerSelect());
     else innerSelect();
   };
   const handleDeleteQuestion = async () => {
@@ -166,20 +200,11 @@ const ExamComponent = () => {
           await axiosDefault.delete(
             `${API_EXAMS.deleteAllQuestions}/${activeAssessment?.id}`,
           );
-          await updateItem(activeAssessment!.id!, {
-            questions: [],
-            examAnswers: [],
-          });
+          await updateItem(activeAssessment!.id!, { questions: [] });
           const activeAssess = {
             ...activeAssessment,
             questions: [],
           } as AssessmentType;
-          dispatch(
-            setAnswer({
-              // assessment_id: activeAssessment!.id!,
-              examAnswers: [],
-            }),
-          );
           updateItem(activeAssessment!.id!, { questions: [] });
           dispatch(setActiveAssessment({ assessment: activeAssess }));
           dispatch(fetchDomains(course_id));
@@ -198,7 +223,6 @@ const ExamComponent = () => {
     dispatch(resetExam());
     activeAssessment &&
       updateItem(activeAssessment?.id, {
-        examAnswers: [],
         showReview: false,
         didAssessmentStart: false,
         examTimeRemaining: examTime,
@@ -226,20 +250,10 @@ const ExamComponent = () => {
           options: shuffle(que.question.options),
         },
       }));
-      const examAnswers: ExamAnswer[] = ques.map(({ question, id }) => ({
-        question_id: id,
-        selectedOpt: "",
-        showAnsClicked: false,
-        isFlagged: false,
-        chapter: question?.chapter || "",
-        domain: question?.domain || "",
-        answerstate: "skipped",
-      }));
 
       getItemById(assessment_id).then((data) => {
         if (data) {
           updateItem(assessment_id, {
-            examAnswers,
             questions: ques,
             didAssessmentStart: true,
             examTimeRemaining: examTime,
@@ -250,30 +264,28 @@ const ExamComponent = () => {
             }),
           );
           dispatch(
-            setAnswer({
-              examAnswers,
-            }),
-          );
-          dispatch(
-            setExamTimeRemaining({
+            setAssessmentDetails({
               examTimeRemaining: examTime,
+              didAssessmentStart: true,
             }),
           );
-          dispatch(setStartAssessment({ didAssessmentStart: true }));
         }
       });
     }
   };
 
   const handleEndExam = async (assessment_id: number) => {
-    dispatch(setReview({ showReview: true }));
     dispatch(setIsPaused(false));
     dispatch(
-      setCurrentQuestionIndex({
-        currentQuestionIndex: 0,
+      setAssessmentDetails({
+        activeAssessQuestionIndex: 0,
+        showReview: true,
       }),
     );
-    updateItem(assessment_id, { showReview: true, currentQuestionIndex: 0 });
+    updateItem(assessment_id, {
+      showReview: true,
+      activeAssessQuestionIndex: 0,
+    });
 
     // add mistakes for a separated exam
     if (!isTeacher) {
@@ -285,33 +297,24 @@ const ExamComponent = () => {
         mistakesExamId = mistakesExamsData.data.id;
       }
       await getItemById(activeAssessment!.id!).then(async (assess) => {
-        const examAnswers = assess?.examAnswers;
-        if (examAnswers) {
-          const total_degree =
-            Math.round(
-              (examAnswers.reduce(
-                (acc: number, examAnswer: { answerstate: string }) =>
-                  examAnswer.answerstate === "correct" ? acc + 1 : acc,
-                0,
-              ) /
-                examAnswers.length) *
-                10000,
-            ) / 100;
-          const wrongQuestionsIds = examAnswers
-            ?.filter(
-              ({ answerstate }: { answerstate: string }) =>
-                answerstate === "wrong",
+        const ques = assess?.questions;
+        if (ques) {
+          const degree = ques.reduce(
+            (acc, { answers }) =>
+              answers.length && answers[0].answerState === "correct"
+                ? acc + 1
+                : acc,
+            0,
+          );
+          const total_degree = Math.round((degree / ques.length) * 10000) / 100;
+
+          const wrongQuestions = ques
+            .filter(
+              ({ answers }) =>
+                answers.length && answers[0].answerState === "wrong",
             )
-            .map(({ question_id }: { question_id: number }) => question_id);
-          const wrongQuestions = questions
-            .filter(({ id }) => wrongQuestionsIds?.includes(id))
             .map(({ question, id }) => ({ ...question, id }));
 
-          console.log({
-            assessment_id: mistakesExamId,
-            course_id,
-            questions: wrongQuestions,
-          });
           if (wrongQuestions.length) {
             await axiosDefault.post(
               API_EXAMS.questions,
@@ -332,24 +335,23 @@ const ExamComponent = () => {
           const { data } = await axiosDefault.post(
             API_EXAMS.answer,
             {
-              activeAssessQuestionIndex: currentQuestionIndex,
-              examTimeRemaining,
+              activeAssessQuestionIndex:
+                assessmentDetails.activeAssessQuestionIndex,
+              examTimeRemaining: assessmentDetails.examTimeRemaining,
               student_id,
               assessment_id,
               total_degree,
               didAssessmentStart: 1,
               showReview: 1,
               answeredAtLeastOnce: 1,
-              answers: examAnswers.map((ans: ExamAnswer) => ({
-                answerState: ans.answerstate,
-                domain: ans.domain,
-                chapter: ans.chapter,
-                selectOpt: ans.selectedOpt || "sad",
-                isFlagged: ans.isFlagged ? 1 : 0,
-                showAnsClicked: ans.showAnsClicked ? 1 : 0,
-                question_id: ans.question_id,
-                // answer: ans.selectedOpt || "not answered",
-                // true: ans.answerstate === "correct" ? 1 : 0,
+              answers: ques.map(({ answers }: { answers: ExamAnswer[] }) => ({
+                answerState: answers[0].answerState,
+                // domain: answers[0].domain,
+                // chapter: answers[0].chapter,
+                selectOpt: answers[0].selectOpt || "NoSelection",
+                isFlagged: falseTrueToZeroOne(answers[0].isFlagged),
+                showAnsClicked: falseTrueToZeroOne(answers[0].showAnsClicked),
+                question_id: answers[0].question_id,
               })),
             },
             {
@@ -388,8 +390,9 @@ const ExamComponent = () => {
                     <h4 className="mx-auto">{t("noQuestions")}</h4>
                     {isTeacher ? <UploadQuestions /> : ""}
                   </>
-                ) : showReview ? (
+                ) : assessmentDetails.showReview ? (
                   <>
+                  {console.log(assessmentDetails.showReview)}
                     <Button
                       onClick={handleResetExam}
                       color="green"
@@ -400,7 +403,7 @@ const ExamComponent = () => {
                     </Button>
                     <ExamResult />
                   </>
-                ) : didAssessmentStart ? (
+                ) : assessmentDetails.didAssessmentStart ? (
                   <ExamInterface
                     questions={questions}
                     examTime={examTime}

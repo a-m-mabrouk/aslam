@@ -18,7 +18,7 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
   const reviewQuestions: ReviewQuestions[] = [];
   examAnswers.forEach((ans, i) => {
     if (wrongOnly) {
-      ans.answerstate === "wrong" &&
+      ans.answerState === "wrong" &&
         reviewQuestions.push({ ...questions[i], reviewIndex: i });
     } else {
       reviewQuestions.push({ ...questions[i], reviewIndex: i });
@@ -71,7 +71,7 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
       <header className="grid gap-2 bg-gray-200 p-4">
         <div className="flex justify-between">
           <p>
-            {`${t(examAnswers[reviewQuestions[currentQuestionIndex]?.reviewIndex]?.answerstate)}: ${t("question")} ${reviewQuestions[currentQuestionIndex]?.reviewIndex + 1} ${t("of")} ${questions?.length}`}
+            {`${t(examAnswers[reviewQuestions[currentQuestionIndex]?.reviewIndex]?.answerState)}: ${t("question")} ${reviewQuestions[currentQuestionIndex]?.reviewIndex + 1} ${t("of")} ${questions?.length}`}
           </p>
         </div>
       </header>

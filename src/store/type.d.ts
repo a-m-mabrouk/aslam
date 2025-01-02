@@ -1,23 +1,26 @@
 interface ExamAnswer {
   question_id: number;
-  selectedOpt: string;
+  selectOpt: string;
   showAnsClicked: boolean;
   isFlagged: boolean;
-  domain: string;
-  chapter: string;
-  answerstate: "wrong" | "correct" | "skipped";
+  // domain: string;
+  // chapter: string;
+  answerState: "wrong" | "correct" | "skipped";
 }
 
 interface ExamType {
   examAnswers: ExamAnswer[];
   domains: DomainType[];
   activeAssessment: AssessmentType | null;
-  showReview: boolean;
   isPaused: boolean;
-  examTimeRemaining: number;
-  currentQuestionIndex: number;
-  didAssessmentStart: boolean;
-  answeredAtLeastOnce: boolean;
+  assessmentDetails: {
+    activeAssessQuestionIndex: number;
+    examTimeRemaining: number;
+    total_degree: number;
+    showReview: boolean;
+    didAssessmentStart: boolean;
+    answeredAtLeastOnce: boolean;
+  }
 }
 
 interface SetAnswerPayload {
@@ -26,12 +29,12 @@ interface SetAnswerPayload {
     // questionIndex: number;
     // queAnsDetails: {
       question_id: number;
-      selectedOpt: string;
+      selectOpt: string;
       showAnsClicked: boolean;
       isFlagged: boolean;
       domain: string;
       chapter: string;
-      answerstate: "wrong" | "correct" | "skipped";
+      answerState: "wrong" | "correct" | "skipped";
     // };
   }[];
 }

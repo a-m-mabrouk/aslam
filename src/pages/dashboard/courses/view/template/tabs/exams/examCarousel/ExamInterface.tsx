@@ -38,8 +38,7 @@ import {
 import Question from "./question";
 import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
 import {
-  setCurrentQuestionIndex,
-  setExamTimeRemaining,
+  setAssessmentDetails,
   setIsFlagged,
   setIsPaused,
   setShowAnsClicked,
@@ -157,11 +156,10 @@ export default function ExamInterface({
   const {
     examAnswers,
     isPaused,
-    examTimeRemaining: timeRemaining,
     activeAssessment,
-    currentQuestionIndex,
+    assessmentDetails,
   } = useAppSelector(({ exams }) => exams);
-  const timeRemainingRef = useRef(timeRemaining);
+  const timeRemainingRef = useRef(assessmentDetails.examTimeRemaining);
   const [borderColor, setBorderColor] = useState<string>("border-gray-300");
   const [timerColor, setTimerColor] = useState<string>("");
   const timerIntervalRef = useRef<number | null>(null);
@@ -169,12 +167,12 @@ export default function ExamInterface({
 
   const handleChooseQue = (queIndex: number) => {
     dispatch(
-      setCurrentQuestionIndex({
-        currentQuestionIndex: queIndex,
+      setAssessmentDetails({
+        activeAssessQuestionIndex: queIndex,
       }),
     );
     
-    activeAssessment && updateItem(activeAssessment?.id, { currentQuestionIndex: 0 });
+    activeAssessment && updateItem(activeAssessment?.id, { activeAssessQuestionIndex: 0 });
 
     closeFlagQuestionsPopupOpen();
     const fakeEvent = { stopPropagation: () => {} } as SyntheticEvent;
@@ -200,20 +198,19 @@ export default function ExamInterface({
     timerIntervalRef.current = setInterval(() => {
       if (activeAssessment?.id) {
         dispatch(
-          setExamTimeRemaining({
-            // assessment_id: activeAssessment?.id,
-            examTimeRemaining: timeRemaining > 0 ? timeRemaining - 1 : 0,
+          setAssessmentDetails({
+            examTimeRemaining: assessmentDetails.examTimeRemaining > 0 ? assessmentDetails.examTimeRemaining - 1 : 0,
           }),
         );
-        updateItem(activeAssessment?.id, {examTimeRemaining: timeRemaining})
+        updateItem(activeAssessment?.id, {examTimeRemaining: assessmentDetails.examTimeRemaining})
       }
-      timeRemaining === 0 && startTimeoutAnimation();
+      assessmentDetails.examTimeRemaining === 0 && startTimeoutAnimation();
     }, 1000);
-  }, [activeAssessment?.id, dispatch, startTimeoutAnimation, timeRemaining]);
+  }, [activeAssessment?.id, assessmentDetails.examTimeRemaining, startTimeoutAnimation, dispatch]);
 
   useEffect(() => {
-    timeRemainingRef.current = timeRemaining;
-  }, [timeRemaining]);
+    timeRemainingRef.current = assessmentDetails.examTimeRemaining;
+  }, [assessmentDetails.examTimeRemaining]);
 
   useEffect(() => {
     if (timeRemainingRef.current === 0) {
@@ -246,29 +243,29 @@ export default function ExamInterface({
     };
   }, [isPaused, startTimer]);
 
-  const progress = ((examTime - timeRemaining) / examTime) * 100;
+  const progress = ((examTime - assessmentDetails.examTimeRemaining) / examTime) * 100;
 
   const goToNextQuestion = useCallback(() => {
-    if (currentQuestionIndex < questions?.length - 1) {
+    if (assessmentDetails.activeAssessQuestionIndex < questions?.length - 1) {
       dispatch(
-        setCurrentQuestionIndex({
-          currentQuestionIndex: currentQuestionIndex + 1,
+        setAssessmentDetails({
+          activeAssessQuestionIndex: assessmentDetails.activeAssessQuestionIndex + 1,
         }),
       );
     }
-    activeAssessment && updateItem(activeAssessment?.id, { currentQuestionIndex: currentQuestionIndex + 1 });
-  }, [activeAssessment, currentQuestionIndex, dispatch, questions?.length]);
+    activeAssessment && updateItem(activeAssessment?.id, { activeAssessQuestionIndex: assessmentDetails.activeAssessQuestionIndex + 1 });
+  }, [activeAssessment, assessmentDetails.activeAssessQuestionIndex, dispatch, questions?.length]);
 
   const goToPreviousQuestion = useCallback(() => {
-    if (currentQuestionIndex > 0) {
+    if (assessmentDetails.activeAssessQuestionIndex > 0) {
       dispatch(
-        setCurrentQuestionIndex({
-          currentQuestionIndex: currentQuestionIndex - 1,
+        setAssessmentDetails({
+          activeAssessQuestionIndex: assessmentDetails.activeAssessQuestionIndex - 1,
         }),
       );
-      activeAssessment && updateItem(activeAssessment?.id, { currentQuestionIndex: currentQuestionIndex - 1 });
+      activeAssessment && updateItem(activeAssessment?.id, { activeAssessQuestionIndex: assessmentDetails.activeAssessQuestionIndex - 1 });
     }
-  }, [activeAssessment, currentQuestionIndex, dispatch]);
+  }, [activeAssessment, assessmentDetails.activeAssessQuestionIndex, dispatch]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -299,7 +296,7 @@ export default function ExamInterface({
       dispatch(
         setShowAnsClicked({
           assessment_id: activeAssessment.id,
-          ansIndex: currentQuestionIndex,
+          ansIndex: assessmentDetails.activeAssessQuestionIndex,
         }),
       );
     }
@@ -355,7 +352,7 @@ export default function ExamInterface({
           <span className="text-blue-600">
             {lang === "ar" ? "الوقت المتبقي:" : "Remaining time:"}
           </span>
-          <span>{formatTime(timeRemaining)}</span>
+          <span>{formatTime(assessmentDetails.examTimeRemaining)}</span>
         </div>
       </div>
       <div
@@ -367,10 +364,10 @@ export default function ExamInterface({
             <div>
               <p className={`flex ${timerColor}`}>
                 <ClockIcon className="size-6" /> {t("remainingTime")}{" "}
-                {formatTime(timeRemaining)}
+                {formatTime(assessmentDetails.examTimeRemaining)}
               </p>
               <p className="ps-6">
-                {t("question")} {currentQuestionIndex + 1} {t("of")}{" "}
+                {t("question")} {assessmentDetails.activeAssessQuestionIndex + 1} {t("of")}{" "}
                 {questions?.length}
               </p>
             </div>
@@ -400,12 +397,12 @@ export default function ExamInterface({
                     dispatch(
                       setIsFlagged({
                         assessment_id: activeAssessment?.id,
-                        ansIndex: currentQuestionIndex,
+                        ansIndex: assessmentDetails.activeAssessQuestionIndex,
                       }),
                     );
                 }}
               >
-                {examAnswers[currentQuestionIndex]?.isFlagged ? (
+                {examAnswers[assessmentDetails.activeAssessQuestionIndex]?.isFlagged ? (
                   <>
                     <FlagIconSolid className="size-5 fill-red-700" />
                     <span className="hidden text-red-700 lg:inline">{t("unFlagQue")}</span>
@@ -430,7 +427,7 @@ export default function ExamInterface({
               <span
                 onClick={isPaused ? resumeTimer : pauseTimer}
                 color="gray"
-                className={`mr-2 size-8 ${!timeRemaining ? "pointer-events-none opacity-50" : ""}`}
+                className={`mr-2 size-8 ${!assessmentDetails.examTimeRemaining ? "pointer-events-none opacity-50" : ""}`}
               >
                 {isPaused ? (
                   <PlayIcon className="size-8 cursor-pointer" />
@@ -451,8 +448,8 @@ export default function ExamInterface({
 
         {/* Question Content */}
         <Question
-          question={questions[currentQuestionIndex]}
-          questionIndex={currentQuestionIndex}
+          question={questions[assessmentDetails.activeAssessQuestionIndex]}
+          questionIndex={assessmentDetails.activeAssessQuestionIndex}
           isDescShow={isPopupOpen}
         />
 
@@ -496,21 +493,21 @@ export default function ExamInterface({
 
           <Tooltip
             content={t("prev")}
-            className={`${currentQuestionIndex === 0 ? "invisible" : ""}`}
+            className={`${assessmentDetails.activeAssessQuestionIndex === 0 ? "invisible" : ""}`}
           >
             <Button
-              className={`${currentQuestionIndex === 0 ? "invisible" : ""}`}
+              className={`${assessmentDetails.activeAssessQuestionIndex === 0 ? "invisible" : ""}`}
               onClick={goToPreviousQuestion}
-              disabled={currentQuestionIndex === 0}
+              disabled={assessmentDetails.activeAssessQuestionIndex === 0}
               color="green"
             >
               {lang === "en" ? (
                 <ChevronLeftIcon
-                  className={`${currentQuestionIndex === 0 ? "invisible" : ""} size-5`}
+                  className={`${assessmentDetails.activeAssessQuestionIndex === 0 ? "invisible" : ""} size-5`}
                 />
               ) : (
                 <ChevronRightIcon
-                  className={`${currentQuestionIndex === 0 ? "invisible" : ""} size-5`}
+                  className={`${assessmentDetails.activeAssessQuestionIndex === 0 ? "invisible" : ""} size-5`}
                 />
               )}
               <span className="hidden lg:inline">{t("prev")}</span>
@@ -518,7 +515,7 @@ export default function ExamInterface({
           </Tooltip>
 
           <Tooltip content={t("correctAnswer")}>
-            {questions[currentQuestionIndex]?.question?.description ? (
+            {questions[assessmentDetails.activeAssessQuestionIndex]?.question?.description ? (
               <>
                 <EyeIcon
                   className="size-12 cursor-pointer border-2"
@@ -534,7 +531,7 @@ export default function ExamInterface({
                 >
                   <div className="max-h-[80vh] w-96 max-w-[90vw] overflow-y-auto p-4">
                     <p className="text-base leading-relaxed text-gray-500">
-                      {questions[currentQuestionIndex]?.question?.description}
+                      {questions[assessmentDetails.activeAssessQuestionIndex]?.question?.description}
                     </p>
                   </div>
                 </DraggablePopup>
@@ -584,7 +581,7 @@ export default function ExamInterface({
             </Button>
           </Tooltip>
 
-          {currentQuestionIndex === questions?.length - 1 ? (
+          {assessmentDetails.activeAssessQuestionIndex === questions?.length - 1 ? (
             <Tooltip content={t("endExam")}>
               <Button onClick={openEndExamPopupOpen} color="green">
                 {lang === "ar" ? (

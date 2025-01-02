@@ -45,7 +45,7 @@ export default function QuestionDragDrop({
   const { examAnswers, showReview, activeAssessment } = useAppSelector(
     ({ exams }) => exams,
   );
-  const thisQueAnswers = examAnswers[questionIndex]?.selectedOpt;
+  const thisQueAnswers = examAnswers[questionIndex]?.selectOpt;
 
   const [draggableItems, setDraggableItems] = useState<DraggableAreaProps[]>(
     [],
@@ -84,7 +84,7 @@ export default function QuestionDragDrop({
     setDroppableAreas(updatedDroppableAreas);
     setDraggableItems(updatedDraggableItems);
 
-    const answerstate = updatedDroppableAreas.every(
+    const answerState = updatedDroppableAreas.every(
       (area) => area.items.length === 0,
     )
       ? "skipped"
@@ -98,13 +98,13 @@ export default function QuestionDragDrop({
       dispatch(
         setAnswerState({
           questionIndex,
-          answerstate,
+          answerState,
         }),
       );
       dispatch(
         setSelectedOpt({
           questionIndex,
-          selectedOpt: JSON.stringify({
+          selectOpt: JSON.stringify({
             draggableItems: updatedDraggableItems,
             droppableAreas: updatedDroppableAreas,
           }),
@@ -113,8 +113,8 @@ export default function QuestionDragDrop({
       getItemById(activeAssessment?.id).then((assessment) => {
         if (assessment) {
           const examAnswers = [...assessment.examAnswers];
-          examAnswers[questionIndex].answerstate = answerstate;
-          examAnswers[questionIndex].selectedOpt = JSON.stringify({
+          examAnswers[questionIndex].answerState = answerState;
+          examAnswers[questionIndex].selectOpt = JSON.stringify({
             draggableItems: updatedDraggableItems,
             droppableAreas: updatedDroppableAreas,
           });
@@ -140,7 +140,7 @@ export default function QuestionDragDrop({
         dispatch(
           setSelectedOpt({
             questionIndex,
-            selectedOpt: JSON.stringify({
+            selectOpt: JSON.stringify({
               draggableItems: updatedDraggableItems,
               droppableAreas: updatedDroppableAreas,
             }),
@@ -149,7 +149,7 @@ export default function QuestionDragDrop({
         getItemById(activeAssessment?.id).then((assessment) => {
           if (assessment) {
             const examAnswers = [...assessment.examAnswers];
-            examAnswers[questionIndex].selectedOpt = JSON.stringify({
+            examAnswers[questionIndex].selectOpt = JSON.stringify({
               draggableItems: updatedDraggableItems,
               droppableAreas: updatedDroppableAreas,
             });
@@ -203,7 +203,7 @@ export default function QuestionDragDrop({
         dispatch(
           setSelectedOpt({
             questionIndex,
-            selectedOpt: JSON.stringify({
+            selectOpt: JSON.stringify({
               draggableItems: [],
               droppableAreas: updatedDroppableAreas,
             }),
@@ -212,8 +212,8 @@ export default function QuestionDragDrop({
         getItemById(activeAssessment?.id).then((assessment) => {
           if (assessment) {
             const examAnswers = [...assessment.examAnswers];
-            // examAnswers[questionIndex].answerstate = answerstate;
-            examAnswers[questionIndex].selectedOpt = JSON.stringify({
+            // examAnswers[questionIndex].answerState = answerState;
+            examAnswers[questionIndex].selectOpt = JSON.stringify({
               draggableItems: [],
               droppableAreas: updatedDroppableAreas,
             });

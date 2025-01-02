@@ -115,9 +115,9 @@ export default function QuestionMCQ({
 }) {
   const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
-  const { examAnswers, showReview, activeAssessment } = useAppSelector(({ exams }) => exams);
+  const { examAnswers, activeAssessment, assessmentDetails } = useAppSelector(({ exams }) => exams);
   const selectedOptionsArr = JSON.parse(
-    examAnswers[questionIndex]?.selectedOpt || "[]",
+    examAnswers[questionIndex]?.selectOpt || "[]",
   );
   const correctOptionsArr = useMemo(
     () =>
@@ -150,20 +150,17 @@ export default function QuestionMCQ({
             .sort();
         }
       }
-      const answerstate = !userAnswers.length
-        ? "skipped"
-        : userAnswers!.join() === correctOptionsArr.join()
-          ? "correct"
-          : "wrong";
-      const selectedOpt = JSON.stringify(userAnswers);
+      const answerState = !userAnswers.length? "skipped"
+        : userAnswers!.join() === correctOptionsArr.join()? "correct": "wrong";
+      const selectOpt = JSON.stringify(userAnswers);
       if (activeAssessment?.id) {
-        dispatch(setAnswerState({ questionIndex, answerstate }));
-        dispatch(setSelectedOpt({ questionIndex, selectedOpt }));
+        dispatch(setAnswerState({ questionIndex, answerState }));
+        dispatch(setSelectedOpt({ questionIndex, selectOpt }));
         getItemById(activeAssessment?.id).then((assessment) => {
           if (assessment) {
             const examAnswers = [...assessment.examAnswers];          
-            examAnswers[questionIndex].answerstate = answerstate;
-            examAnswers[questionIndex].selectedOpt = selectedOpt;            
+            examAnswers[questionIndex].answerState = answerState;
+            examAnswers[questionIndex].selectOpt = selectOpt;            
             updateItem(activeAssessment?.id, { examAnswers });
           }
         });
@@ -198,11 +195,11 @@ export default function QuestionMCQ({
     <div className={imagesArr ? "grid grid-cols-[3fr_2fr]" : undefined}>
       <ul className="mt-4">
         {question?.question?.options.map((opt, i) => {
-          const selectedOpt = examAnswers[questionIndex]?.selectedOpt;
-          const isSelected = selectedOpt?.includes(opt.option);
+          const selectOpt = examAnswers[questionIndex]?.selectOpt;
+          const isSelected = selectOpt?.includes(opt.option);
           const isCorrect = opt.answer === "true";
           const checkDisabled =
-            (examAnswers[questionIndex]?.showAnsClicked && isDescShow) || showReview;
+            (examAnswers[questionIndex]?.showAnsClicked && isDescShow) || assessmentDetails.showReview;
           const ansClass = !checkDisabled
             ? "border-gray-300"
             : isSelected && !isCorrect

@@ -1,15 +1,18 @@
 import { useAppSelector } from "../../../../../../../../../store";
 
 export default function Report() {
-  const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
+  const {examAnswers, activeAssessment} = useAppSelector(({ exams }) => exams);
+  console.log({examAnswers, activeAssessment});
+  
+  const quesCount = activeAssessment?.questions.length;
   const answersRatio =
     Math.round(
       (examAnswers.reduce(
         (acc, examAnswer) =>
-          examAnswer.answerstate === "correct" ? acc + 1 : acc,
+          examAnswer.answerState === "correct" ? acc + 1 : acc,
         0,
       ) /
-        examAnswers.length) *
+      quesCount!) *
         10000,
     ) / 100;
   return (
