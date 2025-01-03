@@ -6,7 +6,6 @@ import {
 } from "../../utilities/idb";
 
 const initialState: ExamType = {
-  examAnswers: [],
   domains: [],
   activeAssessment: null,
   isPaused: true,
@@ -25,7 +24,6 @@ const examsSlice = createSlice({
   initialState,
   reducers: {
     resetExam: (state) => {
-      state.examAnswers = [];
       state.assessmentDetails = {
         activeAssessQuestionIndex: 0,
         examTimeRemaining: 0,
@@ -35,8 +33,23 @@ const examsSlice = createSlice({
         answeredAtLeastOnce: false,
       };
     },
-    setAnswer: (state, { payload }: PayloadAction<SetAnswerPayload>) => {
-      state.examAnswers = payload.examAnswers;
+    setAnswer: (
+      state,
+      {
+        payload,
+      }: PayloadAction<{ questionIndex: number; question_id: number, domain: string; chapter: string; }>,
+    ) => {
+      const { questionIndex, question_id, domain, chapter } = payload;
+      const question = state.activeAssessment!.questions[questionIndex];
+      question.answers.push({
+        question_id,
+        selectOpt: "",
+        answerState: "skipped",
+        showAnsClicked: false,
+        isFlagged: false,
+        domain,
+        chapter,
+      });
     },
     setAnswerState: (
       state,
@@ -47,13 +60,9 @@ const examsSlice = createSlice({
         answerState: "wrong" | "correct" | "skipped";
       }>,
     ) => {
-      console.log(payload);
-      
-      // state.examAnswers[payload.questionIndex].answerState =
-      //   payload.answerState;
-      if (state.activeAssessment) {
-        state.activeAssessment.questions[payload.questionIndex].answers[0].answerState =
-        payload.answerState;
+      const question = state.activeAssessment!.questions[payload.questionIndex];
+      if (question.answers[0]) {
+        question.answers[0].answerState = payload.answerState;
       }
     },
     setSelectedOpt: (
@@ -65,37 +74,70 @@ const examsSlice = createSlice({
         selectOpt: string;
       }>,
     ) => {
-      state.examAnswers[payload.questionIndex].selectOpt =
-        payload.selectOpt;
+      const question = state.activeAssessment!.questions[payload.questionIndex];
+      if (question.answers[0]) {
+        question.answers[0].selectOpt = payload.selectOpt;
+      }
     },
     setShowAnsClicked: (
       state,
       { payload }: PayloadAction<{ assessment_id: number; ansIndex: number }>,
     ) => {
-      const { assessment_id, ansIndex } = payload;
-      getItemById(assessment_id).then((assessment) => {
+      getItemById(payload.assessment_id).then((assessment) => {
         if (assessment) {
-          const examAnswers = [...assessment.examAnswers];
-          examAnswers[ansIndex].showAnsClicked = true;
-          updateItem(assessment_id, { examAnswers });
+          const { id, questions } = assessment;
+          updateItem(id, {
+            ...assessment,
+            questions: questions.map((q) =>
+              q.id !== id
+                ? q
+                : {
+                    ...q,
+                    answers: [
+                      {
+                        ...q.answers,
+                        showAnsClicked: !q.answers[0].showAnsClicked,
+                      },
+                    ],
+                  },
+            ),
+          });
         }
       });
-      state.examAnswers[ansIndex].showAnsClicked = true;
+      const question = state.activeAssessment!.questions[payload.ansIndex];
+      if (question.answers[0]) {
+        question.answers[0].showAnsClicked = true;
+      }
     },
     setIsFlagged: (
       state,
       { payload }: PayloadAction<{ assessment_id: number; ansIndex: number }>,
     ) => {
-      const { assessment_id, ansIndex } = payload;
-      getItemById(assessment_id).then((assessment) => {
+      getItemById(payload.assessment_id).then((assessment) => {
         if (assessment) {
-          const examAnswers = [...assessment.examAnswers];
-          examAnswers[ansIndex].isFlagged = !examAnswers[ansIndex].isFlagged;
-          updateItem(assessment_id, { examAnswers });
+          const { id, questions } = assessment;
+          updateItem(id, {
+            ...assessment,
+            questions: questions.map((q) =>
+              q.id !== id
+                ? q
+                : {
+                    ...q,
+                    answers: [
+                      {
+                        ...q.answers,
+                        isFlagged: !q.answers[0].isFlagged,
+                      },
+                    ],
+                  },
+            ),
+          });
         }
       });
-      state.examAnswers[ansIndex].isFlagged =
-        !state.examAnswers[ansIndex].isFlagged;
+      const question = state.activeAssessment!.questions[payload.ansIndex];
+      if (question.answers[0]) {
+        question.answers[0].isFlagged = !question.answers[0].isFlagged;
+      }
     },
     setDomains: (state, { payload }: PayloadAction<DomainType[]>) => {
       state.domains = payload;
@@ -110,11 +152,8 @@ const examsSlice = createSlice({
     ) => {
       if (payload) {
         const { assessment } = payload;
-        console.log(assessment);
-
-        if ("examAnswers" in assessment) {
+        if ("examTimeRemaining" in assessment) {
           const {
-            examAnswers,
             examTimeRemaining,
             didAssessmentStart,
             showReview,
@@ -123,7 +162,6 @@ const examsSlice = createSlice({
             total_degree,
             ...rest
           } = assessment;
-          state.examAnswers = examAnswers;
           state.isPaused = true;
           state.assessmentDetails = {
             activeAssessQuestionIndex,
@@ -170,23 +208,23 @@ const examsSlice = createSlice({
         answeredAtLeastOnce,
         showReview,
       } = payload;
-      if (activeAssessQuestionIndex) {
+      if (activeAssessQuestionIndex !== undefined) {
         state.assessmentDetails.activeAssessQuestionIndex =
           activeAssessQuestionIndex;
       }
-      if (examTimeRemaining) {
+      if (examTimeRemaining !== undefined) {
         state.assessmentDetails.examTimeRemaining = examTimeRemaining;
       }
-      if (total_degree) {
+      if (total_degree !== undefined) {
         state.assessmentDetails.total_degree = total_degree;
       }
-      if (didAssessmentStart) {
+      if (didAssessmentStart !== undefined) {
         state.assessmentDetails.didAssessmentStart = didAssessmentStart;
       }
-      if (answeredAtLeastOnce) {
+      if (answeredAtLeastOnce !== undefined) {
         state.assessmentDetails.answeredAtLeastOnce = answeredAtLeastOnce;
       }
-      if (showReview) {
+      if (showReview !== undefined) {
         state.assessmentDetails.showReview = showReview;
       }
     },

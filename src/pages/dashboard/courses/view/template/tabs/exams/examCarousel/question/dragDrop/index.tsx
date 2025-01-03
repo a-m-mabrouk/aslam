@@ -42,10 +42,11 @@ export default function QuestionDragDrop({
   isDescShow: boolean;
 }) {
   const dispatch = useAppDispatch();
-  const { examAnswers, showReview, activeAssessment } = useAppSelector(
+  const { assessmentDetails, activeAssessment } = useAppSelector(
     ({ exams }) => exams,
   );
-  const thisQueAnswers = examAnswers[questionIndex]?.selectOpt;
+  const thisQueAnswers =
+    activeAssessment?.questions[questionIndex]?.answers[0]?.selectOpt;
 
   const [draggableItems, setDraggableItems] = useState<DraggableAreaProps[]>(
     [],
@@ -58,14 +59,16 @@ export default function QuestionDragDrop({
   const checkDisabled = useMemo(
     () =>
       (question.question.description === ""
-        ? examAnswers[questionIndex]?.showAnsClicked && isDescShow
-        : examAnswers[questionIndex]?.showAnsClicked) || showReview,
+        ? activeAssessment?.questions[questionIndex]?.answers[0]
+            ?.showAnsClicked && isDescShow
+        : activeAssessment?.questions[questionIndex]?.answers[0]
+            ?.showAnsClicked) || assessmentDetails.showReview,
     [
-      examAnswers,
+      activeAssessment?.questions,
+      assessmentDetails.showReview,
       isDescShow,
       question.question.description,
       questionIndex,
-      showReview,
     ],
   );
 
@@ -112,13 +115,17 @@ export default function QuestionDragDrop({
       );
       getItemById(activeAssessment?.id).then((assessment) => {
         if (assessment) {
-          const examAnswers = [...assessment.examAnswers];
-          examAnswers[questionIndex].answerState = answerState;
-          examAnswers[questionIndex].selectOpt = JSON.stringify({
+          const ans = { ...assessment.questions[questionIndex].answers[0] };
+          ans.answerState = answerState;
+          ans.selectOpt = JSON.stringify({
             draggableItems: updatedDraggableItems,
             droppableAreas: updatedDroppableAreas,
           });
-          updateItem(activeAssessment?.id, { examAnswers });
+          updateItem(activeAssessment?.id, {
+            questions: assessment.questions.map((q) =>
+              q.id !== question.id ? q : { ...q, answers: [ans] },
+            ),
+          });
         }
       });
     }
@@ -148,12 +155,16 @@ export default function QuestionDragDrop({
         );
         getItemById(activeAssessment?.id).then((assessment) => {
           if (assessment) {
-            const examAnswers = [...assessment.examAnswers];
-            examAnswers[questionIndex].selectOpt = JSON.stringify({
+            const ans = { ...assessment.questions[questionIndex].answers[0] };
+            ans.selectOpt = JSON.stringify({
               draggableItems: updatedDraggableItems,
               droppableAreas: updatedDroppableAreas,
             });
-            updateItem(activeAssessment?.id, { examAnswers });
+            updateItem(activeAssessment?.id, {
+              questions: assessment.questions.map((q) =>
+                q.id !== question.id ? q : { ...q, answers: [ans] },
+              ),
+            });
           }
         });
       }
@@ -211,24 +222,28 @@ export default function QuestionDragDrop({
         );
         getItemById(activeAssessment?.id).then((assessment) => {
           if (assessment) {
-            const examAnswers = [...assessment.examAnswers];
-            // examAnswers[questionIndex].answerState = answerState;
-            examAnswers[questionIndex].selectOpt = JSON.stringify({
+            const ans = { ...assessment.questions[questionIndex].answers[0] };
+            ans.selectOpt = JSON.stringify({
               draggableItems: [],
               droppableAreas: updatedDroppableAreas,
             });
-            updateItem(activeAssessment?.id, { examAnswers });
+            updateItem(activeAssessment?.id, {
+              questions: assessment.questions.map((q) =>
+                q.id !== question.id ? q : { ...q, answers: [ans] },
+              ),
+            });
           }
         });
       }
     }
   }, [
-    checkDisabled,
-    question?.question?.options,
-    dispatch,
-    questionIndex,
-    isAnswered,
     activeAssessment?.id,
+    checkDisabled,
+    dispatch,
+    isAnswered,
+    question.id,
+    question?.question?.options,
+    questionIndex,
   ]);
 
   return (

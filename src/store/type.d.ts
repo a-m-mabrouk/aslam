@@ -3,13 +3,12 @@ interface ExamAnswer {
   selectOpt: string;
   showAnsClicked: boolean;
   isFlagged: boolean;
-  // domain: string;
-  // chapter: string;
+  domain: string;
+  chapter: string;
   answerState: "wrong" | "correct" | "skipped";
 }
 
 interface ExamType {
-  examAnswers: ExamAnswer[];
   domains: DomainType[];
   activeAssessment: AssessmentType | null;
   isPaused: boolean;
@@ -20,23 +19,7 @@ interface ExamType {
     showReview: boolean;
     didAssessmentStart: boolean;
     answeredAtLeastOnce: boolean;
-  }
-}
-
-interface SetAnswerPayload {
-  // assessment_id: number;
-  examAnswers: {
-    // questionIndex: number;
-    // queAnsDetails: {
-      question_id: number;
-      selectOpt: string;
-      showAnsClicked: boolean;
-      isFlagged: boolean;
-      domain: string;
-      chapter: string;
-      answerState: "wrong" | "correct" | "skipped";
-    // };
-  }[];
+  };
 }
 
 interface SearchPayloadActionProps {

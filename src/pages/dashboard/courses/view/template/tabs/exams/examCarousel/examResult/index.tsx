@@ -7,8 +7,8 @@ import { useAppSelector } from "../../../../../../../../../store";
 
 export default function ExamResult() {
   const { t } = useTranslation("exams");
-  const examAnswers = useAppSelector(({exams})=> exams.examAnswers);
-  const isWrongExisted = examAnswers.some(ans => ans.answerState === "wrong");
+  const {activeAssessment} = useAppSelector(({exams})=> exams);
+  const isWrongExisted = activeAssessment?.questions.some(({answers}) => answers[0]?.answerState === "wrong");
   return (
     <Tabs aria-label="Default tabs" variant="default">
       <Tabs.Item active title={t("resultReport")}>

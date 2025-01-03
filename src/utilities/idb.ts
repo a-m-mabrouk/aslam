@@ -5,7 +5,6 @@ export type IDBAssessmentType = AssessmentType & {
   activeAssessQuestionIndex: number;
   examTimeRemaining: number;
   showReview: boolean;
-  examAnswers: ExamAnswer[];
   didAssessmentStart: boolean;
   answeredAtLeastOnce: boolean;
   total_degree: number;
@@ -29,7 +28,6 @@ const initIDBAssessment: IDBAssessmentType = {
   activeAssessQuestionIndex: 0,
   examTimeRemaining: 0,
   showReview: false,
-  examAnswers: [],
   didAssessmentStart: false,
   answeredAtLeastOnce: false,
   total_degree: 0,

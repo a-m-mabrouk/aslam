@@ -38,6 +38,7 @@ import {
 import Question from "./question";
 import { useAppDispatch, useAppSelector } from "../../../../../../../../store";
 import {
+  setAnswer,
   setAssessmentDetails,
   setIsFlagged,
   setIsPaused,
@@ -153,12 +154,8 @@ export default function ExamInterface({
   const { lang } = useGetLang();
   const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
-  const {
-    examAnswers,
-    isPaused,
-    activeAssessment,
-    assessmentDetails,
-  } = useAppSelector(({ exams }) => exams);
+  const { isPaused, activeAssessment, assessmentDetails } =
+    useAppSelector(({ exams }) => exams);
   const timeRemainingRef = useRef(assessmentDetails.examTimeRemaining);
   const [borderColor, setBorderColor] = useState<string>("border-gray-300");
   const [timerColor, setTimerColor] = useState<string>("");
@@ -171,8 +168,9 @@ export default function ExamInterface({
         activeAssessQuestionIndex: queIndex,
       }),
     );
-    
-    activeAssessment && updateItem(activeAssessment?.id, { activeAssessQuestionIndex: 0 });
+
+    activeAssessment &&
+      updateItem(activeAssessment?.id, { activeAssessQuestionIndex: 0 });
 
     closeFlagQuestionsPopupOpen();
     const fakeEvent = { stopPropagation: () => {} } as SyntheticEvent;
@@ -199,14 +197,24 @@ export default function ExamInterface({
       if (activeAssessment?.id) {
         dispatch(
           setAssessmentDetails({
-            examTimeRemaining: assessmentDetails.examTimeRemaining > 0 ? assessmentDetails.examTimeRemaining - 1 : 0,
+            examTimeRemaining:
+              assessmentDetails.examTimeRemaining > 0
+                ? assessmentDetails.examTimeRemaining - 1
+                : 0,
           }),
         );
-        updateItem(activeAssessment?.id, {examTimeRemaining: assessmentDetails.examTimeRemaining})
+        updateItem(activeAssessment?.id, {
+          examTimeRemaining: assessmentDetails.examTimeRemaining,
+        });
       }
       assessmentDetails.examTimeRemaining === 0 && startTimeoutAnimation();
     }, 1000);
-  }, [activeAssessment?.id, assessmentDetails.examTimeRemaining, startTimeoutAnimation, dispatch]);
+  }, [
+    activeAssessment?.id,
+    assessmentDetails.examTimeRemaining,
+    startTimeoutAnimation,
+    dispatch,
+  ]);
 
   useEffect(() => {
     timeRemainingRef.current = assessmentDetails.examTimeRemaining;
@@ -243,27 +251,43 @@ export default function ExamInterface({
     };
   }, [isPaused, startTimer]);
 
-  const progress = ((examTime - assessmentDetails.examTimeRemaining) / examTime) * 100;
+  const progress =
+    ((examTime - assessmentDetails.examTimeRemaining) / examTime) * 100;
 
   const goToNextQuestion = useCallback(() => {
     if (assessmentDetails.activeAssessQuestionIndex < questions?.length - 1) {
       dispatch(
         setAssessmentDetails({
-          activeAssessQuestionIndex: assessmentDetails.activeAssessQuestionIndex + 1,
+          activeAssessQuestionIndex:
+            assessmentDetails.activeAssessQuestionIndex + 1,
         }),
       );
     }
-    activeAssessment && updateItem(activeAssessment?.id, { activeAssessQuestionIndex: assessmentDetails.activeAssessQuestionIndex + 1 });
-  }, [activeAssessment, assessmentDetails.activeAssessQuestionIndex, dispatch, questions?.length]);
+    activeAssessment &&
+      updateItem(activeAssessment?.id, {
+        activeAssessQuestionIndex:
+          assessmentDetails.activeAssessQuestionIndex + 1,
+      });
+  }, [
+    activeAssessment,
+    assessmentDetails.activeAssessQuestionIndex,
+    dispatch,
+    questions?.length,
+  ]);
 
   const goToPreviousQuestion = useCallback(() => {
     if (assessmentDetails.activeAssessQuestionIndex > 0) {
       dispatch(
         setAssessmentDetails({
-          activeAssessQuestionIndex: assessmentDetails.activeAssessQuestionIndex - 1,
+          activeAssessQuestionIndex:
+            assessmentDetails.activeAssessQuestionIndex - 1,
         }),
       );
-      activeAssessment && updateItem(activeAssessment?.id, { activeAssessQuestionIndex: assessmentDetails.activeAssessQuestionIndex - 1 });
+      activeAssessment &&
+        updateItem(activeAssessment?.id, {
+          activeAssessQuestionIndex:
+            assessmentDetails.activeAssessQuestionIndex - 1,
+        });
     }
   }, [activeAssessment, assessmentDetails.activeAssessQuestionIndex, dispatch]);
 
@@ -312,8 +336,8 @@ export default function ExamInterface({
     // return `${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  const flaggedQuestionsArr: FlaggedQuestionType[] = examAnswers
-    .map((examAnswer, i) => (examAnswer.isFlagged ? i : -1))
+  const flaggedQuestionsArr: FlaggedQuestionType[] = questions
+    .map(({answers}, i) => (answers[0]?.isFlagged ? i : -1))
     .filter((i) => i !== -1)
     .map((e) => ({ ...questions[e], queIndex: e }));
 
@@ -334,6 +358,45 @@ export default function ExamInterface({
     event.stopPropagation();
     setIsAllQuestionsPopupOpen(false);
   };
+
+  useEffect(() => {
+    const question = questions[assessmentDetails.activeAssessQuestionIndex];
+    if (!question.answers.length) {
+      // console.log(question);
+      setAnswer({
+        questionIndex: assessmentDetails.activeAssessQuestionIndex,
+        question_id: question.id,
+        domain: question.question.domain || "",
+        chapter: question.question.chapter || "",
+      });
+      if (activeAssessment?.id) {
+        updateItem(activeAssessment?.id, {
+          questions: activeAssessment.questions.map((q) =>
+            q.id !== question.id
+              ? q
+              : {
+                  ...q,
+                  answers: [
+                    {
+                      question_id: q.id,
+                      answerState: "skipped",
+                      selectOpt: "",
+                      isFlagged: false,
+                      showAnsClicked: false,
+                      domain: question.question.domain || "",
+                      chapter: question.question.chapter || "",
+                    },
+                  ],
+                },
+          ),
+        });
+      }
+    }
+  }, [
+    activeAssessment,
+    assessmentDetails.activeAssessQuestionIndex,
+    questions,
+  ]);
 
   return (
     <div
@@ -367,7 +430,8 @@ export default function ExamInterface({
                 {formatTime(assessmentDetails.examTimeRemaining)}
               </p>
               <p className="ps-6">
-                {t("question")} {assessmentDetails.activeAssessQuestionIndex + 1} {t("of")}{" "}
+                {t("question")}{" "}
+                {assessmentDetails.activeAssessQuestionIndex + 1} {t("of")}{" "}
                 {questions?.length}
               </p>
             </div>
@@ -402,10 +466,13 @@ export default function ExamInterface({
                     );
                 }}
               >
-                {examAnswers[assessmentDetails.activeAssessQuestionIndex]?.isFlagged ? (
+                {questions[assessmentDetails.activeAssessQuestionIndex].answers[0]
+                  ?.isFlagged ? (
                   <>
                     <FlagIconSolid className="size-5 fill-red-700" />
-                    <span className="hidden text-red-700 lg:inline">{t("unFlagQue")}</span>
+                    <span className="hidden text-red-700 lg:inline">
+                      {t("unFlagQue")}
+                    </span>
                   </>
                 ) : (
                   <>
@@ -515,7 +582,8 @@ export default function ExamInterface({
           </Tooltip>
 
           <Tooltip content={t("correctAnswer")}>
-            {questions[assessmentDetails.activeAssessQuestionIndex]?.question?.description ? (
+            {questions[assessmentDetails.activeAssessQuestionIndex]?.question
+              ?.description ? (
               <>
                 <EyeIcon
                   className="size-12 cursor-pointer border-2"
@@ -531,7 +599,10 @@ export default function ExamInterface({
                 >
                   <div className="max-h-[80vh] w-96 max-w-[90vw] overflow-y-auto p-4">
                     <p className="text-base leading-relaxed text-gray-500">
-                      {questions[assessmentDetails.activeAssessQuestionIndex]?.question?.description}
+                      {
+                        questions[assessmentDetails.activeAssessQuestionIndex]
+                          ?.question?.description
+                      }
                     </p>
                   </div>
                 </DraggablePopup>
@@ -581,7 +652,8 @@ export default function ExamInterface({
             </Button>
           </Tooltip>
 
-          {assessmentDetails.activeAssessQuestionIndex === questions?.length - 1 ? (
+          {assessmentDetails.activeAssessQuestionIndex ===
+          questions?.length - 1 ? (
             <Tooltip content={t("endExam")}>
               <Button onClick={openEndExamPopupOpen} color="green">
                 {lang === "ar" ? (

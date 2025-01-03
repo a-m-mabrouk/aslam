@@ -9,7 +9,12 @@ import {
 } from "../../../../../../../../../../store/reducers/exams";
 import { useTranslation } from "react-i18next";
 import { toastifyBox } from "../../../../../../../../../../helper/toastifyBox";
-import { getItemById, updateItem } from "../../../../../../../../../../utilities/idb";
+import {
+  getItemById,
+  updateItem,
+} from "../../../../../../../../../../utilities/idb";
+import { API_EXAMS } from "../../../../../../../../../../router/routes/apiRoutes";
+import axiosDefault from "../../../../../../../../../../utilities/axios";
 
 export function OptionEditable({
   opt,
@@ -115,9 +120,12 @@ export default function QuestionMCQ({
 }) {
   const { t } = useTranslation("exams");
   const dispatch = useAppDispatch();
-  const { examAnswers, activeAssessment, assessmentDetails } = useAppSelector(({ exams }) => exams);
+  const { activeAssessment, assessmentDetails } = useAppSelector(
+    ({ exams }) => exams,
+  );
+  const { id: student_id } = useAppSelector(({ auth }) => auth);
   const selectedOptionsArr = JSON.parse(
-    examAnswers[questionIndex]?.selectOpt || "[]",
+    activeAssessment?.questions[questionIndex].answers[0]?.selectOpt || "[]",
   );
   const correctOptionsArr = useMemo(
     () =>
@@ -150,23 +158,69 @@ export default function QuestionMCQ({
             .sort();
         }
       }
-      const answerState = !userAnswers.length? "skipped"
-        : userAnswers!.join() === correctOptionsArr.join()? "correct": "wrong";
+      const answerState = !userAnswers.length
+        ? "skipped"
+        : userAnswers!.join() === correctOptionsArr.join()
+          ? "correct"
+          : "wrong";
       const selectOpt = JSON.stringify(userAnswers);
       if (activeAssessment?.id) {
         dispatch(setAnswerState({ questionIndex, answerState }));
+        console.log(activeAssessment.questions.map(({ answers }) => answers));
+
         dispatch(setSelectedOpt({ questionIndex, selectOpt }));
-        getItemById(activeAssessment?.id).then((assessment) => {
+        getItemById(activeAssessment?.id).then(async (assessment) => {
           if (assessment) {
-            const examAnswers = [...assessment.examAnswers];          
-            examAnswers[questionIndex].answerState = answerState;
-            examAnswers[questionIndex].selectOpt = selectOpt;            
-            updateItem(activeAssessment?.id, { examAnswers });
+            const ans = { ...assessment.questions[questionIndex].answers[0] };
+            ans.answerState = answerState;
+            ans.selectOpt = selectOpt;
+            updateItem(assessment.id, {
+              questions: assessment.questions.map((q) =>
+                q.id !== question.id ? q : { ...q, answers: [ans] },
+              ),
+            });
+            try {
+              await axiosDefault.post(
+                API_EXAMS.answer,
+                {
+                  activeAssessQuestionIndex:
+                    assessmentDetails.activeAssessQuestionIndex,
+                  examTimeRemaining: assessmentDetails.examTimeRemaining,
+                  student_id,
+                  assessment_id: assessment.id,
+                  total_degree: 0,
+                  didAssessmentStart: 1,
+                  showReview: 0,
+                  answeredAtLeastOnce: assessment.answeredAtLeastOnce ? 1 : 0,
+                  answers: [ans],
+                },
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  transformRequest: [(data) => JSON.stringify(data)],
+                },
+              );
+            } catch (error) {
+              console.error("Couldn't send answer");
+            }
           }
         });
       }
     },
-    [activeAssessment?.id, correctOptionsArr, dispatch, questionIndex, selectedOptionsArr, t],
+    [
+      activeAssessment?.id,
+      activeAssessment?.questions,
+      assessmentDetails.activeAssessQuestionIndex,
+      assessmentDetails.examTimeRemaining,
+      correctOptionsArr,
+      dispatch,
+      question.id,
+      questionIndex,
+      selectedOptionsArr,
+      student_id,
+      t,
+    ],
   );
   return editable ? (
     <div className={imagesArr ? "grid" : undefined}>
@@ -195,11 +249,15 @@ export default function QuestionMCQ({
     <div className={imagesArr ? "grid grid-cols-[3fr_2fr]" : undefined}>
       <ul className="mt-4">
         {question?.question?.options.map((opt, i) => {
-          const selectOpt = examAnswers[questionIndex]?.selectOpt;
+          const selectOpt =
+            activeAssessment?.questions[questionIndex].answers[0]?.selectOpt;
           const isSelected = selectOpt?.includes(opt.option);
           const isCorrect = opt.answer === "true";
           const checkDisabled =
-            (examAnswers[questionIndex]?.showAnsClicked && isDescShow) || assessmentDetails.showReview;
+            (activeAssessment?.questions[questionIndex].answers[0]
+              ?.showAnsClicked &&
+              isDescShow) ||
+            assessmentDetails.showReview;
           const ansClass = !checkDisabled
             ? "border-gray-300"
             : isSelected && !isCorrect

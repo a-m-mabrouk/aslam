@@ -38,7 +38,7 @@ const Question = memo(
   }) => {
     const [editable, setEditable] = useState<boolean>(false);
     const dispatch = useAppDispatch();
-    const showReview = useAppSelector(({ exams }) => exams.showReview);
+    const {showReview} = useAppSelector(({ exams }) => exams.assessmentDetails);
     const assessment_id = useAppSelector(
       ({ exams }) => exams.activeAssessment?.id,
     );

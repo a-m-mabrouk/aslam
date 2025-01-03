@@ -30,7 +30,6 @@ import { fetchDomains } from "../../../../../../../store/reducers/examsDomains";
 import { getItemById, updateItem } from "../../../../../../../utilities/idb";
 import { shuffle } from "../../../../../../../utilities/shuffleArray";
 import {
-  falseTrueToZeroOne,
   zeroOneToFalseTrue,
 } from "../../../../../../../utilities/zeroOneToFalseTrue";
 
@@ -151,14 +150,6 @@ const ExamComponent = () => {
             showReview = zeroOneToFalseTrue(pivot.showReview);
             total_degree = pivot.total_degree;
           }
-          console.log({
-            activeAssessQuestionIndex,
-            examTimeRemaining,
-            didAssessmentStart,
-            answeredAtLeastOnce,
-            showReview,
-            total_degree,
-          });
           
           dispatch(setActiveAssessment({ assessment }));
           dispatch(
@@ -233,6 +224,7 @@ const ExamComponent = () => {
     dispatch(resetExam());
     dispatch(setIsPaused(false));
     try {
+      // create mistakes assessment for this course, Backend ignores it if exists
       await axiosDefault.post(API_EXAMS.assessments, {
         student_id,
         course_id,
@@ -344,15 +336,7 @@ const ExamComponent = () => {
               didAssessmentStart: 1,
               showReview: 1,
               answeredAtLeastOnce: 1,
-              answers: ques.map(({ answers }: { answers: ExamAnswer[] }) => ({
-                answerState: answers[0].answerState,
-                // domain: answers[0].domain,
-                // chapter: answers[0].chapter,
-                selectOpt: answers[0].selectOpt || "NoSelection",
-                isFlagged: falseTrueToZeroOne(answers[0].isFlagged),
-                showAnsClicked: falseTrueToZeroOne(answers[0].showAnsClicked),
-                question_id: answers[0].question_id,
-              })),
+              answers: [],
             },
             {
               headers: {
@@ -392,7 +376,6 @@ const ExamComponent = () => {
                   </>
                 ) : assessmentDetails.showReview ? (
                   <>
-                  {console.log(assessmentDetails.showReview)}
                     <Button
                       onClick={handleResetExam}
                       color="green"

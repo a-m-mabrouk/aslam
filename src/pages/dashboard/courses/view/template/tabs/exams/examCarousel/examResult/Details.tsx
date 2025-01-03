@@ -3,17 +3,17 @@ import { useAppSelector } from "../../../../../../../../../store";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/solid";
 
 export default function Details() {
-  const examAnswers = useAppSelector(({ exams }) => exams.examAnswers);
+  const {activeAssessment} = useAppSelector(({ exams }) => exams);
 
-  const aggregatedData = examAnswers.reduce(
-    (acc, examAnswer) => {
-      if (!acc[examAnswer.chapter]) {
-        acc[examAnswer.chapter] = { questionsCount: 0, correctAnswersCount: 0 };
+  const aggregatedData = activeAssessment?.questions.reduce(
+    (acc, {answers}) => {
+      if (!acc[answers[0]?.chapter]) {
+        acc[answers[0]?.chapter] = { questionsCount: 0, correctAnswersCount: 0 };
       }
 
-      acc[examAnswer.chapter].questionsCount += 1;
-      if (examAnswer.answerState === "correct") {
-        acc[examAnswer.chapter].correctAnswersCount += 1;
+      acc[answers[0]?.chapter].questionsCount += 1;
+      if (answers[0]?.answerState === "correct") {
+        acc[answers[0]?.chapter].correctAnswersCount += 1;
       }
 
       return acc;
@@ -37,7 +37,7 @@ export default function Details() {
             <Table.HeadCell>صحيح%</Table.HeadCell>
           </Table.Head>
           <Table.Body>
-            {Object.keys(aggregatedData).map((key, i) => (
+            {aggregatedData && Object.keys(aggregatedData).map((key, i) => (
               <Table.Row className="border-2" key={i}>
                 <Table.Cell>{key}</Table.Cell>
                 <Table.Cell>{aggregatedData[key].questionsCount}</Table.Cell>
@@ -67,13 +67,13 @@ export default function Details() {
             <Table.HeadCell>الدرجة</Table.HeadCell>
           </Table.Head>
           <Table.Body>
-            {examAnswers.map((examAnswer, queIndex) => (
+            {activeAssessment?.questions.map(({answers}, queIndex) => (
               <Table.Row className="border-2" key={queIndex}>
                 <Table.Cell>{queIndex + 1}</Table.Cell>
-                <Table.Cell>{examAnswer.domain}</Table.Cell>
-                <Table.Cell>{examAnswer.chapter}</Table.Cell>
+                <Table.Cell>{answers[0]?.domain}</Table.Cell>
+                <Table.Cell>{answers[0]?.chapter}</Table.Cell>
                 <Table.Cell>
-                  {examAnswer.answerState === "correct" ? (
+                  {answers[0]?.answerState === "correct" ? (
                     <CheckIcon className="mx-auto size-5 text-green-500" />
                   ) : (
                     <XMarkIcon className="mx-auto size-5 text-red-600" />

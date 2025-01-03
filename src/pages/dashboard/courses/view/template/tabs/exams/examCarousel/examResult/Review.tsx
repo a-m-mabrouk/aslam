@@ -9,16 +9,16 @@ import useGetLang from "../../../../../../../../../hooks/useGetLang";
 export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
   const { t } = useTranslation("exams");
   // const dispatch = useAppDispatch();
-  const { examAnswers, activeAssessment } = useAppSelector(({ exams }) => exams);
+  const { activeAssessment } = useAppSelector(({ exams }) => exams);
   const { questions } = activeAssessment!;
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
   const {lang} = useGetLang();
 
   type ReviewQuestions = Question & { reviewIndex: number };
   const reviewQuestions: ReviewQuestions[] = [];
-  examAnswers.forEach((ans, i) => {
+  questions.forEach(({answers}, i) => {
     if (wrongOnly) {
-      ans.answerState === "wrong" &&
+      answers[0].answerState === "wrong" &&
         reviewQuestions.push({ ...questions[i], reviewIndex: i });
     } else {
       reviewQuestions.push({ ...questions[i], reviewIndex: i });
@@ -71,7 +71,7 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
       <header className="grid gap-2 bg-gray-200 p-4">
         <div className="flex justify-between">
           <p>
-            {`${t(examAnswers[reviewQuestions[currentQuestionIndex]?.reviewIndex]?.answerState)}: ${t("question")} ${reviewQuestions[currentQuestionIndex]?.reviewIndex + 1} ${t("of")} ${questions?.length}`}
+            {`${t(questions[reviewQuestions[currentQuestionIndex]?.reviewIndex]?.answers[0]?.answerState)}: ${t("question")} ${reviewQuestions[currentQuestionIndex]?.reviewIndex + 1} ${t("of")} ${questions?.length}`}
           </p>
         </div>
       </header>
