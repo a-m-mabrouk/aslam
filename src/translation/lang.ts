@@ -182,6 +182,7 @@ export const resources = {
       wrong: "Wrong",
       deleteQuestions: "Delete Questions",
       resetExam: "Reset exam",
+      previousMistakes: "Previous mistakes",
     },
   },
   ar: {
@@ -366,6 +367,7 @@ export const resources = {
       wrong: "خطأ",
       deleteQuestions: "حذف الأسئلة",
       resetExam: "إعادة الامتحان",
+      previousMistakes: "الأخطاء السابقة",
     },
   },
 };

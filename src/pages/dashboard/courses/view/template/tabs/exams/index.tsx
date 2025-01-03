@@ -29,9 +29,7 @@ import { useParams } from "react-router";
 import { fetchDomains } from "../../../../../../../store/reducers/examsDomains";
 import { getItemById, updateItem } from "../../../../../../../utilities/idb";
 import { shuffle } from "../../../../../../../utilities/shuffleArray";
-import {
-  zeroOneToFalseTrue,
-} from "../../../../../../../utilities/zeroOneToFalseTrue";
+import { zeroOneToFalseTrue } from "../../../../../../../utilities/zeroOneToFalseTrue";
 
 export function FullScreenButton({
   onFullscreen,
@@ -150,7 +148,7 @@ const ExamComponent = () => {
             showReview = zeroOneToFalseTrue(pivot.showReview);
             total_degree = pivot.total_degree;
           }
-          
+
           dispatch(setActiveAssessment({ assessment }));
           dispatch(
             setAssessmentDetails({
@@ -212,16 +210,45 @@ const ExamComponent = () => {
   };
   const handleResetExam = () => {
     dispatch(resetExam());
-    activeAssessment &&
-      updateItem(activeAssessment?.id, {
-        showReview: false,
-        didAssessmentStart: false,
-        examTimeRemaining: examTime,
+    if (activeAssessment?.id) {
+      getItemById(activeAssessment?.id).then(async (assessmanet) => {
+        if (assessmanet) {
+          const obj = {
+            activeAssessQuestionIndex: 0,
+            examTimeRemaining: examTime,
+            student_id,
+            assessment_id: assessmanet.id,
+            total_degree: assessmanet.total_degree,
+            didAssessmentStart: 0,
+            showReview: 0,
+            answeredAtLeastOnce: assessmanet?.answeredAtLeastOnce ? 1 : 0,
+            answers: assessmanet.questions.map((q) => ({
+              answerState: "skipped",
+              chapter: q.question.chapter,
+              domain: q.question.domain,
+              isFlagged: 0,
+              question_id: q.id,
+              selectOpt: "",
+              showAnsClicked: 0,
+            })),
+          };
+          updateItem(assessmanet.id, obj);
+          try {
+            await axiosDefault.post(API_EXAMS.answer, obj, {
+              headers: {
+                "Content-Type": "application/json",
+              },
+              transformRequest: [(data) => JSON.stringify(data)],
+            });
+          } catch (error) {
+            console.error("Couldn't send answer");
+          }
+        }
       });
+    }
   };
   const onStart = async () => {
     const assessment_id = activeAssessment?.id;
-    dispatch(resetExam());
     dispatch(setIsPaused(false));
     try {
       // create mistakes assessment for this course, Backend ignores it if exists

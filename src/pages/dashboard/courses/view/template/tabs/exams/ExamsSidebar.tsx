@@ -26,6 +26,8 @@ import { toastifyBox } from "../../../../../../../helper/toastifyBox";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
 import { setActiveAssessment } from "../../../../../../../store/reducers/exams";
+import axiosDefault from "../../../../../../../utilities/axios";
+import { API_EXAMS } from "../../../../../../../router/routes/apiRoutes";
 
 export function AddDomainModal({
   modalType,
@@ -254,8 +256,12 @@ export default function ExamsSidebar({
   const activeAssessmentId = useAppSelector(
     ({ exams }) => exams.activeAssessment?.id,
   );
+  const [allAssessmentsAnswered, setAllAssessmentsAnswered] =
+    useState<boolean>(false);
+  const [mistakesExam, setMistakesExam] = useState<null | AssessmentType>(null);
   const domains = useAppSelector(({ examsDomains }) => examsDomains.domains);
-  const isTeacher = useAppSelector(({ auth }) => auth.role) === "teacher";
+  const { role, id: student_id } = useAppSelector(({ auth }) => auth);
+  const isTeacher = role === "teacher";
 
   const { t } = useTranslation("exams");
   const { t: tBtns } = useTranslation("buttons");
@@ -304,32 +310,96 @@ export default function ExamsSidebar({
 
   useEffect(() => {
     dispatch(fetchDomains(Number(course_id!)))
-    .unwrap()
-    .then((data) => {
-      // reset exam and clear localStorage if exam was removed by teacher
-      const domains = data.data;
-      const localActiveAssessmentId = localStorage.getItem("activeAssessmentId");
-      if (localActiveAssessmentId) {
-        const id = JSON.parse(localActiveAssessmentId);
-        const assessmentInDomains = domains.some((domain: DomainType) =>
-          domain.assessments.some((assessment) => assessment.id === id),
-        );
-        const assessmentInSubdomains = domains.some((domain: DomainType) =>
-          domain.subdomains?.some((subdomain) =>
-            subdomain.assessments.some((assessment) => assessment.id === id),
-          ),
-        );
-        if (!assessmentInDomains && !assessmentInSubdomains) {
-          dispatch(setActiveAssessment(null));
-          localStorage.removeItem("activeAssessmentId")
+      .unwrap()
+      .then(async (data) => {
+        // reset exam and clear localStorage if exam was removed by teacher
+        const domains: DomainType[] = data.data;
+        const localActiveAssessmentId =
+          localStorage.getItem("activeAssessmentId");
+
+        // setAllAssessmentsAnswered of domains and subdomains
+        const areAllAssessmentsAnswered = !domains.some((domain) => {
+          const hasUnansweredInDomain = domain.assessments?.some(
+            ({ student }) => student?.[0]?.pivot?.answeredAtLeastOnce === 0,
+          );
+          const hasUnansweredInSubdomains = domain.subdomains?.some(
+            (subdomain) =>
+              subdomain.assessments?.some(
+                ({ student }) => student?.[0]?.pivot?.answeredAtLeastOnce === 0,
+              ),
+          );
+          return hasUnansweredInDomain || hasUnansweredInSubdomains;
+        });
+        setAllAssessmentsAnswered(areAllAssessmentsAnswered);
+        if (areAllAssessmentsAnswered) {
+          const { data: mistakesExamsData } = await axiosDefault.get(
+            `${API_EXAMS.mistakesExams}/${student_id}`,
+          );
+          
+          if (mistakesExamsData.data) {
+            setMistakesExam(mistakesExamsData.data);
+          }
         }
-      }
-    })
-    .catch((err) => toastifyBox("error", err.message || "Failed!"));
-  }, [course_id, dispatch]);
+
+        if (localActiveAssessmentId) {
+          const id = JSON.parse(localActiveAssessmentId);
+          const assessmentInDomains = domains.some((domain: DomainType) =>
+            domain.assessments.some((assessment) => assessment.id === id),
+          );
+          const assessmentInSubdomains = domains.some((domain: DomainType) =>
+            domain.subdomains?.some((subdomain) =>
+              subdomain.assessments.some((assessment) => assessment.id === id),
+            ),
+          );
+          if (!assessmentInDomains && !assessmentInSubdomains) {
+            dispatch(setActiveAssessment(null));
+            localStorage.removeItem("activeAssessmentId");
+          }
+        }
+      })
+      .catch((err) => toastifyBox("error", err.message || "Failed!"));
+  }, [course_id, dispatch, student_id]);
 
   return (
-    <div className="shrink-0 md:w-72 md:min-w-64">
+    <div className="flex shrink-0 flex-col gap-2 md:w-72 md:min-w-64">
+      {!allAssessmentsAnswered &&
+      mistakesExam &&
+      mistakesExam.questions.length ? (
+        <AccordionCard>
+          <AccordionCard.Panel key={12}>
+            <AccordionCard.Title className="grow">
+              <div className="flex items-center justify-between gap-4">
+                {t("previousMistakes")}
+              </div>
+            </AccordionCard.Title>
+            <AccordionCard.Content className="py-0 pe-0">
+              <h3 className="flex gap-2 p-2" key={mistakesExam?.id}>
+                <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
+                <span
+                  title={
+                    activeAssessmentId === mistakesExam.id
+                      ? lang === "en"
+                        ? "This assessment is already active"
+                        : "هذا الامتحان نشط بالفعل"
+                      : undefined
+                  }
+                  className={`text-indigo-900 ${activeAssessmentId === mistakesExam.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
+                  onClick={() => {
+                    activeAssessmentId !== mistakesExam.id &&
+                      onSelectAssessment(mistakesExam);
+                  }}
+                >
+                  {lang === "en"
+                    ? mistakesExam?.name.en
+                    : lang === "ar"
+                      ? mistakesExam?.name.ar
+                      : undefined}
+                </span>
+              </h3>
+            </AccordionCard.Content>
+          </AccordionCard.Panel>
+        </AccordionCard>
+      ) : undefined}
       <AccordionCard>
         {domains?.map((domain) => (
           <AccordionCard.Panel key={domain.id}>
@@ -397,7 +467,6 @@ export default function ExamsSidebar({
                           <h3 className="flex gap-2 p-2" key={assessment.id}>
                             {isTeacher ? (
                               <>
-                              
                                 <TrashIcon
                                   title={
                                     activeAssessmentId === assessment.id
@@ -437,7 +506,7 @@ export default function ExamsSidebar({
                               className={`text-indigo-900 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
                               onClick={() => {
                                 activeAssessmentId !== assessment.id &&
-                                  onSelectAssessment(assessment);                                  
+                                  onSelectAssessment(assessment);
                               }}
                             >
                               {lang === "en"

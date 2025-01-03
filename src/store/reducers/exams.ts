@@ -37,16 +37,35 @@ const examsSlice = createSlice({
       state,
       {
         payload,
-      }: PayloadAction<{ questionIndex: number; question_id: number, domain: string; chapter: string; }>,
+      }: PayloadAction<{
+        questionIndex: number;
+        question_id: number;
+        domain: string;
+        chapter: string;
+        answerState: "skipped";
+        selectOpt: string;
+        isFlagged: boolean;
+        showAnsClicked: boolean;
+      }>,
     ) => {
-      const { questionIndex, question_id, domain, chapter } = payload;
+      const {
+        questionIndex,
+        question_id,
+        domain,
+        chapter,
+        answerState,
+        selectOpt,
+        isFlagged,
+        showAnsClicked,
+      } = payload;
       const question = state.activeAssessment!.questions[questionIndex];
+
       question.answers.push({
         question_id,
-        selectOpt: "",
-        answerState: "skipped",
-        showAnsClicked: false,
-        isFlagged: false,
+        selectOpt,
+        answerState,
+        showAnsClicked,
+        isFlagged,
         domain,
         chapter,
       });
@@ -138,9 +157,6 @@ const examsSlice = createSlice({
       if (question.answers[0]) {
         question.answers[0].isFlagged = !question.answers[0].isFlagged;
       }
-    },
-    setDomains: (state, { payload }: PayloadAction<DomainType[]>) => {
-      state.domains = payload;
     },
     setActiveAssessment: (
       state,
@@ -238,7 +254,6 @@ export const {
   setShowAnsClicked,
   setIsFlagged,
   setAnswerState,
-  setDomains,
   setActiveAssessment,
   setIsPaused,
   setAssessmentDetails,

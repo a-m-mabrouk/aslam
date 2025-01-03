@@ -50,7 +50,9 @@ import { FullScreenButton } from "..";
 import useGetLang from "../../../../../../../../hooks/useGetLang";
 import CanvasDraw from "react-canvas-draw";
 import DraggablePopup from "../../../../../../../../components/draggablePopover";
-import { updateItem } from "../../../../../../../../utilities/idb";
+import { getItemById, updateItem } from "../../../../../../../../utilities/idb";
+import axiosDefault from "../../../../../../../../utilities/axios";
+import { API_EXAMS } from "../../../../../../../../router/routes/apiRoutes";
 
 type FlaggedQuestionType = Question & { queIndex: number };
 
@@ -156,6 +158,7 @@ export default function ExamInterface({
   const dispatch = useAppDispatch();
   const { isPaused, activeAssessment, assessmentDetails } =
     useAppSelector(({ exams }) => exams);
+  const student_id = useAppSelector(({ auth }) => auth).id;
   const timeRemainingRef = useRef(assessmentDetails.examTimeRemaining);
   const [borderColor, setBorderColor] = useState<string>("border-gray-300");
   const [timerColor, setTimerColor] = useState<string>("");
@@ -361,14 +364,17 @@ export default function ExamInterface({
 
   useEffect(() => {
     const question = questions[assessmentDetails.activeAssessQuestionIndex];
-    if (!question.answers.length) {
-      // console.log(question);
-      setAnswer({
+    if (question.answers.length === 0) {
+      dispatch(setAnswer({
         questionIndex: assessmentDetails.activeAssessQuestionIndex,
         question_id: question.id,
+        answerState: "skipped",
+        selectOpt: "",
+        isFlagged: false,
+        showAnsClicked: false,
         domain: question.question.domain || "",
         chapter: question.question.chapter || "",
-      });
+      }));
       if (activeAssessment?.id) {
         updateItem(activeAssessment?.id, {
           questions: activeAssessment.questions.map((q) =>
@@ -392,11 +398,7 @@ export default function ExamInterface({
         });
       }
     }
-  }, [
-    activeAssessment,
-    assessmentDetails.activeAssessQuestionIndex,
-    questions,
-  ]);
+  }, [activeAssessment, assessmentDetails.activeAssessQuestionIndex, dispatch, questions]);
 
   return (
     <div
@@ -457,13 +459,54 @@ export default function ExamInterface({
               <span
                 className="flex cursor-pointer gap-1 text-gray-700"
                 onClick={() => {
-                  activeAssessment?.id &&
-                    dispatch(
-                      setIsFlagged({
-                        assessment_id: activeAssessment?.id,
-                        ansIndex: assessmentDetails.activeAssessQuestionIndex,
-                      }),
-                    );
+                    if (activeAssessment?.id) {
+                      dispatch(
+                        setIsFlagged({
+                          assessment_id: activeAssessment?.id,
+                          ansIndex: assessmentDetails.activeAssessQuestionIndex,
+                        }),
+                      );
+                      getItemById(activeAssessment?.id).then(async (assessment) => {
+                        if (assessment) {
+                          const question = assessment.questions[assessmentDetails.activeAssessQuestionIndex];
+                          const ans = { ...question.answers[0] };
+                          ans.isFlagged = !ans.isFlagged;
+                          ans.chapter = ans.chapter || "No chapter";
+                          ans.domain = ans.domain || "No Domain";
+                          
+                          updateItem(assessment.id, {
+                            questions: assessment.questions.map((q) =>
+                              q.id !== question.id ? q : { ...q, answers: [ans] },
+                            ),
+                          });
+                          try {
+                            await axiosDefault.post(
+                              API_EXAMS.answer,
+                              {
+                                activeAssessQuestionIndex:
+                                  assessmentDetails.activeAssessQuestionIndex,
+                                examTimeRemaining: assessmentDetails.examTimeRemaining,
+                                student_id,
+                                assessment_id: assessment?.id,
+                                total_degree: assessmentDetails.total_degree,
+                                didAssessmentStart: 1,
+                                showReview: 0,
+                                answeredAtLeastOnce: assessment?.answeredAtLeastOnce ? 1 : 0,
+                                answers: [ans],
+                              },
+                              {
+                                headers: {
+                                  "Content-Type": "application/json",
+                                },
+                                transformRequest: [(data) => JSON.stringify(data)],
+                              },
+                            );
+                          } catch (error) {
+                            console.error("Couldn't send answer");
+                          }
+                        }
+                      })
+                    }
                 }}
               >
                 {questions[assessmentDetails.activeAssessQuestionIndex].answers[0]

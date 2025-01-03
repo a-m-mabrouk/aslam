@@ -166,14 +166,15 @@ export default function QuestionMCQ({
       const selectOpt = JSON.stringify(userAnswers);
       if (activeAssessment?.id) {
         dispatch(setAnswerState({ questionIndex, answerState }));
-        console.log(activeAssessment.questions.map(({ answers }) => answers));
-
         dispatch(setSelectedOpt({ questionIndex, selectOpt }));
         getItemById(activeAssessment?.id).then(async (assessment) => {
           if (assessment) {
             const ans = { ...assessment.questions[questionIndex].answers[0] };
             ans.answerState = answerState;
             ans.selectOpt = selectOpt;
+            ans.chapter = ans.chapter || "No chapter";
+            ans.domain = ans.domain || "No Domain";
+            
             updateItem(assessment.id, {
               questions: assessment.questions.map((q) =>
                 q.id !== question.id ? q : { ...q, answers: [ans] },
@@ -210,7 +211,6 @@ export default function QuestionMCQ({
     },
     [
       activeAssessment?.id,
-      activeAssessment?.questions,
       assessmentDetails.activeAssessQuestionIndex,
       assessmentDetails.examTimeRemaining,
       correctOptionsArr,
