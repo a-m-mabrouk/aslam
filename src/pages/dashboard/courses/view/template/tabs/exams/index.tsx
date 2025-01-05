@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../../../../store";
 import {
   resetExam,
@@ -29,7 +29,10 @@ import { useParams } from "react-router";
 import { fetchDomains } from "../../../../../../../store/reducers/examsDomains";
 import { getItemById, updateItem } from "../../../../../../../utilities/idb";
 import { shuffle } from "../../../../../../../utilities/shuffleArray";
-import { zeroOneToFalseTrue } from "../../../../../../../utilities/zeroOneToFalseTrue";
+import {
+  falseTrueToZeroOne,
+  zeroOneToFalseTrue,
+} from "../../../../../../../utilities/zeroOneToFalseTrue";
 
 export function FullScreenButton({
   onFullscreen,
@@ -77,6 +80,9 @@ declare global {
 
 const ExamComponent = () => {
   const fullscreenDivRef = useRef<HTMLDivElement>(null);
+
+  const [showMistakesExam, setShowMistakesExam] = useState<boolean>(false);
+  const [mistakesExam, setMistakesExam] = useState<null | AssessmentType>(null);
   const dispatch = useAppDispatch();
   const { activeAssessment, assessmentDetails } = useAppSelector(
     ({ exams }) => exams,
@@ -247,7 +253,7 @@ const ExamComponent = () => {
       });
     }
   };
-  const onStart = async () => {
+  const handleStartExam = async () => {
     const assessment_id = activeAssessment?.id;
     dispatch(setIsPaused(false));
     try {
@@ -270,8 +276,28 @@ const ExamComponent = () => {
         },
       }));
 
-      getItemById(assessment_id).then((data) => {
+      getItemById(assessment_id).then(async (data) => {
         if (data) {
+          await axiosDefault.post(
+            API_EXAMS.answer,
+            {
+              activeAssessQuestionIndex: 0,
+              examTimeRemaining: examTime,
+              student_id,
+              assessment_id,
+              total_degree: data.total_degree,
+              didAssessmentStart: 1,
+              showReview: 0,
+              answeredAtLeastOnce: falseTrueToZeroOne(data.answeredAtLeastOnce),
+              answers: [],
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+              transformRequest: [(data) => JSON.stringify(data)],
+            },
+          );
           updateItem(assessment_id, {
             questions: ques,
             didAssessmentStart: true,
@@ -292,6 +318,34 @@ const ExamComponent = () => {
       });
     }
   };
+
+  const handleCheckForMistakesExam = useCallback(async (domains: DomainType[]) => {
+    // setAllAssessmentsAnswered of domains and subdomains
+    const areAllAssessmentsAnswered = !domains.some((domain) => {
+      const hasUnansweredInDomain = domain.assessments?.some(
+        ({ student }) =>
+          student?.[0]?.pivot?.answeredAtLeastOnce === 0,
+      );
+      const hasUnansweredInSubdomains = domain.subdomains?.some(
+        (subdomain) =>
+          subdomain.assessments?.some(
+            ({ student }) =>
+              student?.[0]?.pivot?.answeredAtLeastOnce === 0,
+          ),
+      );
+      return hasUnansweredInDomain || hasUnansweredInSubdomains;
+    });
+    setShowMistakesExam(areAllAssessmentsAnswered);
+    if (areAllAssessmentsAnswered) {
+      const { data: mistakesExamsData } = await axiosDefault.get(
+        `${API_EXAMS.mistakesExams}/${student_id}`,
+      );
+
+      if (mistakesExamsData.data) {
+        setMistakesExam(mistakesExamsData.data);
+      }
+    }
+  }, [student_id]) 
 
   const handleEndExam = async (assessment_id: number) => {
     dispatch(setIsPaused(false));
@@ -373,7 +427,9 @@ const ExamComponent = () => {
             },
           );
           if (data?.success) {
-            dispatch(fetchDomains(course_id));
+            dispatch(fetchDomains(course_id))
+              .unwrap()
+              .then(async (data) => handleCheckForMistakesExam(data.data));
           }
         }
       });
@@ -384,7 +440,12 @@ const ExamComponent = () => {
     <div className="grid gap-4">
       <TitleSection title={t("exams")} />
       <div className="grid gap-3 md:flex md:flex-row-reverse">
-        <ExamsSidebar onSelectAssessment={handleSelectAssessment} />
+        <ExamsSidebar
+          onSelectAssessment={handleSelectAssessment}
+          showMistakesExam={showMistakesExam}
+          mistakesExam={mistakesExam}
+          onCheckMistakesExam={handleCheckForMistakesExam}
+        />
         <div className="grow">
           {!activeAssessment ? undefined : (
             <h2 className="py-4 text-center text-2xl text-indigo-800">
@@ -434,7 +495,7 @@ const ExamComponent = () => {
                     <ExamDetails
                       questions={questions}
                       examTime={examTime}
-                      onStart={onStart}
+                      onStart={handleStartExam}
                     />
                   </>
                 )}

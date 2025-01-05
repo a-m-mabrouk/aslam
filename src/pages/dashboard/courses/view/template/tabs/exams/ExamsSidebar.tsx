@@ -26,8 +26,6 @@ import { toastifyBox } from "../../../../../../../helper/toastifyBox";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
 import { setActiveAssessment } from "../../../../../../../store/reducers/exams";
-import axiosDefault from "../../../../../../../utilities/axios";
-import { API_EXAMS } from "../../../../../../../router/routes/apiRoutes";
 
 export function AddDomainModal({
   modalType,
@@ -248,17 +246,20 @@ export function AddDomainModal({
 
 export default function ExamsSidebar({
   onSelectAssessment,
+  mistakesExam,
+  showMistakesExam,
+  onCheckMistakesExam
 }: {
   onSelectAssessment: (assessment: AssessmentType) => void;
+  mistakesExam: null | AssessmentType;
+  showMistakesExam: boolean;
+  onCheckMistakesExam: (domains: DomainType[]) => void;
 }) {
   const { id: course_id } = useParams();
   const dispatch = useAppDispatch();
   const activeAssessmentId = useAppSelector(
     ({ exams }) => exams.activeAssessment?.id,
   );
-  const [allAssessmentsAnswered, setAllAssessmentsAnswered] =
-    useState<boolean>(false);
-  const [mistakesExam, setMistakesExam] = useState<null | AssessmentType>(null);
   const domains = useAppSelector(({ examsDomains }) => examsDomains.domains);
   const { role, id: student_id } = useAppSelector(({ auth }) => auth);
   const isTeacher = role === "teacher";
@@ -311,35 +312,12 @@ export default function ExamsSidebar({
   useEffect(() => {
     dispatch(fetchDomains(Number(course_id!)))
       .unwrap()
-      .then(async (data) => {
+      .then(async (data) => {        
         // reset exam and clear localStorage if exam was removed by teacher
         const domains: DomainType[] = data.data;
+        onCheckMistakesExam(domains);
         const localActiveAssessmentId =
           localStorage.getItem("activeAssessmentId");
-
-        // setAllAssessmentsAnswered of domains and subdomains
-        const areAllAssessmentsAnswered = !domains.some((domain) => {
-          const hasUnansweredInDomain = domain.assessments?.some(
-            ({ student }) => student?.[0]?.pivot?.answeredAtLeastOnce === 0,
-          );
-          const hasUnansweredInSubdomains = domain.subdomains?.some(
-            (subdomain) =>
-              subdomain.assessments?.some(
-                ({ student }) => student?.[0]?.pivot?.answeredAtLeastOnce === 0,
-              ),
-          );
-          return hasUnansweredInDomain || hasUnansweredInSubdomains;
-        });
-        setAllAssessmentsAnswered(areAllAssessmentsAnswered);
-        if (areAllAssessmentsAnswered) {
-          const { data: mistakesExamsData } = await axiosDefault.get(
-            `${API_EXAMS.mistakesExams}/${student_id}`,
-          );
-          
-          if (mistakesExamsData.data) {
-            setMistakesExam(mistakesExamsData.data);
-          }
-        }
 
         if (localActiveAssessmentId) {
           const id = JSON.parse(localActiveAssessmentId);
@@ -358,11 +336,11 @@ export default function ExamsSidebar({
         }
       })
       .catch((err) => toastifyBox("error", err.message || "Failed!"));
-  }, [course_id, dispatch, student_id]);
+  }, [course_id, dispatch, onCheckMistakesExam, student_id]);
 
   return (
     <div className="flex shrink-0 flex-col gap-2 md:w-72 md:min-w-64">
-      {!allAssessmentsAnswered &&
+      {showMistakesExam &&
       mistakesExam &&
       mistakesExam.questions.length ? (
         <AccordionCard>

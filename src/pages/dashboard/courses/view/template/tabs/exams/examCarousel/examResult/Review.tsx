@@ -18,7 +18,7 @@ export default function Review({ wrongOnly = false }: { wrongOnly?: boolean }) {
   const reviewQuestions: ReviewQuestions[] = [];
   questions.forEach(({answers}, i) => {
     if (wrongOnly) {
-      answers[0].answerState === "wrong" &&
+      answers[0]?.answerState === "wrong" &&
         reviewQuestions.push({ ...questions[i], reviewIndex: i });
     } else {
       reviewQuestions.push({ ...questions[i], reviewIndex: i });
