@@ -471,14 +471,14 @@ export default function ExamsSidebar({
                                 />
                               </>
                             ) : assessment.student &&
-                            assessment.student[0].pivot.answeredAtLeastOnce === 0 ? (
+                            assessment.student[0].pivot?.answeredAtLeastOnce === 0 ? (
                             <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
                           ) : (
                             <Tooltip
-                              content={`${assessment.student && assessment.student[0].pivot.total_degree}%`}
+                              content={`${assessment.student && assessment.student[0].pivot?.total_degree}%`}
                             >
                               {assessment.student &&
-                              assessment.student[0].pivot.total_degree >= 75 ? (
+                              assessment.student[0].pivot?.total_degree >= 75 ? (
                                 <CheckCircleIcon className="size-7 rounded-full p-1 text-green-600" />
                               ) : (
                                 <XCircleIcon className="size-7 rounded-full p-1 text-red-600" />
@@ -547,14 +547,14 @@ export default function ExamsSidebar({
                       />
                     </>
                   ) : assessment.student &&
-                    assessment.student[0].pivot.answeredAtLeastOnce === 0 ? (
+                    assessment.student[0].pivot?.answeredAtLeastOnce === 0 ? (
                     <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
                   ) : (
                     <Tooltip
-                      content={`${assessment.student && assessment.student[0].pivot.total_degree}%`}
+                      content={`${assessment.student && assessment.student[0].pivot?.total_degree}%`}
                     >
                       {assessment.student &&
-                      assessment.student[0].pivot.total_degree >= 75 ? (
+                      assessment.student[0].pivot?.total_degree >= 75 ? (
                         <CheckCircleIcon className="size-7 rounded-full p-1 text-green-600" />
                       ) : (
                         <XCircleIcon className="size-7 rounded-full p-1 text-red-600" />
