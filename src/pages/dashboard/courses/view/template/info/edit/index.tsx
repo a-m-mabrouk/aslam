@@ -13,6 +13,7 @@ import { toastifyBox } from "../../../../../../../helper/toastifyBox";
 import EditBtn from "../../../../../../../components/button/editBtn";
 import { ViewCourseContext } from "../../..";
 import axiosJson from "../../../../../../../utilities/axiosJson";
+import { ToggleSwitch } from "flowbite-react";
 
 export default function EditCourse() {
   const { t } = useTranslation("common");
@@ -38,19 +39,27 @@ export default function EditCourse() {
       name_en: "",
       description_ar: "",
       description_en: "",
+      free: false,
     },
 
     validationSchema: editCourseScheme,
     onSubmit: async (values) => {
       setLoading(true);
       const formData = new FormData();
+
       const entries = Object.entries(values).filter(
         ([_, value]) => value !== undefined,
       );
       for (const [key, value] of entries) {
-        formData.append(key, value as unknown as string);
+        if (key === "free") {
+          const isFreeVal = value? "1": "0";
+          formData.append(key, isFreeVal as string);
+        } else {
+          formData.append(key, value as string);
+        }
       }
       formData.append("_method", "put");
+
       try {
         const { data } = await axiosJson.post(
           `${API_COURSES.courses}/${course?.id}`,
@@ -90,6 +99,7 @@ export default function EditCourse() {
         name_ar: course?.name?.ar || "",
         name_en: course?.name?.en || "",
         photo: course?.photo || "",
+        free: course?.free || false,
       });
     }
   }, [course, setValues]);
@@ -133,7 +143,12 @@ export default function EditCourse() {
             errors={errors}
             touched={touched}
           />
-
+          <ToggleSwitch
+                      name="free"
+                      onBlur={handleBlur}
+                      checked={values.free} // Bind the checked state to Formik's value
+                      onChange={(state) => setFieldValue("free", state)}
+                    />
           <PrimaryBtn type="submit" className="mx-auto" isProcessing={loading}>
             {tBtn("save")}
           </PrimaryBtn>

@@ -32,6 +32,15 @@ const examsSlice = createSlice({
         didAssessmentStart: false,
         answeredAtLeastOnce: false,
       };
+      if (state.activeAssessment) {
+        state.activeAssessment = {
+          ...state.activeAssessment,
+          questions: state.activeAssessment?.questions.map((q) => ({
+            ...q,
+            answers: [],
+          })),
+        };
+      }
     },
     setAnswer: (
       state,

@@ -18,6 +18,9 @@ import {
   getItemById,
   updateItem,
 } from "../../../../../../../../../../utilities/idb";
+import axiosDefault from "../../../../../../../../../../utilities/axios";
+import { API_EXAMS } from "../../../../../../../../../../router/routes/apiRoutes";
+import { falseTrueToZeroOne } from "../../../../../../../../../../utilities/zeroOneToFalseTrue";
 
 const backendOptions = {
   backends: [
@@ -45,6 +48,7 @@ export default function QuestionDragDrop({
   const { assessmentDetails, activeAssessment } = useAppSelector(
     ({ exams }) => exams,
   );
+  const { id: student_id } = useAppSelector(({ auth }) => auth);
   const thisQueAnswers =
     activeAssessment?.questions[questionIndex]?.answers[0]?.selectOpt;
 
@@ -113,7 +117,7 @@ export default function QuestionDragDrop({
           }),
         }),
       );
-      getItemById(activeAssessment?.id).then((assessment) => {
+      getItemById(activeAssessment?.id).then(async (assessment) => {
         if (assessment) {
           const ans = { ...assessment.questions[questionIndex].answers[0] };
           ans.answerState = answerState;
@@ -126,6 +130,33 @@ export default function QuestionDragDrop({
               q.id !== question.id ? q : { ...q, answers: [ans] },
             ),
           });
+          try {
+            await axiosDefault.post(
+              API_EXAMS.answer,
+              {
+                activeAssessQuestionIndex:
+                  assessmentDetails.activeAssessQuestionIndex,
+                examTimeRemaining: assessmentDetails.examTimeRemaining,
+                student_id,
+                assessment_id: assessment.id,
+                total_degree: assessmentDetails.total_degree,
+                didAssessmentStart: 1,
+                showReview: 0,
+                answeredAtLeastOnce: falseTrueToZeroOne(
+                  assessment.answeredAtLeastOnce,
+                ),
+                answers: [ans],
+              },
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                transformRequest: [(data) => JSON.stringify(data)],
+              },
+            );
+          } catch (error) {
+            console.error("Couldn't send answer");
+          }
         }
       });
     }
@@ -153,7 +184,7 @@ export default function QuestionDragDrop({
             }),
           }),
         );
-        getItemById(activeAssessment?.id).then((assessment) => {
+        getItemById(activeAssessment?.id).then(async (assessment) => {
           if (assessment) {
             const ans = { ...assessment.questions[questionIndex].answers[0] };
             ans.selectOpt = JSON.stringify({
@@ -165,6 +196,33 @@ export default function QuestionDragDrop({
                 q.id !== question.id ? q : { ...q, answers: [ans] },
               ),
             });
+            try {
+              await axiosDefault.post(
+                API_EXAMS.answer,
+                {
+                  activeAssessQuestionIndex:
+                    assessmentDetails.activeAssessQuestionIndex,
+                  examTimeRemaining: assessmentDetails.examTimeRemaining,
+                  student_id,
+                  assessment_id: assessment.id,
+                  total_degree: assessmentDetails.total_degree,
+                  didAssessmentStart: 1,
+                  showReview: 0,
+                  answeredAtLeastOnce: falseTrueToZeroOne(
+                    assessment.answeredAtLeastOnce,
+                  ),
+                  answers: [ans],
+                },
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  transformRequest: [(data) => JSON.stringify(data)],
+                },
+              );
+            } catch (error) {
+              console.error("Couldn't send answer");
+            }
           }
         });
       }
@@ -220,7 +278,7 @@ export default function QuestionDragDrop({
             }),
           }),
         );
-        getItemById(activeAssessment?.id).then((assessment) => {
+        getItemById(activeAssessment?.id).then(async (assessment) => {
           if (assessment) {
             const ans = { ...assessment.questions[questionIndex].answers[0] };
             ans.selectOpt = JSON.stringify({
@@ -232,18 +290,49 @@ export default function QuestionDragDrop({
                 q.id !== question.id ? q : { ...q, answers: [ans] },
               ),
             });
+            try {
+              await axiosDefault.post(
+                API_EXAMS.answer,
+                {
+                  activeAssessQuestionIndex:
+                    assessmentDetails.activeAssessQuestionIndex,
+                  examTimeRemaining: assessmentDetails.examTimeRemaining,
+                  student_id,
+                  assessment_id: assessment.id,
+                  total_degree: assessmentDetails.total_degree,
+                  didAssessmentStart: 1,
+                  showReview: 0,
+                  answeredAtLeastOnce: falseTrueToZeroOne(
+                    assessment.answeredAtLeastOnce,
+                  ),
+                  answers: [ans],
+                },
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  transformRequest: [(data) => JSON.stringify(data)],
+                },
+              );
+            } catch (error) {
+              console.error("Couldn't send answer");
+            }
           }
         });
       }
     }
   }, [
     activeAssessment?.id,
+    assessmentDetails.activeAssessQuestionIndex,
+    assessmentDetails.examTimeRemaining,
+    assessmentDetails.total_degree,
     checkDisabled,
     dispatch,
     isAnswered,
     question.id,
     question?.question?.options,
     questionIndex,
+    student_id,
   ]);
 
   return (

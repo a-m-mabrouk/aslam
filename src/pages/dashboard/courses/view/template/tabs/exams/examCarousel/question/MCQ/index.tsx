@@ -15,6 +15,7 @@ import {
 } from "../../../../../../../../../../utilities/idb";
 import { API_EXAMS } from "../../../../../../../../../../router/routes/apiRoutes";
 import axiosDefault from "../../../../../../../../../../utilities/axios";
+import { falseTrueToZeroOne } from "../../../../../../../../../../utilities/zeroOneToFalseTrue";
 
 export function OptionEditable({
   opt,
@@ -174,7 +175,7 @@ export default function QuestionMCQ({
             ans.selectOpt = selectOpt;
             ans.chapter = ans.chapter || "No chapter";
             ans.domain = ans.domain || "No Domain";
-            
+
             updateItem(assessment.id, {
               questions: assessment.questions.map((q) =>
                 q.id !== question.id ? q : { ...q, answers: [ans] },
@@ -189,10 +190,12 @@ export default function QuestionMCQ({
                   examTimeRemaining: assessmentDetails.examTimeRemaining,
                   student_id,
                   assessment_id: assessment.id,
-                  total_degree: 0,
+                  total_degree: assessmentDetails.total_degree,
                   didAssessmentStart: 1,
                   showReview: 0,
-                  answeredAtLeastOnce: assessment.answeredAtLeastOnce ? 1 : 0,
+                  answeredAtLeastOnce: falseTrueToZeroOne(
+                    assessment.answeredAtLeastOnce,
+                  ),
                   answers: [ans],
                 },
                 {
@@ -213,6 +216,7 @@ export default function QuestionMCQ({
       activeAssessment?.id,
       assessmentDetails.activeAssessQuestionIndex,
       assessmentDetails.examTimeRemaining,
+      assessmentDetails.total_degree,
       correctOptionsArr,
       dispatch,
       question.id,

@@ -1,5 +1,5 @@
 import { FormEventHandler, useEffect, useState } from "react";
-import { Button, Modal, TextInput } from "flowbite-react";
+import { Button, Modal, TextInput, Tooltip } from "flowbite-react";
 import { AccordionCard } from "../../../../../../../components/accordion";
 import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -10,6 +10,7 @@ import {
   TrashIcon,
   BookmarkIcon,
 } from "@heroicons/react/24/outline";
+import { XCircleIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
 import {
   addAssessment,
   addDomain,
@@ -248,7 +249,7 @@ export default function ExamsSidebar({
   onSelectAssessment,
   mistakesExam,
   showMistakesExam,
-  onCheckMistakesExam
+  onCheckMistakesExam,
 }: {
   onSelectAssessment: (assessment: AssessmentType) => void;
   mistakesExam: null | AssessmentType;
@@ -312,7 +313,7 @@ export default function ExamsSidebar({
   useEffect(() => {
     dispatch(fetchDomains(Number(course_id!)))
       .unwrap()
-      .then(async (data) => {        
+      .then(async (data) => {
         // reset exam and clear localStorage if exam was removed by teacher
         const domains: DomainType[] = data.data;
         onCheckMistakesExam(domains);
@@ -340,43 +341,42 @@ export default function ExamsSidebar({
 
   return (
     <div className="flex shrink-0 flex-col gap-2 md:w-72 md:min-w-64">
-      {showMistakesExam &&
-      mistakesExam &&
-      mistakesExam.questions.length ? (
-        <AccordionCard>
-          <AccordionCard.Panel key={12}>
-            <AccordionCard.Title className="grow">
-              <div className="flex items-center justify-between gap-4">
-                {t("previousMistakes")}
-              </div>
-            </AccordionCard.Title>
-            <AccordionCard.Content className="py-0 pe-0">
-              <h3 className="flex gap-2 p-2" key={mistakesExam?.id}>
-                <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
-                <span
-                  title={
-                    activeAssessmentId === mistakesExam.id
-                      ? lang === "en"
-                        ? "This assessment is already active"
-                        : "هذا الامتحان نشط بالفعل"
-                      : undefined
-                  }
-                  className={`text-indigo-900 ${activeAssessmentId === mistakesExam.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
-                  onClick={() => {
-                    activeAssessmentId !== mistakesExam.id &&
-                      onSelectAssessment(mistakesExam);
-                  }}
-                >
-                  {lang === "en"
-                    ? mistakesExam?.name.en
-                    : lang === "ar"
-                      ? mistakesExam?.name.ar
-                      : undefined}
-                </span>
-              </h3>
-            </AccordionCard.Content>
-          </AccordionCard.Panel>
-        </AccordionCard>
+      {showMistakesExam && mistakesExam && mistakesExam.questions.length ? (
+        <></>
+        // <AccordionCard>
+        //   <AccordionCard.Panel key={12}>
+        //     <AccordionCard.Title className="grow">
+        //       <div className="flex items-center justify-between gap-4">
+        //         {t("previousMistakes")}
+        //       </div>
+        //     </AccordionCard.Title>
+        //     <AccordionCard.Content className="py-0 pe-0">
+        //       <h3 className="flex gap-2 p-2" key={mistakesExam?.id}>
+        //         <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
+        //         <span
+        //           title={
+        //             activeAssessmentId === mistakesExam.id
+        //               ? lang === "en"
+        //                 ? "This assessment is already active"
+        //                 : "هذا الامتحان نشط بالفعل"
+        //               : undefined
+        //           }
+        //           className={`text-indigo-900 ${activeAssessmentId === mistakesExam.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
+        //           onClick={() => {
+        //             activeAssessmentId !== mistakesExam.id &&
+        //               onSelectAssessment(mistakesExam);
+        //           }}
+        //         >
+        //           {lang === "en"
+        //             ? mistakesExam?.name.en
+        //             : lang === "ar"
+        //               ? mistakesExam?.name.ar
+        //               : undefined}
+        //         </span>
+        //       </h3>
+        //     </AccordionCard.Content>
+        //   </AccordionCard.Panel>
+        // </AccordionCard>
       ) : undefined}
       <AccordionCard>
         {domains?.map((domain) => (
@@ -470,9 +470,21 @@ export default function ExamsSidebar({
                                   }
                                 />
                               </>
-                            ) : (
-                              <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
-                            )}
+                            ) : assessment.student &&
+                            assessment.student[0].pivot.answeredAtLeastOnce === 0 ? (
+                            <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
+                          ) : (
+                            <Tooltip
+                              content={`${assessment.student && assessment.student[0].pivot.total_degree}%`}
+                            >
+                              {assessment.student &&
+                              assessment.student[0].pivot.total_degree >= 75 ? (
+                                <CheckCircleIcon className="size-7 rounded-full p-1 text-green-600" />
+                              ) : (
+                                <XCircleIcon className="size-7 rounded-full p-1 text-red-600" />
+                              )}
+                            </Tooltip>
+                          )}
                             <span
                               title={
                                 activeAssessmentId === assessment.id
@@ -534,8 +546,20 @@ export default function ExamsSidebar({
                         isButtonDisabled={activeAssessmentId === assessment.id}
                       />
                     </>
-                  ) : (
+                  ) : assessment.student &&
+                    assessment.student[0].pivot.answeredAtLeastOnce === 0 ? (
                     <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
+                  ) : (
+                    <Tooltip
+                      content={`${assessment.student && assessment.student[0].pivot.total_degree}%`}
+                    >
+                      {assessment.student &&
+                      assessment.student[0].pivot.total_degree >= 75 ? (
+                        <CheckCircleIcon className="size-7 rounded-full p-1 text-green-600" />
+                      ) : (
+                        <XCircleIcon className="size-7 rounded-full p-1 text-red-600" />
+                      )}
+                    </Tooltip>
                   )}
                   <span
                     title={
