@@ -80,7 +80,7 @@ export default function CreateChapter() {
 
   const courses = useMemo(
     () =>
-      data?.map((item) => ({
+      data?.filter((item) => !item.free)?.map((item) => ({
         id: item.id,
         title: item.name[lang],
       })) || [],

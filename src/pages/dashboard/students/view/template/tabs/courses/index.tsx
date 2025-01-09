@@ -29,13 +29,13 @@ export default function Chapters() {
               <InfoItem title={t("course")} value={course.name[lang]} />
               <InfoItem
                 title={t("expiration_date")}
-                value={course.pivot.expiration_date || t("unlimited")}
+                value={course.pivot?.expiration_date || t("unlimited")}
               />
             </div>
 
             {(new Date().getTime() <
-              new Date(course.pivot.expiration_date || "").getTime() ||
-              !course.pivot.expiration_date) && <DeleteCourse id={course.id} />}
+              new Date(course.pivot?.expiration_date || "").getTime() ||
+              !course.pivot?.expiration_date) && <DeleteCourse id={course.id} />}
           </div>
         ))}
 

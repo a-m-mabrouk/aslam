@@ -245,6 +245,31 @@ export function AddDomainModal({
   );
 }
 
+function ExamIconForStudent({assessment}: {assessment: AssessmentType}) {
+  const hasStudent = assessment.student && assessment.student[0];
+  const studentPivot = hasStudent && assessment.student ? assessment.student[0].pivot : null;
+
+  const shouldShowBookmarkIcon =
+    !hasStudent || (studentPivot && studentPivot.answeredAtLeastOnce === 0);
+
+  const tooltipContent = studentPivot ? `${studentPivot.total_degree}%` : "";
+
+  const shouldShowCheckCircleIcon =
+    studentPivot && studentPivot.total_degree >= 75;
+
+  return shouldShowBookmarkIcon ? (
+    <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
+  ) : (
+    <Tooltip content={tooltipContent}>
+      {shouldShowCheckCircleIcon ? (
+        <CheckCircleIcon className="size-7 rounded-full p-1 text-green-600" />
+      ) : (
+        <XCircleIcon className="size-7 rounded-full p-1 text-red-600" />
+      )}
+    </Tooltip>
+  );
+}
+
 export default function ExamsSidebar({
   onSelectAssessment,
   mistakesExam,
@@ -342,41 +367,40 @@ export default function ExamsSidebar({
   return (
     <div className="flex shrink-0 flex-col gap-2 md:w-72 md:min-w-64">
       {showMistakesExam && mistakesExam && mistakesExam.questions.length ? (
-        <></>
-        // <AccordionCard>
-        //   <AccordionCard.Panel key={12}>
-        //     <AccordionCard.Title className="grow">
-        //       <div className="flex items-center justify-between gap-4">
-        //         {t("previousMistakes")}
-        //       </div>
-        //     </AccordionCard.Title>
-        //     <AccordionCard.Content className="py-0 pe-0">
-        //       <h3 className="flex gap-2 p-2" key={mistakesExam?.id}>
-        //         <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
-        //         <span
-        //           title={
-        //             activeAssessmentId === mistakesExam.id
-        //               ? lang === "en"
-        //                 ? "This assessment is already active"
-        //                 : "هذا الامتحان نشط بالفعل"
-        //               : undefined
-        //           }
-        //           className={`text-indigo-900 ${activeAssessmentId === mistakesExam.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
-        //           onClick={() => {
-        //             activeAssessmentId !== mistakesExam.id &&
-        //               onSelectAssessment(mistakesExam);
-        //           }}
-        //         >
-        //           {lang === "en"
-        //             ? mistakesExam?.name.en
-        //             : lang === "ar"
-        //               ? mistakesExam?.name.ar
-        //               : undefined}
-        //         </span>
-        //       </h3>
-        //     </AccordionCard.Content>
-        //   </AccordionCard.Panel>
-        // </AccordionCard>
+        <AccordionCard>
+          <AccordionCard.Panel key={12}>
+            <AccordionCard.Title className="grow">
+              <div className="flex items-center justify-between gap-4">
+                {t("previousMistakes")}
+              </div>
+            </AccordionCard.Title>
+            <AccordionCard.Content className="py-0 pe-0">
+              <h3 className="flex gap-2 p-2" key={mistakesExam?.id}>
+                <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
+                <span
+                  title={
+                    activeAssessmentId === mistakesExam.id
+                      ? lang === "en"
+                        ? "This assessment is already active"
+                        : "هذا الامتحان نشط بالفعل"
+                      : undefined
+                  }
+                  className={`text-indigo-900 ${activeAssessmentId === mistakesExam.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
+                  onClick={() => {
+                    activeAssessmentId !== mistakesExam.id &&
+                      onSelectAssessment(mistakesExam);
+                  }}
+                >
+                  {lang === "en"
+                    ? mistakesExam?.name.en
+                    : lang === "ar"
+                      ? mistakesExam?.name.ar
+                      : undefined}
+                </span>
+              </h3>
+            </AccordionCard.Content>
+          </AccordionCard.Panel>
+        </AccordionCard>
       ) : undefined}
       <AccordionCard>
         {domains?.map((domain) => (
@@ -470,21 +494,7 @@ export default function ExamsSidebar({
                                   }
                                 />
                               </>
-                            ) : assessment.student &&
-                            assessment.student[0].pivot?.answeredAtLeastOnce === 0 ? (
-                            <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
-                          ) : (
-                            <Tooltip
-                              content={`${assessment.student && assessment.student[0].pivot?.total_degree}%`}
-                            >
-                              {assessment.student &&
-                              assessment.student[0].pivot?.total_degree >= 75 ? (
-                                <CheckCircleIcon className="size-7 rounded-full p-1 text-green-600" />
-                              ) : (
-                                <XCircleIcon className="size-7 rounded-full p-1 text-red-600" />
-                              )}
-                            </Tooltip>
-                          )}
+                            ) : (<ExamIconForStudent assessment={assessment} />)}
                             <span
                               title={
                                 activeAssessmentId === assessment.id
@@ -546,21 +556,7 @@ export default function ExamsSidebar({
                         isButtonDisabled={activeAssessmentId === assessment.id}
                       />
                     </>
-                  ) : assessment.student &&
-                    assessment.student[0].pivot?.answeredAtLeastOnce === 0 ? (
-                    <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
-                  ) : (
-                    <Tooltip
-                      content={`${assessment.student && assessment.student[0].pivot?.total_degree}%`}
-                    >
-                      {assessment.student &&
-                      assessment.student[0].pivot?.total_degree >= 75 ? (
-                        <CheckCircleIcon className="size-7 rounded-full p-1 text-green-600" />
-                      ) : (
-                        <XCircleIcon className="size-7 rounded-full p-1 text-red-600" />
-                      )}
-                    </Tooltip>
-                  )}
+                  ) : ((<ExamIconForStudent assessment={assessment} />))}
                   <span
                     title={
                       activeAssessmentId === assessment.id

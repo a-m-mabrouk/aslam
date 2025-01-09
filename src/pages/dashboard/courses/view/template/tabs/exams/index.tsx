@@ -378,13 +378,13 @@ const ExamComponent = () => {
 
     // add mistakes for a separated exam
     if (!isTeacher) {
-      // let mistakesExamId: number | null = null;
-      // const { data: mistakesExamsData } = await axiosDefault.get(
-      //   `${API_EXAMS.mistakesExams}/${student_id}`,
-      // );
-      // if (mistakesExamsData.data) {
-      //   mistakesExamId = mistakesExamsData.data.id;
-      // }
+      let mistakesExamId: number | null = null;
+      const { data: mistakesExamsData } = await axiosDefault.get(
+        `${API_EXAMS.mistakesExams}/${student_id}`,
+      );
+      if (mistakesExamsData.data) {
+        mistakesExamId = mistakesExamsData.data.id;
+      }
       await getItemById(activeAssessment!.id!).then(async (assess) => {
         const ques = assess?.questions;
         if (ques) {
@@ -397,29 +397,29 @@ const ExamComponent = () => {
           );
           const total_degree = Math.round((degree / ques.length) * 10000) / 100;
 
-          // const wrongQuestions = ques
-          //   .filter(
-          //     ({ answers }) =>
-          //       answers.length && answers[0].answerState === "wrong",
-          //   )
-          //   .map(({ question, id }) => ({ ...question, id }));
+          const wrongQuestions = ques
+            .filter(
+              ({ answers }) =>
+                answers.length && answers[0].answerState === "wrong",
+            )
+            .map(({ question, id }) => ({ ...question, question_id: id }));
 
-          // if (wrongQuestions.length) {
-          //   await axiosDefault.post(
-          //     API_EXAMS.questions,
-          //     {
-          //       assessment_id: mistakesExamId,
-          //       course_id,
-          //       questions: wrongQuestions,
-          //     },
-          //     {
-          //       headers: {
-          //         "Content-Type": "application/json",
-          //       },
-          //       transformRequest: [(data) => JSON.stringify(data)],
-          //     },
-          //   );
-          // }
+          if (wrongQuestions.length) {
+            await axiosDefault.post(
+              API_EXAMS.questions,
+              {
+                assessment_id: mistakesExamId,
+                course_id,
+                questions: wrongQuestions,
+              },
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                transformRequest: [(data) => JSON.stringify(data)],
+              },
+            );
+          }
 
           const { data } = await axiosDefault.post(
             API_EXAMS.answer,
