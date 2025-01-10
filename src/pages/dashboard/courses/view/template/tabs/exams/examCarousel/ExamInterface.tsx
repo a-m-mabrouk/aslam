@@ -110,12 +110,13 @@ function PopoverQuestionsTable({
   onChooseQue: (queIndex: number) => void;
   ques: FlaggedQuestionType[] | Question[];
 }) {
+  const {t} = useTranslation("exams");
   return (
     <div className="max-h-[80vh] w-[50rem] max-w-[90vw] overflow-y-auto">
       <Table striped className="text-center">
         <TableHead>
-          <TableHeadCell>Que num</TableHeadCell>
-          <TableHeadCell className="max-w-96">Question</TableHeadCell>
+          <TableHeadCell>#</TableHeadCell>
+          <TableHeadCell className="max-w-96">{t("question")}</TableHeadCell>
         </TableHead>
         <TableBody>
           {ques.map((que, i) => {

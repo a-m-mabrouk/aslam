@@ -1,5 +1,5 @@
 import { FormEventHandler, useEffect, useState } from "react";
-import { Button, Modal, TextInput, Tooltip } from "flowbite-react";
+import { Button, Modal, Spinner, TextInput, Tooltip } from "flowbite-react";
 import { AccordionCard } from "../../../../../../../components/accordion";
 import { useParams } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -245,9 +245,10 @@ export function AddDomainModal({
   );
 }
 
-function ExamIconForStudent({assessment}: {assessment: AssessmentType}) {
+function ExamIconForStudent({ assessment }: { assessment: AssessmentType }) {
   const hasStudent = assessment.student && assessment.student[0];
-  const studentPivot = hasStudent && assessment.student ? assessment.student[0].pivot : null;
+  const studentPivot =
+    hasStudent && assessment.student ? assessment.student[0].pivot : null;
 
   const shouldShowBookmarkIcon =
     !hasStudent || (studentPivot && studentPivot.answeredAtLeastOnce === 0);
@@ -366,110 +367,154 @@ export default function ExamsSidebar({
 
   return (
     <div className="flex shrink-0 flex-col gap-2 md:w-72 md:min-w-64">
-      {showMistakesExam && mistakesExam && mistakesExam.questions.length ? (
-        <AccordionCard>
-          <AccordionCard.Panel key={12}>
-            <AccordionCard.Title className="grow">
-              <div className="flex items-center justify-between gap-4">
-                {t("previousMistakes")}
-              </div>
-            </AccordionCard.Title>
-            <AccordionCard.Content className="py-0 pe-0">
-              <h3 className="flex gap-2 p-2" key={mistakesExam?.id}>
-                <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
-                <span
-                  title={
-                    activeAssessmentId === mistakesExam.id
-                      ? lang === "en"
-                        ? "This assessment is already active"
-                        : "هذا الامتحان نشط بالفعل"
-                      : undefined
-                  }
-                  className={`text-indigo-900 ${activeAssessmentId === mistakesExam.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
-                  onClick={() => {
-                    activeAssessmentId !== mistakesExam.id &&
-                      onSelectAssessment(mistakesExam);
-                  }}
-                >
-                  {lang === "en"
-                    ? mistakesExam?.name.en
-                    : lang === "ar"
-                      ? mistakesExam?.name.ar
-                      : undefined}
-                </span>
-              </h3>
-            </AccordionCard.Content>
-          </AccordionCard.Panel>
-        </AccordionCard>
-      ) : undefined}
-      <AccordionCard>
-        {domains?.map((domain) => (
-          <AccordionCard.Panel key={domain.id}>
-            <AccordionCard.Title className="grow">
-              <div className="flex items-center justify-between gap-4">
-                {isTeacher ? (
-                  <>
-                    <TrashIcon
-                      className="size-5 cursor-pointer"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleDeleteDomain(domain.id);
+      {!domains.length ? (
+        <div className="flex flex-wrap gap-2">
+          <span>{t("loadingExams")}</span>
+          <Spinner aria-label="spinner" />
+        </div>
+      ) : (
+        <>
+          {showMistakesExam && mistakesExam && mistakesExam.questions.length ? (
+            <AccordionCard>
+              <AccordionCard.Panel key={12}>
+                <AccordionCard.Title className="grow">
+                  <div className="flex items-center justify-between gap-4">
+                    {t("previousMistakes")}
+                  </div>
+                </AccordionCard.Title>
+                <AccordionCard.Content className="py-0 pe-0">
+                  <h3 className="flex gap-2 p-2" key={mistakesExam?.id}>
+                    <BookmarkIcon className="size-7 rounded-full bg-gray-100 p-1" />
+                    <span
+                      title={
+                        activeAssessmentId === mistakesExam.id
+                          ? lang === "en"
+                            ? "This assessment is already active"
+                            : "هذا الامتحان نشط بالفعل"
+                          : undefined
+                      }
+                      className={`text-indigo-900 ${activeAssessmentId === mistakesExam.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
+                      onClick={() => {
+                        activeAssessmentId !== mistakesExam.id &&
+                          onSelectAssessment(mistakesExam);
                       }}
-                    />
+                    >
+                      {lang === "en"
+                        ? mistakesExam?.name.en
+                        : lang === "ar"
+                          ? mistakesExam?.name.ar
+                          : undefined}
+                    </span>
+                  </h3>
+                </AccordionCard.Content>
+              </AccordionCard.Panel>
+            </AccordionCard>
+          ) : undefined}
+          <AccordionCard>
+            {domains?.map((domain) => (
+              <AccordionCard.Panel key={domain.id}>
+                <AccordionCard.Title className="grow">
+                  <div className="flex items-center justify-between gap-4">
+                    {isTeacher ? (
+                      <>
+                        <TrashIcon
+                          className="size-5 cursor-pointer"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleDeleteDomain(domain.id);
+                          }}
+                        />
 
-                    <AddDomainModal modalType="domain" isEdit obj={domain} />
-                  </>
-                ) : undefined}
-                <span className="">
-                  {lang === "en"
-                    ? domain.name.en
-                    : lang === "ar"
-                      ? domain.name.ar
-                      : undefined}
-                </span>
-              </div>
-            </AccordionCard.Title>
-            <AccordionCard.Content className="py-0 pe-0">
-              {domain.subdomains?.length ? (
-                <AccordionCard>
-                  {domain.subdomains.map((subdomain) => (
-                    <AccordionCard.Panel key={subdomain.id}>
-                      <AccordionCard.Title className="grow">
-                        <div className="flex items-center justify-between gap-4">
-                          {isTeacher ? (
-                            <>
-                              <TrashIcon
-                                className="size-5 cursor-pointer"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  handleDeleteSubdomain(subdomain.id);
-                                }}
-                              />
-                              <AddDomainModal
-                                modalType="subdomain"
-                                isEdit
-                                obj={{
-                                  ...subdomain,
-                                  course_id: domain.course_id,
-                                }}
-                              />
-                            </>
-                          ) : undefined}
-                          <span className="">
-                            {lang === "en"
-                              ? subdomain.name.en
-                              : lang === "ar"
-                                ? subdomain.name.ar
-                                : undefined}
-                          </span>
-                        </div>
-                      </AccordionCard.Title>
-                      <AccordionCard.Content>
-                        {subdomain.assessments?.map((assessment) => (
-                          <h3 className="flex gap-2 p-2" key={assessment.id}>
-                            {isTeacher ? (
-                              <>
-                                <TrashIcon
+                        <AddDomainModal
+                          modalType="domain"
+                          isEdit
+                          obj={domain}
+                        />
+                      </>
+                    ) : undefined}
+                    <span className="">
+                      {lang === "en"
+                        ? domain.name.en
+                        : lang === "ar"
+                          ? domain.name.ar
+                          : undefined}
+                    </span>
+                  </div>
+                </AccordionCard.Title>
+                <AccordionCard.Content className="py-0 pe-0">
+                  {domain.subdomains?.length ? (
+                    <AccordionCard>
+                      {domain.subdomains.map((subdomain) => (
+                        <AccordionCard.Panel key={subdomain.id}>
+                          <AccordionCard.Title className="grow">
+                            <div className="flex items-center justify-between gap-4">
+                              {isTeacher ? (
+                                <>
+                                  <TrashIcon
+                                    className="size-5 cursor-pointer"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      handleDeleteSubdomain(subdomain.id);
+                                    }}
+                                  />
+                                  <AddDomainModal
+                                    modalType="subdomain"
+                                    isEdit
+                                    obj={{
+                                      ...subdomain,
+                                      course_id: domain.course_id,
+                                    }}
+                                  />
+                                </>
+                              ) : undefined}
+                              <span className="">
+                                {lang === "en"
+                                  ? subdomain.name.en
+                                  : lang === "ar"
+                                    ? subdomain.name.ar
+                                    : undefined}
+                              </span>
+                            </div>
+                          </AccordionCard.Title>
+                          <AccordionCard.Content>
+                            {subdomain.assessments?.map((assessment) => (
+                              <h3
+                                className="flex gap-2 p-2"
+                                key={assessment.id}
+                              >
+                                {isTeacher ? (
+                                  <>
+                                    <TrashIcon
+                                      title={
+                                        activeAssessmentId === assessment.id
+                                          ? lang === "en"
+                                            ? "This assessment is already active"
+                                            : "هذا الامتحان نشط بالفعل"
+                                          : undefined
+                                      }
+                                      className={`size-5 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer"}`}
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        if (
+                                          activeAssessmentId !== assessment.id
+                                        ) {
+                                          handleDeleteAssessment(assessment.id);
+                                        }
+                                      }}
+                                    />
+                                    <AddDomainModal
+                                      modalType="assessment"
+                                      isEdit
+                                      obj={assessment}
+                                      isButtonDisabled={
+                                        activeAssessmentId === assessment.id
+                                      }
+                                    />
+                                  </>
+                                ) : (
+                                  <ExamIconForStudent assessment={assessment} />
+                                )}
+                                <span
                                   title={
                                     activeAssessmentId === assessment.id
                                       ? lang === "en"
@@ -477,63 +522,65 @@ export default function ExamsSidebar({
                                         : "هذا الامتحان نشط بالفعل"
                                       : undefined
                                   }
-                                  className={`size-5 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer"}`}
-                                  onClick={(event) => {
-                                    event.stopPropagation();
-                                    if (activeAssessmentId !== assessment.id) {
-                                      handleDeleteAssessment(assessment.id);
-                                    }
+                                  className={`text-indigo-900 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
+                                  onClick={() => {
+                                    activeAssessmentId !== assessment.id &&
+                                      onSelectAssessment(assessment);
                                   }}
-                                />
-                                <AddDomainModal
-                                  modalType="assessment"
-                                  isEdit
-                                  obj={assessment}
-                                  isButtonDisabled={
-                                    activeAssessmentId === assessment.id
-                                  }
-                                />
-                              </>
-                            ) : (<ExamIconForStudent assessment={assessment} />)}
-                            <span
-                              title={
-                                activeAssessmentId === assessment.id
-                                  ? lang === "en"
-                                    ? "This assessment is already active"
-                                    : "هذا الامتحان نشط بالفعل"
-                                  : undefined
+                                >
+                                  {lang === "en"
+                                    ? assessment.name.en
+                                    : lang === "ar"
+                                      ? assessment.name.ar
+                                      : undefined}
+                                </span>
+                              </h3>
+                            ))}
+                            <AddDomainModal
+                              modalType="assessment"
+                              subDomainId={subdomain.id}
+                            />
+                          </AccordionCard.Content>
+                        </AccordionCard.Panel>
+                      ))}
+                    </AccordionCard>
+                  ) : undefined}
+                  {domain.assessments?.map((assessment) => (
+                    <h3
+                      className={`flex gap-2 p-2  ${activeAssessmentId === assessment.id ? "select-none" : "cursor-pointer"}`}
+                      key={assessment.id}
+                    >
+                      {isTeacher ? (
+                        <>
+                          <TrashIcon
+                            title={
+                              activeAssessmentId === assessment.id
+                                ? lang === "en"
+                                  ? "This assessment is already active"
+                                  : "هذا الامتحان نشط بالفعل"
+                                : undefined
+                            }
+                            className={`size-5 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer"}`}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              if (activeAssessmentId !== assessment.id) {
+                                handleDeleteAssessment(assessment.id);
                               }
-                              className={`text-indigo-900 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
-                              onClick={() => {
-                                activeAssessmentId !== assessment.id &&
-                                  onSelectAssessment(assessment);
-                              }}
-                            >
-                              {lang === "en"
-                                ? assessment.name.en
-                                : lang === "ar"
-                                  ? assessment.name.ar
-                                  : undefined}
-                            </span>
-                          </h3>
-                        ))}
-                        <AddDomainModal
-                          modalType="assessment"
-                          subDomainId={subdomain.id}
-                        />
-                      </AccordionCard.Content>
-                    </AccordionCard.Panel>
-                  ))}
-                </AccordionCard>
-              ) : undefined}
-              {domain.assessments?.map((assessment) => (
-                <h3
-                  className={`flex gap-2 p-2  ${activeAssessmentId === assessment.id ? "select-none" : "cursor-pointer"}`}
-                  key={assessment.id}
-                >
-                  {isTeacher ? (
-                    <>
-                      <TrashIcon
+                            }}
+                          />
+                          <AddDomainModal
+                            modalType="assessment"
+                            isEdit
+                            obj={assessment}
+                            isButtonDisabled={
+                              activeAssessmentId === assessment.id
+                            }
+                          />
+                        </>
+                      ) : (
+                        <ExamIconForStudent assessment={assessment} />
+                      )}
+                      <span
                         title={
                           activeAssessmentId === assessment.id
                             ? lang === "en"
@@ -541,59 +588,43 @@ export default function ExamsSidebar({
                               : "هذا الامتحان نشط بالفعل"
                             : undefined
                         }
-                        className={`size-5 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer"}`}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          if (activeAssessmentId !== assessment.id) {
-                            handleDeleteAssessment(assessment.id);
-                          }
+                        className={`text-indigo-900 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
+                        onClick={() => {
+                          activeAssessmentId !== assessment.id &&
+                            onSelectAssessment(assessment);
                         }}
-                      />
-                      <AddDomainModal
-                        modalType="assessment"
-                        isEdit
-                        obj={assessment}
-                        isButtonDisabled={activeAssessmentId === assessment.id}
-                      />
-                    </>
-                  ) : ((<ExamIconForStudent assessment={assessment} />))}
-                  <span
-                    title={
-                      activeAssessmentId === assessment.id
-                        ? lang === "en"
-                          ? "This assessment is already active"
-                          : "هذا الامتحان نشط بالفعل"
-                        : undefined
-                    }
-                    className={`text-indigo-900 ${activeAssessmentId === assessment.id ? "cursor-not-allowed" : "cursor-pointer hover:underline"}`}
-                    onClick={() => {
-                      activeAssessmentId !== assessment.id &&
-                        onSelectAssessment(assessment);
-                    }}
-                  >
-                    {lang === "en"
-                      ? assessment.name.en
-                      : lang === "ar"
-                        ? assessment.name.ar
-                        : undefined}
-                  </span>
-                </h3>
-              ))}
-              {domain.assessments?.length ? undefined : (
-                <AddDomainModal modalType="subdomain" domainId={domain.id} />
-              )}
-              {isTeacher &&
-                !domain.subdomains?.length &&
-                !domain.assessments?.length &&
-                t("or")}
-              {domain.subdomains?.length ? undefined : (
-                <AddDomainModal modalType="assessment" domainId={domain.id} />
-              )}
-            </AccordionCard.Content>
-          </AccordionCard.Panel>
-        ))}
-      </AccordionCard>
-      <AddDomainModal modalType="domain" />
+                      >
+                        {lang === "en"
+                          ? assessment.name.en
+                          : lang === "ar"
+                            ? assessment.name.ar
+                            : undefined}
+                      </span>
+                    </h3>
+                  ))}
+                  {domain.assessments?.length ? undefined : (
+                    <AddDomainModal
+                      modalType="subdomain"
+                      domainId={domain.id}
+                    />
+                  )}
+                  {isTeacher &&
+                    !domain.subdomains?.length &&
+                    !domain.assessments?.length &&
+                    t("or")}
+                  {domain.subdomains?.length ? undefined : (
+                    <AddDomainModal
+                      modalType="assessment"
+                      domainId={domain.id}
+                    />
+                  )}
+                </AccordionCard.Content>
+              </AccordionCard.Panel>
+            ))}
+          </AccordionCard>
+          <AddDomainModal modalType="domain" />
+        </>
+      )}
     </div>
   );
 }
