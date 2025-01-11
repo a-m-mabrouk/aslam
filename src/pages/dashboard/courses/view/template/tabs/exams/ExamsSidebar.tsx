@@ -287,7 +287,7 @@ export default function ExamsSidebar({
   const activeAssessmentId = useAppSelector(
     ({ exams }) => exams.activeAssessment?.id,
   );
-  const domains = useAppSelector(({ examsDomains }) => examsDomains.domains);
+  const {domains, loading: loadingDomains} = useAppSelector(({ examsDomains }) => examsDomains);
   const { role, id: student_id } = useAppSelector(({ auth }) => auth);
   const isTeacher = role === "teacher";
 
@@ -367,7 +367,7 @@ export default function ExamsSidebar({
 
   return (
     <div className="flex shrink-0 flex-col gap-2 md:w-72 md:min-w-64">
-      {!domains.length ? (
+      {loadingDomains ? (
         <div className="flex flex-wrap gap-2">
           <span>{t("loadingExams")}</span>
           <Spinner aria-label="spinner" />
