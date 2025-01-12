@@ -13,12 +13,14 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 import { UploadFile } from "../../../../../../../../components/form/uploadFile";
 import TextareaLang from "../../../../../../../../components/form/textareaLang";
 import axiosJson from "../../../../../../../../utilities/axiosJson";
+import { Progress } from "flowbite-react";
 
 export default function CreateLesson({ moduleIndex }: { moduleIndex: number }) {
   const { t } = useTranslation("inputs");
   const { t: tBtn } = useTranslation("buttons");
   const { id } = useParams();
   const [open, setOpen] = useState(false);
+  const [progress, setProgress] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const { setData } = useContext(ViewCourseContext);
 
@@ -55,7 +57,19 @@ export default function CreateLesson({ moduleIndex }: { moduleIndex: number }) {
       formData.append("course_id", id as string);
       formData.append("module_id", `${moduleIndex}`);
       try {
-        const { data } = await axiosJson.post(API_COURSES.lessons, formData);
+        const { data } = await axiosJson.post(API_COURSES.lessons, formData, {
+          onUploadProgress: (event) => {
+            if (event.total) {
+              const percentCompleted = Math.round(
+                (event.loaded * 100) / event.total,
+              );
+              setProgress(percentCompleted);
+              if (percentCompleted >= 100) {
+                setProgress(0);
+              }
+            }
+          },
+        });
 
         setData((prev: CoursesListDatum) =>
           prev
@@ -132,6 +146,13 @@ export default function CreateLesson({ moduleIndex }: { moduleIndex: number }) {
           <PrimaryBtn type="submit" className="mx-auto" isProcessing={loading}>
             {t("add")}
           </PrimaryBtn>
+          {progress > 0 && (
+            <Progress
+              progress={progress}
+              color={progress === 100 ? "green" : "blue"}
+              className="mb-4"
+            />
+          )}
         </PopupModal.Form>
       </PopupModal>
       <div

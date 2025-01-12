@@ -358,10 +358,14 @@ const ExamComponent = () => {
       );
 
       if (mistakesExamsData.data) {
-        setMistakesExam(mistakesExamsData.data);
+        const mistakeAssessArr = mistakesExamsData.data as AssessmentType[];
+        const thisMistakesAssess = mistakeAssessArr.find((data) => data.course_id == course_id);
+        if (thisMistakesAssess) {
+          setMistakesExam(thisMistakesAssess);
+        }
       }
     }
-  }, [student_id]) 
+  }, [course_id, student_id]) 
 
   const handleEndExam = async (assessment_id: number) => {
     dispatch(setIsPaused(false));
@@ -382,8 +386,13 @@ const ExamComponent = () => {
       const { data: mistakesExamsData } = await axiosDefault.get(
         `${API_EXAMS.mistakesExams}/${student_id}`,
       );
+      
       if (mistakesExamsData.data) {
-        mistakesExamId = mistakesExamsData.data.id;
+        const mistakeAssessArr = mistakesExamsData.data as AssessmentType[];
+        const thisMistakesAssess = mistakeAssessArr.find((data) => data.course_id == course_id);
+        if (thisMistakesAssess) {
+          mistakesExamId = thisMistakesAssess.id;
+        }
       }
       await getItemById(activeAssessment!.id!).then(async (assess) => {
         const ques = assess?.questions;
@@ -404,7 +413,7 @@ const ExamComponent = () => {
             )
             .map(({ question, id }) => ({ ...question, question_id: id }));
 
-          if (wrongQuestions.length) {
+          if (wrongQuestions.length) {            
             await axiosDefault.post(
               API_EXAMS.questions,
               {

@@ -8,11 +8,13 @@ import { toastifyBox } from "../../../../../../../../helper/toastifyBox";
 import { ViewCourseContext } from "../../../..";
 import { MultipleFiles } from "../../../../../../../../components/form/multipleFiles";
 import axiosJson from "../../../../../../../../utilities/axiosJson";
+import { Progress } from "flowbite-react";
 
 export default function AddResources() {
   const { t } = useTranslation("common");
   const { t: tBtn } = useTranslation("buttons");
   const [open, setOpen] = useState(false);
+  const [progress, setProgress] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const { setData, course } = useContext(ViewCourseContext);
 
@@ -32,6 +34,19 @@ export default function AddResources() {
         const { data } = await axiosJson.post(
           `${API_COURSES.courses}/${course?.id}`,
           formData,
+          {
+            onUploadProgress: (event) => {
+              if (event.total) {
+                const percentCompleted = Math.round(
+                  (event.loaded * 100) / event.total,
+                );
+                setProgress(percentCompleted);
+                if (percentCompleted >= 100) {
+                  setProgress(0);
+                }
+              }
+            },
+          },
         );
 
         setData((prev: unknown) =>
@@ -81,6 +96,13 @@ export default function AddResources() {
           <PrimaryBtn type="submit" className="mx-auto" isProcessing={loading}>
             {tBtn("save")}
           </PrimaryBtn>
+          {progress > 0 && (
+            <Progress
+              progress={progress}
+              color={progress === 100 ? "green" : "blue"}
+              className="mb-4"
+            />
+          )}
         </form>
       </PopupModal>
     </>

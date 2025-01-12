@@ -374,7 +374,7 @@ export default function ExamsSidebar({
         </div>
       ) : (
         <>
-          {showMistakesExam && mistakesExam && mistakesExam.questions.length ? (
+          {showMistakesExam && mistakesExam && mistakesExam?.questions?.length ? (
             <AccordionCard>
               <AccordionCard.Panel key={12}>
                 <AccordionCard.Title className="grow">
