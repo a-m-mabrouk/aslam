@@ -400,7 +400,11 @@ export default function ExamInterface({
       }
     }
   }, [activeAssessment, assessmentDetails.activeAssessQuestionIndex, dispatch, questions]);
-
+  useEffect(() => {
+    return () => {
+      if (document.fullscreenElement) document.exitFullscreen();
+    }
+  }, [])
   return (
     <div
       className={`grid h-full overflow-auto rounded-[10px] border-2 ${borderColor} relative`}

@@ -336,21 +336,21 @@ const ExamComponent = () => {
   };
 
   const handleCheckForMistakesExam = useCallback(async (domains: DomainType[]) => {
-    // setAllAssessmentsAnswered of domains and subdomains
     const areAllAssessmentsAnswered = !domains.some((domain) => {
       const hasUnansweredInDomain = domain.assessments?.some(
-        ({ student }) =>
-          student?.[0]?.pivot?.answeredAtLeastOnce === 0,
+        ({ student }) => student?.[0]?.pivot?.answeredAtLeastOnce === 0 || !student?.[0]?.pivot,
       );
+    
       const hasUnansweredInSubdomains = domain.subdomains?.some(
         (subdomain) =>
           subdomain.assessments?.some(
-            ({ student }) =>
-              student?.[0]?.pivot?.answeredAtLeastOnce === 0,
+            ({ student }) => student?.[0]?.pivot?.answeredAtLeastOnce === 0 || !student?.[0]?.pivot,
           ),
       );
+    
       return hasUnansweredInDomain || hasUnansweredInSubdomains;
     });
+    
     setShowMistakesExam(areAllAssessmentsAnswered);
     if (areAllAssessmentsAnswered) {
       const { data: mistakesExamsData } = await axiosDefault.get(
