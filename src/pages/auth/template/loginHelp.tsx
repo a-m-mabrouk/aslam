@@ -1,25 +1,21 @@
 import { type ReactNode, useState } from "react";
 import { PlayCircleIcon, DocumentTextIcon, QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { Modal } from "flowbite-react";
-import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
+// import { Document, Page, pdfjs } from "react-pdf";
+// import "react-pdf/dist/Page/AnnotationLayer.css";
+// import "react-pdf/dist/Page/TextLayer.css";
 import useGetLang from "../../../hooks/useGetLang";
 
-// Set the worker URL for `react-pdf` with the correct version (2.15.349)
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url,
-).toString();
+// pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js"
 
 const LoginHelp = () => {
-  const [pages, setPages] = useState<number[]>([]);
+  // const [pages, setPages] = useState<number[]>([]);
   const { lang } = useGetLang();
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
-    for (let i: number = 1; i <= numPages; i++) {
-      setPages((prev) => [...prev, i]);
-    }
-  }
+  // function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
+  //   for (let i: number = 1; i <= numPages; i++) {
+  //     setPages((prev) => [...prev, i]);
+  //   }
+  // }
   return (
     <fieldset className="justify-self-center rounded-lg border-2 px-6 py-1">
       <legend className="flex gap-1">
@@ -33,7 +29,10 @@ const LoginHelp = () => {
         </HelpModal>
 
         {/* PDF Help */}
-        <HelpModal icon={<DocumentTextIcon className="size-6 cursor-pointer" />}>
+        <a className="flex items-center text-gray-600 hover:text-teal-500" href="/help.pdf" target="_blank">
+        <DocumentTextIcon className="size-6 cursor-pointer" />
+      </a>
+        {/* <HelpModal icon={<DocumentTextIcon className="size-6 cursor-pointer" />}>
           <div>
             <Document file="/help.pdf" onLoadSuccess={onDocumentLoadSuccess}>
               {pages.map((page) => (
@@ -41,7 +40,7 @@ const LoginHelp = () => {
               ))}
             </Document>
           </div>
-        </HelpModal>
+        </HelpModal> */}
       </div>
     </fieldset>
   );
