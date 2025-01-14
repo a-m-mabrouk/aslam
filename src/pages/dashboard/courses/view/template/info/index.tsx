@@ -17,7 +17,6 @@ export default function CourseInfo() {
     number_of_student,
     created_from,
     updated_from,
-    teacher,
   } = course || {};
   const { lang } = useGetLang();
 

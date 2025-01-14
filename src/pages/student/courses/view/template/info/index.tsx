@@ -18,7 +18,6 @@ export default function CourseInfo() {
     // number_of_student,
     created_from,
     // updated_from,
-    teacher,
     expiration_date,
     expire: isExpired,
     free
