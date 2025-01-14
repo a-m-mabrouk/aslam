@@ -12,39 +12,61 @@ import Exams from "./exams";
 import { useCallback, useContext, useState } from "react";
 import { ViewCourseContext } from "../..";
 import useGetLang from "../../../../../../hooks/useGetLang";
+import descImg from "../../../../../../assets/images/desc-img.jpg";
 
 export default function Tabs() {
-  const localstorageTabIndex = Number(localStorage.getItem('tabIndex'));
-  const [activeTabIndex, setActiveTabIndex] = useState<number>(localstorageTabIndex || 0)
+  const localstorageTabIndex = Number(localStorage.getItem("tabIndex"));
+  const [activeTabIndex, setActiveTabIndex] = useState<number>(
+    localstorageTabIndex || 0,
+  );
   const { t } = useTranslation("viewCourse");
   const setTabsLocalstorage = useCallback((tabIndex: number) => {
     setActiveTabIndex(tabIndex);
-    localStorage.setItem('tabIndex', JSON.stringify(tabIndex))
-  }, [])
+    localStorage.setItem("tabIndex", JSON.stringify(tabIndex));
+  }, []);
   const { lang } = useGetLang();
   const { course } = useContext(ViewCourseContext);
   return (
     <div>
       <BgCard>
-        <TabsCard handleActiveTabchange={e=> setTabsLocalstorage(e)}>
-        <TabsCard.TabItem title={t("description")} icon={DocumentTextIcon} active={activeTabIndex === 0}>
-          <pre
-            style={{
-              fontFamily: "unset",
-              fontWeight: "bold",
-              textWrap: "wrap",
-            }}
+        <TabsCard handleActiveTabchange={(e) => setTabsLocalstorage(e)}>
+          <TabsCard.TabItem
+            title={t("description")}
+            icon={DocumentTextIcon}
+            active={activeTabIndex === 0}
           >
-            {course?.description[lang]}
-          </pre>
-        </TabsCard.TabItem>
-          <TabsCard.TabItem title={t("videos")} icon={FolderIcon} active={activeTabIndex === 1}>
+            <div className="flex flex-col justify-between gap-5 lg:flex-row">
+              <pre
+                style={{
+                  fontFamily: "unset",
+                  fontWeight: "bold",
+                  textWrap: "wrap",
+                }}
+              >
+                {course?.description[lang]}
+              </pre>
+              <img src={descImg} alt="img" className="w-80 object-contain" />
+            </div>
+          </TabsCard.TabItem>
+          <TabsCard.TabItem
+            title={t("videos")}
+            icon={FolderIcon}
+            active={activeTabIndex === 1}
+          >
             <Videos />
           </TabsCard.TabItem>
-          <TabsCard.TabItem title={t("resources")} icon={DocumentIcon} active={activeTabIndex === 2}>
+          <TabsCard.TabItem
+            title={t("resources")}
+            icon={DocumentIcon}
+            active={activeTabIndex === 2}
+          >
             <Resources />
           </TabsCard.TabItem>
-          <TabsCard.TabItem title={t("exams")} icon={DocumentTextIcon} active={activeTabIndex === 3}>
+          <TabsCard.TabItem
+            title={t("exams")}
+            icon={DocumentTextIcon}
+            active={activeTabIndex === 3}
+          >
             <Exams />
           </TabsCard.TabItem>
         </TabsCard>

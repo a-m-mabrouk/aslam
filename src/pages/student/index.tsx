@@ -4,9 +4,11 @@ import cover from "../../assets/images/cover.jpg";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { staggerContainer, textVariant } from "../../utilities/motion";
+import useGetLang from "../../hooks/useGetLang";
 
 export default function Student() {
   const { t } = useTranslation("common");
+  const { lang } = useGetLang();
   return (
     <motion.div
       variants={staggerContainer()}
@@ -15,21 +17,23 @@ export default function Student() {
       viewport={{ once: true, amount: 0.25 }}
       className="relative max-h-[calc(100vh-60px)] min-h-[calc(100vh-60px)] overflow-hidden"
     >
-      <img src={cover} alt="cover" className="size-full object-cover" />
+      <img src={cover} alt="cover" className="size-full object-cover opacity-50" />
       <div className="absolute inset-0 size-full bg-black/50" />
-      <div className="absolute inset-0 grid place-content-center place-items-center gap-4">
+      <div className="absolute inset-0 grid place-content-center place-items-center gap-4 drop-shadow-[0_0_1px_rgba(0,0,0,0.75)]">
         <motion.h1
           variants={textVariant(0.5)}
-          className="break-words text-center text-4xl font-bold text-white"
+          className="break-words text-center text-5xl font-bold text-white leading-snug"
         >
-          <span className="block first-letter:text-5xl first-letter:text-primary">
+          <div className={lang === "en"? "flex flex-row-reverse justify-center": ""}>
+            <span className="text-primary font-mono">”</span>
             {t("name")}
-          </span>
+            <span className="text-primary font-mono">“</span>
+          </div>
           {t("welcome")}
         </motion.h1>
         <motion.p
           variants={textVariant(1)}
-          className="max-w-[600px]  text-balance text-center font-medium text-white"
+          className="mb-5 max-w-[600px]  text-balance text-center text-2xl font-medium text-white"
         >
           {t("desc")}
         </motion.p>

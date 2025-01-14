@@ -53,8 +53,8 @@ export default function CourseInfo() {
         </div>
           <div className="flex w-[90%] flex-wrap justify-around gap-2">
             <InfoItem
-              title={t("teacher")}
-              value={`${teacher?.first_name || ""} ${teacher?.last_name || ""}`}
+              title={lang === "en"? "Authorized instructor:": "المدرب المعتمد:"}
+              value={lang === "en"? "Dr. Mohamed Waly": "د. محمد والي"}
             />
             <InfoItem title={t("created_from")} value={created_from} />
           </div>

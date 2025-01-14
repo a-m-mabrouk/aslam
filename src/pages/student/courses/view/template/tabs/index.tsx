@@ -12,6 +12,7 @@ import { ViewCourseContext } from "../..";
 import { useCallback, useContext, useState } from "react";
 import useGetLang from "../../../../../../hooks/useGetLang";
 import ExamComponent from "../../../../../dashboard/courses/view/template/tabs/exams";
+import descImg from "../../../../../../assets/images/desc-img.jpg";
 
 export default function Tabs() {
   const localstorageTabIndex = Number(localStorage.getItem('tabIndex'));
@@ -27,15 +28,18 @@ export default function Tabs() {
     <BgCard>
       <TabsCard handleActiveTabchange={e=> setTabsLocalstorage(e)}>
         <TabsCard.TabItem title={t("description")} icon={DocumentTextIcon} active={activeTabIndex === 0}>
-          <pre
-            style={{
-              fontFamily: "unset",
-              fontWeight: "bold",
-              textWrap: "wrap",
-            }}
-          >
-            {course?.description[lang]}
-          </pre>
+        <div className="flex flex-col justify-between gap-5 lg:flex-row">
+              <pre
+                style={{
+                  fontFamily: "unset",
+                  fontWeight: "bold",
+                  textWrap: "wrap",
+                }}
+              >
+                {course?.description[lang]}
+              </pre>
+              <img src={descImg} alt="img" className="w-80 object-contain" />
+            </div>
         </TabsCard.TabItem>
         <TabsCard.TabItem title={t("videos")} icon={FolderIcon} active={activeTabIndex === 1}>
           <Videos />
